@@ -1,0 +1,21 @@
+{
+  "diary": {
+    "count": 1,
+    "last_ts": "2026-08-14T03:54:57.190607",
+    "last_error": "'text'",
+    "last_day": 2
+  },
+  "compact": {
+    "count": 1,
+    "last_ts": "2026-08-14T03:55:32.269695",
+    "last_error": "HTTP Error 429: Too Many Requests",
+    "last_invoke": 1
+  },
+  "stm": {
+    "count": 1,
+    "last_ts": "2026-08-14T04:00:35.698793",
+    "last_sessions": 1,
+    "last_messages": 4,
+    "last_chars": 4479
+  }
+}
