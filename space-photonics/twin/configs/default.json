@@ -1,0 +1,15 @@
+{
+  "dt": 1e-06,
+  "log_interval": 0.001,
+  "tx_power": 1.0,
+  "wavelength": 1.55e-06,
+  "tx_aperture": 0.1,
+  "rx_aperture": 0.05,
+  "atmospheric_loss_db": 2.0,
+  "scintillation_index": 0.1,
+  "enable_tracking": true,
+  "tracking_bandwidth": 1000.0,
+  "pointing_loss_db": 3.0,
+  "enable_thermal": true,
+  "enable_nested_control": true
+}
