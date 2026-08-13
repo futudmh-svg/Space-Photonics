@@ -97,7 +97,7 @@ class AgChalcogenideAmplifier:
         self.phase_shift = self.gamma * l_eff * self.output_power
         
         # Thermal phase shift
-        delta_T = self.thermo_optic_coeff * self.output_power * 0.1  # Simplified heating
+        delta_T = self.cfg.thermo_optic_coeff * self.output_power * 0.1  # Simplified heating
         self.thermal_phase = 2 * np.pi / wavelength * self.cfg.length * delta_T
         
         total_phase = self.phase_shift + self.thermal_phase
