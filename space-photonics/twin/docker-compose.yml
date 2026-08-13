@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  twin:
+    build: .
+    volumes:
+      - ./results:/app/results
+      - ./configs:/app/configs
+    command: python -m space_photonics_twin --scenario tracking --duration 10.0 --output /app/results/simulation.json
+    
+  notebook:
+    build: .
+    ports:
+      - "8888:8888"
+    volumes:
+      - .:/app
+    command: jupyter notebook --ip=0.0.0.0 --port=8888 --no-browser --allow-root
