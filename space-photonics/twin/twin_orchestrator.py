@@ -6,6 +6,9 @@ Main simulation controller that integrates:
 - Hypersonic vehicle tracking
 - OPA beam steering
 - Ag-chalcogenide amplification
+- Nested control loops (optical PLL + digital Kalman)
+- Atmospheric channel (turbulence, scintillation)
+- VLEO thermal environment
 - Optical link budget
 """
 
@@ -18,6 +21,9 @@ from pathlib import Path
 from .opa_beamsteer import OPABeamSteerer, OPAConfig
 from .agchalcogenide import AgChalcogenideAmplifier, AgChalcogenideConfig
 from .orbit_target import VLEOPropagator, HypersonicVehicle, OrbitConfig, VehicleConfig
+from .control_loop import NestedControlSystem, OpticalLoopConfig, DigitalLoopConfig
+from .atmospheric_channel import AtmosphericChannel, AtmosphericConfig
+from .thermal_model import VLEOThermalModel, VLEOThermalConfig
 
 
 @dataclass
@@ -41,6 +47,12 @@ class TwinConfig:
     enable_tracking: bool = True
     tracking_bandwidth: float = 1e3   # Tracking loop bandwidth [Hz]
     pointing_loss_db: float = 3.0     # Initial pointing loss [dB]
+    
+    # Thermal
+    enable_thermal: bool = True
+    
+    # Control
+    enable_nested_control: bool = True
 
 
 class DigitalTwin:
@@ -61,6 +73,28 @@ class DigitalTwin:
         self.vehicle = HypersonicVehicle(VehicleConfig())
         self.opa = OPABeamSteerer(OPAConfig(wavelength=self.cfg.wavelength))
         self.amplifier = AgChalcogenideAmplifier(AgChalcogenideConfig())
+        
+        # Nested control system
+        if self.cfg.enable_nested_control:
+            self.control = NestedControlSystem(
+                OpticalLoopConfig(bandwidth=1e9),
+                DigitalLoopConfig(sample_rate=1/self.cfg.log_interval)
+            )
+        else:
+            self.control = None
+            
+        # Atmospheric channel
+        self.atm_channel = AtmosphericChannel(AtmosphericConfig(
+            wavelength=self.cfg.wavelength,
+            rx_aperture=self.cfg.rx_aperture,
+            scintillation_index=self.cfg.scintillation_index
+        ))
+        
+        # Thermal model
+        if self.cfg.enable_thermal:
+            self.thermal = VLEOThermalModel(VLEOThermalConfig())
+        else:
+            self.thermal = None
         
         # Tracking state
         self.tracking_error_theta = 0.0
@@ -87,14 +121,37 @@ class DigitalTwin:
         elevation = self.vehicle.get_elevation_angle(sat_pos)
         azimuth = self.vehicle.get_azimuth(sat_pos)
         
-        # Update OPA pointing (if tracking enabled)
+        # Update atmospheric channel
+        self.atm_channel.update(dt, slant_range, elevation)
+        
+        # Update thermal model
+        if self.thermal:
+            # Simplified: assume sun angle changes with orbital position
+            sun_angle = 45 + 45 * np.sin(self.time / self.satellite.period * 2 * np.pi)
+            eclipse = sun_angle > 135
+            self.thermal.update(dt, sun_angle, eclipse)
+            
+            # Apply thermal effects to OPA
+            thermal_effects = self.thermal.get_thermal_effects_on_optics()
+            # Add thermal phase drift to OPA
+            # self.opa.current_phases += thermal_effects['opa_phase_drift_rad']  # Would need interface
+        
+        # Update OPA pointing
         if self.cfg.enable_tracking:
-            # Compute pointing angles from satellite to vehicle
-            # Simplified: steer OPA toward vehicle
-            self.opa.set_steering_angle(
-                elevation, 
-                azimuth
-            )
+            if self.control:
+                # Use nested control system
+                measured_theta = elevation + self.atm_channel.tilt_x
+                measured_phi = azimuth + self.atm_channel.tilt_y
+                
+                theta_cmd, phi_cmd = self.control.update(
+                    measured_theta, measured_phi,
+                    elevation, azimuth,
+                    dt
+                )
+                self.opa.set_steering_angle(theta_cmd, phi_cmd)
+            else:
+                # Direct pointing
+                self.opa.set_steering_angle(elevation, azimuth)
         
         self.opa.update(dt)
         
@@ -104,6 +161,9 @@ class DigitalTwin:
             elevation,
             self.opa.get_pointing_error()[0]
         )
+        
+        # Apply atmospheric channel effects
+        rx_power = self.atm_channel.apply_channel(rx_power, elevation)
         
         # Process through amplifier
         if rx_power > 0:
@@ -135,8 +195,8 @@ class DigitalTwin:
         # Free space path loss
         fspl_db = 20 * np.log10(4 * np.pi * range_m / self.cfg.wavelength)
         
-        # Atmospheric loss
-        atm_db = self.cfg.atmospheric_loss_db / np.sin(np.radians(max(elevation_deg, 5)))
+        # Atmospheric extinction
+        atm_db = self.atm_channel.compute_extinction(range_m, elevation_deg)
         
         # Pointing loss
         pointing_loss = self.cfg.pointing_loss_db + \
@@ -151,7 +211,6 @@ class DigitalTwin:
         rx_power_w = 10**((rx_power_dbm - 30) / 10)
         
         # SNR (simplified shot-noise limited)
-        # SNR = (R * P_s)^2 / (2*q*R*P_s*B)
         responsivity = 1.0  # A/W (simplified)
         bandwidth = self.cfg.tracking_bandwidth
         q = 1.6e-19  # Electron charge
@@ -191,8 +250,16 @@ class DigitalTwin:
                 'pointing_error': self.tracking_error_theta,
                 'beamwidth': self.opa.get_beamwidth()
             },
+            'atmospheric': self.atm_channel.get_state(),
             'amplifier': self.amplifier.get_state()
         }
+        
+        if self.control:
+            state['control'] = self.control.get_performance_metrics()
+            
+        if self.thermal:
+            state['thermal'] = self.thermal.get_thermal_state()
+        
         self.log_data.append(state)
     
     def run(self, duration: float, progress_interval: Optional[float] = None):
@@ -207,6 +274,8 @@ class DigitalTwin:
         progress_steps = int(progress_interval / self.cfg.dt) if progress_interval else None
         
         print(f"Running digital twin for {duration}s ({n_steps} steps)...")
+        print(f"  Subsystems: {'nested control' if self.control else 'direct'} | "
+              f"{'thermal' if self.thermal else 'no thermal'} | atmospheric")
         
         for i in range(n_steps):
             self.step()
@@ -242,7 +311,7 @@ class DigitalTwin:
         snr_values = [d['optical']['snr_db'] for d in self.log_data if np.isfinite(d['optical']['snr_db'])]
         rx_values = [d['optical']['rx_power_dbm'] for d in self.log_data if np.isfinite(d['optical']['rx_power_dbm'])]
         
-        return {
+        summary = {
             'duration': self.time,
             'mean_snr_db': np.mean(snr_values) if snr_values else 0,
             'min_snr_db': np.min(snr_values) if snr_values else 0,
@@ -250,3 +319,9 @@ class DigitalTwin:
             'mean_rx_power_dbm': np.mean(rx_values) if rx_values else 0,
             'final_pointing_error': self.tracking_error_theta
         }
+        
+        if self.control:
+            ctrl_metrics = self.control.get_performance_metrics()
+            summary['control'] = ctrl_metrics
+            
+        return summary
