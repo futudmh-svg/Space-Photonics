@@ -6,109 +6,29 @@
     <title>OPA Analysis — Space Photonics</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #050811;
-            color: #e0e6ed;
-            line-height: 1.6;
-        }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #050811; color: #e0e6ed; line-height: 1.6; }
         .container { max-width: 1000px; margin: 0 auto; padding: 16px; }
-        
-        /* Navigation */
-        nav {
-            background: #1b263b;
-            padding: 12px;
-            border-radius: 10px;
-            margin-bottom: 16px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-        nav a {
-            color: #e0e6ed;
-            text-decoration: none;
-            padding: 8px 14px;
-            border-radius: 6px;
-            font-size: 0.9em;
-            background: #0d1b2a;
-        }
-        nav a:hover, nav a.active {
-            background: #00d4aa;
-            color: #050811;
-        }
-        
+        nav { background: #1b263b; padding: 12px; border-radius: 10px; margin-bottom: 16px; display: flex; flex-wrap: wrap; gap: 8px; }
+        nav a { color: #e0e6ed; text-decoration: none; padding: 8px 14px; border-radius: 6px; font-size: 0.9em; background: #0d1b2a; }
+        nav a:hover, nav a.active { background: #00d4aa; color: #050811; }
         h1 { font-size: 1.5em; color: #00d4aa; margin: 16px 0 8px; }
         .subtitle { color: #778da9; font-size: 0.9em; margin-bottom: 16px; }
-        
-        .card {
-            background: #1b263b;
-            border-radius: 12px;
-            padding: 18px;
-            margin-bottom: 16px;
-            border: 1px solid #415a77;
-        }
-        .card h2 {
-            font-size: 1.15em;
-            color: #00d4aa;
-            margin-bottom: 12px;
-        }
-        
-        canvas {
-            width: 100%;
-            background: #0d1b2a;
-            border-radius: 8px;
-            margin: 12px 0;
-        }
-        
-        .controls {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 12px;
-            margin: 12px 0;
-        }
-        .control-group label {
-            display: block;
-            font-size: 0.85em;
-            color: #778da9;
-            margin-bottom: 4px;
-        }
-        input[type="range"] {
-            width: 100%;
-            -webkit-appearance: none;
-            height: 6px;
-            border-radius: 3px;
-            background: #415a77;
-        }
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            background: #00d4aa;
-            cursor: pointer;
-        }
-        
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 10px;
-            margin: 12px 0;
-        }
-        .stat-box {
-            background: #0d1b2a;
-            padding: 14px;
-            border-radius: 8px;
-            text-align: center;
-        }
+        .card { background: #1b263b; border-radius: 12px; padding: 18px; margin-bottom: 16px; border: 1px solid #415a77; }
+        .card h2 { font-size: 1.15em; color: #00d4aa; margin-bottom: 12px; }
+        svg { width: 100%; background: #0d1b2a; border-radius: 8px; }
+        .controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin: 12px 0; }
+        .control-group label { display: block; font-size: 0.85em; color: #778da9; margin-bottom: 4px; }
+        input[type="range"] { width: 100%; -webkit-appearance: none; height: 6px; border-radius: 3px; background: #415a77; }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: #00d4aa; cursor: pointer; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 12px 0; }
+        .stat-box { background: #0d1b2a; padding: 14px; border-radius: 8px; text-align: center; }
         .stat-value { font-size: 1.5em; font-weight: bold; color: #00d4aa; }
         .stat-label { font-size: 0.8em; color: #778da9; }
-        
-        footer {
-            text-align: center;
-            padding: 30px;
-            color: #778da9;
-            font-size: 0.8em;
-        }
+        .btn { padding: 10px 20px; background: #2d6a4f; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9em; margin: 4px; }
+        .btn:hover { background: #40916c; }
+        .btn-secondary { background: #1b4d6e; }
+        .btn-secondary:hover { background: #2a6f97; }
+        footer { text-align: center; padding: 30px; color: #778da9; font-size: 0.8em; }
     </style>
 </head>
 <body>
@@ -122,12 +42,19 @@
             <a href="hypersonic.html">🚀 Hypersonic</a>
             <a href="architecture.html">🏗️ Architecture</a>
             <a href="digital-twin.html">🎮 3D Twin</a>
+            <a href="mrr-sim.html">💍 MRR</a>
+            <a href="mzi-sim.html">🔲 MZI</a>
+            <a href="nonlinear-sim.html">🌀 XPM</a>
         </nav>
 
         <h1>🔭 OPA Beam Analysis</h1>
         <p class="subtitle">Optical Phased Array — Far-field patterns, grating lobes, beamwidth</p>
 
-        <!-- Array Configuration -->
+        <div style="margin: 12px 0;">
+            <button class="btn" onclick="startAutoPlay()">▶️ Auto Animate</button>
+            <button class="btn btn-secondary" onclick="stopAutoPlay()">⏹️ Stop</button>
+        </div>
+
         <div class="card">
             <h2>Array Configuration</h2>
             <div class="controls">
@@ -150,82 +77,60 @@
             </div>
             
             <div class="stats-grid">
-                <div class="stat-box">
-                    <div class="stat-value" id="beamwidth">-</div>
-                    <div class="stat-label">3dB Beamwidth</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-value" id="grating-lobe">-</div>
-                    <div class="stat-label">Grating Lobe Sep.</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-value" id="directivity">-</div>
-                    <div class="stat-label">Directivity (dBi)</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-value" id="sidelobe">-</div>
-                    <div class="stat-label">Peak Sidelobe</div>
-                </div>
+                <div class="stat-box"><div class="stat-value" id="beamwidth">-</div><div class="stat-label">3dB Beamwidth</div></div>
+                <div class="stat-box"><div class="stat-value" id="grating-lobe">-</div><div class="stat-label">Grating Lobe Sep.</div></div>
+                <div class="stat-box"><div class="stat-value" id="directivity">-</div><div class="stat-label">Directivity (dBi)</div></div>
+                <div class="stat-box"><div class="stat-value" id="sidelobe">-</div><div class="stat-label">Peak Sidelobe</div></div>
             </div>
         </div>
 
-        <!-- Far-Field Pattern -->
         <div class="card">
             <h2>Far-Field Pattern (Linear)</h2>
-            <canvas id="pattern-linear" height="300"></canvas>
+            <svg id="pattern-linear" viewBox="0 0 600 300" preserveAspectRatio="none">
+                <rect width="600" height="300" fill="#0d1b2a"/>
+                <polyline id="pl-line" fill="none" stroke="#00d4aa" stroke-width="2"/>
+                <line x1="0" y1="280" x2="600" y2="280" stroke="#415a77" stroke-width="1"/>
+            </svg>
         </div>
 
-        <!-- Far-Field Pattern (dB) -->
         <div class="card">
             <h2>Far-Field Pattern (dB)</h2>
-            <canvas id="pattern-db" height="300"></canvas>
+            <svg id="pattern-db" viewBox="0 0 600 300" preserveAspectRatio="none">
+                <rect width="600" height="300" fill="#0d1b2a"/>
+                <polyline id="pdb-line" fill="none" stroke="#90e0ef" stroke-width="2"/>
+                <line x1="0" y1="280" x2="600" y2="280" stroke="#415a77" stroke-width="1"/>
+            </svg>
         </div>
 
-        <!-- Array Factor vs Element Count -->
         <div class="card">
             <h2>Beamwidth vs Array Size</h2>
-            <canvas id="beamwidth-chart" height="300"></canvas>
+            <svg id="beamwidth-chart" viewBox="0 0 600 300" preserveAspectRatio="none">
+                <rect width="600" height="300" fill="#0d1b2a"/>
+                <polyline id="bw-line" fill="none" stroke="#ffd166" stroke-width="2"/>
+                <circle id="bw-dot" r="6" fill="#e63946"/>
+            </svg>
         </div>
 
-        <!-- Grating Lobe Visualization -->
         <div class="card">
             <h2>Grating Lobe Map</h2>
-            <p style="font-size: 0.85em; color: #778da9; margin-bottom: 8px;">
-                Shows grating lobe positions for different steering angles.
-                Red zones indicate ambiguous directions.
-            </p>
-            <canvas id="grating-map" height="350"></canvas>
+            <p style="font-size: 0.85em; color: #778da9; margin-bottom: 8px;">Red zones indicate ambiguous directions</p>
+            <svg id="grating-map" viewBox="0 0 600 350" preserveAspectRatio="none">
+                <rect width="600" height="350" fill="#0d1b2a"/>
+                <g id="gl-dots"></g>
+            </svg>
         </div>
 
-        <footer>
-            <p>Space Photonics Digital Twin — OPA Analysis Module</p>
-        </footer>
+        <footer><p>Space Photonics Digital Twin — OPA Analysis Module</p></footer>
     </div>
 
     <script>
-        // Canvas setup
-        const c1 = document.getElementById('pattern-linear');
-        const c2 = document.getElementById('pattern-db');
-        const c3 = document.getElementById('beamwidth-chart');
-        const c4 = document.getElementById('grating-map');
-        
-        function setupCanvas(c) {
-            const rect = c.getBoundingClientRect();
-            if (rect.width > 0 && rect.height > 0) {
-                c.width = rect.width * 2;
-                c.height = rect.height * 2;
-            } else {
-                c.width = 600;
-                c.height = 300;
-            }
-        }
-        [c1, c2, c3, c4].forEach(setupCanvas);
+        let autoPlayInterval = null;
+        let autoPlayDirection = 1;
 
         function computePattern(N, d, lambda, theta0, angles) {
             const k = 2 * Math.PI / lambda;
             const results = [];
             let maxI = 0;
-            
             for (let theta of angles) {
                 let real = 0, imag = 0;
                 for (let n = 0; n < N; n++) {
@@ -242,7 +147,7 @@
 
         function findBeamwidth(pattern, angles) {
             const maxI = Math.max(...pattern);
-            const threshold = maxI * 0.5; // 3dB point
+            const threshold = maxI * 0.5;
             let first = -1, last = -1;
             for (let i = 0; i < pattern.length; i++) {
                 if (pattern[i] >= threshold) {
@@ -265,16 +170,11 @@
 
         function findPeakSidelobe(pattern) {
             const maxI = Math.max(...pattern);
-            // Find first null, then max after it
             let inMainLobe = true;
             let peakSL = 0;
             for (let i = 0; i < pattern.length; i++) {
-                if (inMainLobe && pattern[i] < maxI * 0.1) {
-                    inMainLobe = false;
-                }
-                if (!inMainLobe && pattern[i] > peakSL) {
-                    peakSL = pattern[i];
-                }
+                if (inMainLobe && pattern[i] < maxI * 0.1) inMainLobe = false;
+                if (!inMainLobe && pattern[i] > peakSL) peakSL = pattern[i];
             }
             return 10 * Math.log10(peakSL / maxI);
         }
@@ -291,13 +191,10 @@
             document.getElementById('theta-val').textContent = (theta0 * 180 / Math.PI).toFixed(1);
             
             const angles = [];
-            for (let t = -45; t <= 45; t += 0.2) {
-                angles.push(t * Math.PI / 180);
-            }
+            for (let t = -45; t <= 45; t += 0.2) angles.push(t * Math.PI / 180);
             
             const { results, maxI } = computePattern(N, d, lambda, theta0, angles);
             
-            // Stats
             const bw = findBeamwidth(results, angles);
             const gl = findGratingLobeSeparation(d, lambda);
             const dir = computeDirectivity(N, d, lambda);
@@ -309,94 +206,90 @@
             document.getElementById('sidelobe').textContent = sl.toFixed(1) + ' dB';
             
             // Linear plot
-            const ctx1 = c1.getContext('2d');
-            ctx1.clearRect(0, 0, c1.width, c1.height);
-            ctx1.strokeStyle = '#00d4aa';
-            ctx1.lineWidth = 2;
-            ctx1.beginPath();
+            const plPoints = [];
             for (let i = 0; i < results.length; i++) {
-                const x = (i / results.length) * c1.width;
-                const y = c1.height - (results[i] / maxI) * c1.height * 0.85 - c1.height * 0.05;
-                if (i === 0) ctx1.moveTo(x, y);
-                else ctx1.lineTo(x, y);
+                const x = (i / results.length) * 600;
+                const y = 280 - (results[i] / maxI) * 260;
+                plPoints.push(`${x},${y}`);
             }
-            ctx1.stroke();
+            document.getElementById('pl-line').setAttribute('points', plPoints.join(' '));
             
             // dB plot
-            const ctx2 = c2.getContext('2d');
-            ctx2.clearRect(0, 0, c2.width, c2.height);
-            ctx2.strokeStyle = '#90e0ef';
-            ctx2.lineWidth = 2;
-            ctx2.beginPath();
+            const pdbPoints = [];
             for (let i = 0; i < results.length; i++) {
-                const x = (i / results.length) * c2.width;
+                const x = (i / results.length) * 600;
                 const db = 10 * Math.log10(results[i] + 1e-10);
-                const y = c2.height - ((db + 60) / 65) * c2.height * 0.85 - c2.height * 0.05;
-                if (i === 0) ctx2.moveTo(x, y);
-                else ctx2.lineTo(x, y);
+                const y = 280 - ((db + 60) / 65) * 260;
+                pdbPoints.push(`${x},${y}`);
             }
-            ctx2.stroke();
+            document.getElementById('pdb-line').setAttribute('points', pdbPoints.join(' '));
             
             // Beamwidth vs N
-            const ctx3 = c3.getContext('2d');
-            ctx3.clearRect(0, 0, c3.width, c3.height);
-            ctx3.strokeStyle = '#ffd166';
-            ctx3.lineWidth = 2;
-            ctx3.beginPath();
+            const bwPoints = [];
             for (let n = 8; n <= 256; n += 8) {
                 const testAngles = [];
                 for (let t = -45; t <= 45; t += 0.5) testAngles.push(t * Math.PI / 180);
                 const { results: testPattern } = computePattern(n, d, lambda, 0, testAngles);
                 const testBw = findBeamwidth(testPattern, testAngles);
-                const x = ((n - 8) / 248) * c3.width;
-                const y = c3.height - (testBw / 10) * c3.height * 0.85 - c3.height * 0.05;
-                if (n === 8) ctx3.moveTo(x, y);
-                else ctx3.lineTo(x, y);
+                const x = ((n - 8) / 248) * 600;
+                const y = 280 - (testBw / 10) * 260;
+                bwPoints.push(`${x},${y}`);
             }
-            ctx3.stroke();
+            document.getElementById('bw-line').setAttribute('points', bwPoints.join(' '));
             
-            // Mark current N
-            const curX = ((N - 8) / 248) * c3.width;
-            ctx3.fillStyle = '#e63946';
-            ctx3.beginPath();
-            ctx3.arc(curX, c3.height - (bw / 10) * c3.height * 0.85 - c3.height * 0.05, 8, 0, 2 * Math.PI);
-            ctx3.fill();
+            const curX = ((N - 8) / 248) * 600;
+            const curY = 280 - (bw / 10) * 260;
+            document.getElementById('bw-dot').setAttribute('cx', curX);
+            document.getElementById('bw-dot').setAttribute('cy', curY);
             
             // Grating lobe map
-            const ctx4 = c4.getContext('2d');
-            ctx4.clearRect(0, 0, c4.width, c4.height);
-            
-            const maxSteer = Math.asin(lambda / d) * 180 / Math.PI;
+            const glGroup = document.getElementById('gl-dots');
+            glGroup.innerHTML = '';
             for (let steer = -30; steer <= 30; steer += 1) {
                 for (let angle = -45; angle <= 45; angle += 1) {
                     const { results: mapPattern } = computePattern(N, d, lambda, steer * Math.PI / 180, [angle * Math.PI / 180]);
                     const I = mapPattern[0];
                     if (I > 0.01) {
-                        const x = ((angle + 45) / 90) * c4.width;
-                        const y = ((steer + 30) / 60) * c4.height;
-                        const intensity = Math.min(I * 255, 255);
-                        ctx4.fillStyle = `rgba(230, 57, 70, ${intensity / 255})`;
-                        ctx4.fillRect(x - 2, y - 2, 4, 4);
+                        const x = ((angle + 45) / 90) * 600;
+                        const y = ((steer + 30) / 60) * 350;
+                        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                        circle.setAttribute('cx', x);
+                        circle.setAttribute('cy', y);
+                        circle.setAttribute('r', 3);
+                        circle.setAttribute('fill', `rgba(230, 57, 70, ${Math.min(I, 1)})`);
+                        glGroup.appendChild(circle);
                     }
                 }
             }
-            
-            // Labels
-            ctx4.fillStyle = '#e0e6ed';
-            ctx4.font = '16px sans-serif';
-            ctx4.fillText('Observation Angle →', c4.width / 2 - 60, c4.height - 10);
-            ctx4.save();
-            ctx4.translate(20, c4.height / 2);
-            ctx4.rotate(-Math.PI / 2);
-            ctx4.fillText('Steering Angle →', -60, 0);
-            ctx4.restore();
+        }
+
+        function startAutoPlay() {
+            if (autoPlayInterval) return;
+            autoPlayInterval = setInterval(() => {
+                const slider = document.getElementById('steer-angle');
+                let val = parseFloat(slider.value);
+                val += autoPlayDirection * 0.5;
+                if (val >= 30 || val <= -30) autoPlayDirection *= -1;
+                slider.value = val;
+                draw();
+            }, 100);
+        }
+
+        function stopAutoPlay() {
+            if (autoPlayInterval) {
+                clearInterval(autoPlayInterval);
+                autoPlayInterval = null;
+            }
         }
 
         ['n-elements', 'spacing', 'wavelength', 'steer-angle'].forEach(id => {
             document.getElementById(id).addEventListener('input', draw);
         });
 
+        // Auto-play on load
         draw();
+        startAutoPlay();
+        setTimeout(stopAutoPlay, 5000); // Stop after 5 seconds
     </script>
 </body>
 </html>

@@ -15,7 +15,7 @@
         .subtitle { color: #778da9; font-size: 0.9em; margin-bottom: 16px; }
         .card { background: #1b263b; border-radius: 12px; padding: 18px; margin-bottom: 16px; border: 1px solid #415a77; }
         .card h2 { font-size: 1.15em; color: #00d4aa; margin-bottom: 12px; }
-        canvas { width: 100%; background: #0d1b2a; border-radius: 8px; margin: 12px 0; }
+        svg { width: 100%; background: #0d1b2a; border-radius: 8px; }
         .controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin: 12px 0; }
         .control-group label { display: block; font-size: 0.85em; color: #778da9; margin-bottom: 4px; }
         input[type="range"] { width: 100%; -webkit-appearance: none; height: 6px; border-radius: 3px; background: #415a77; }
@@ -24,6 +24,10 @@
         .stat-box { background: #0d1b2a; padding: 14px; border-radius: 8px; text-align: center; }
         .stat-value { font-size: 1.5em; font-weight: bold; color: #00d4aa; }
         .stat-label { font-size: 0.8em; color: #778da9; }
+        .btn { padding: 10px 20px; background: #2d6a4f; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9em; margin: 4px; }
+        .btn:hover { background: #40916c; }
+        .btn-secondary { background: #1b4d6e; }
+        .btn-secondary:hover { background: #2a6f97; }
         footer { text-align: center; padding: 30px; color: #778da9; font-size: 0.8em; }
     </style>
 </head>
@@ -38,10 +42,18 @@
             <a href="hypersonic.html">🚀 Hypersonic</a>
             <a href="architecture.html">🏗️ Architecture</a>
             <a href="digital-twin.html">🎮 3D Twin</a>
+            <a href="mrr-sim.html">💍 MRR</a>
+            <a href="mzi-sim.html">🔲 MZI</a>
+            <a href="nonlinear-sim.html">🌀 XPM</a>
         </nav>
 
         <h1>🌫️ Atmospheric Channel</h1>
         <p class="subtitle">Turbulence, scintillation index, Fried parameter, beam wander</p>
+
+        <div style="margin: 12px 0;">
+            <button class="btn" onclick="startAutoPlay()">▶️ Auto Animate</button>
+            <button class="btn btn-secondary" onclick="stopAutoPlay()">⏹️ Stop</button>
+        </div>
 
         <div class="card">
             <h2>Channel Parameters</h2>
@@ -74,36 +86,54 @@
 
         <div class="card">
             <h2>Fried Parameter vs Elevation</h2>
-            <canvas id="r0-plot" height="300"></canvas>
+            <svg id="r0-plot" viewBox="0 0 600 300" preserveAspectRatio="none">
+                <rect width="600" height="300" fill="#0d1b2a"/>
+                <polyline id="r0-line" fill="none" stroke="#00d4aa" stroke-width="2"/>
+                <circle id="r0-dot" r="6" fill="#e63946"/>
+                <line x1="0" y1="280" x2="600" y2="280" stroke="#415a77" stroke-width="1"/>
+            </svg>
         </div>
 
         <div class="card">
             <h2>Scintillation Index vs Elevation</h2>
-            <canvas id="scint-plot" height="300"></canvas>
+            <svg id="scint-plot" viewBox="0 0 600 300" preserveAspectRatio="none">
+                <rect width="600" height="300" fill="#0d1b2a"/>
+                <polyline id="scint-line" fill="none" stroke="#ffd166" stroke-width="2"/>
+                <circle id="scint-dot" r="6" fill="#e63946"/>
+                <line x1="0" y1="280" x2="600" y2="280" stroke="#415a77" stroke-width="1"/>
+            </svg>
         </div>
 
         <div class="card">
-            <h2>Turbulence Phase Screen (Simulated)</h2>
-            <canvas id="phase-screen" height="300"></canvas>
+            <h2>Atmospheric Link Schematic</h2>
+            <svg id="atm-schematic" viewBox="0 0 600 250" preserveAspectRatio="xMidYMid meet">
+                <rect width="600" height="250" fill="#0d1b2a"/>
+                <!-- Ground station -->
+                <rect x="30" y="180" width="60" height="40" fill="#1b263b" stroke="#00d4aa" stroke-width="2"/>
+                <text x="60" y="205" text-anchor="middle" fill="#00d4aa" font-size="10">Ground</text>
+                <!-- Satellite -->
+                <rect x="510" y="40" width="60" height="40" fill="#1b263b" stroke="#ffd166" stroke-width="2"/>
+                <text x="540" y="65" text-anchor="middle" fill="#ffd166" font-size="10">VLEO</text>
+                <!-- Beam -->
+                <line x1="90" y1="180" x2="510" y2="80" stroke="#00d4aa" stroke-width="2" opacity="0.6" id="beam-line"/>
+                <!-- Turbulence blobs -->
+                <circle cx="200" cy="140" r="15" fill="none" stroke="#e63946" stroke-width="1" opacity="0.5">
+                    <animate attributeName="r" values="15;20;15" dur="2s" repeatCount="indefinite"/>
+                </circle>
+                <circle cx="350" cy="110" r="20" fill="none" stroke="#e63946" stroke-width="1" opacity="0.5">
+                    <animate attributeName="r" values="20;25;20" dur="3s" repeatCount="indefinite"/>
+                </circle>
+                <!-- Labels -->
+                <text x="300" y="240" text-anchor="middle" fill="#778da9" font-size="12">Atmospheric Turbulence (Cn²)</text>
+                <text x="300" y="120" text-anchor="middle" fill="#e63946" font-size="11">↑ Beam Wander & Scintillation</text>
+            </svg>
         </div>
 
         <footer><p>Space Photonics Digital Twin — Atmospheric Channel Module</p></footer>
     </div>
 
     <script>
-        const c1 = document.getElementById('r0-plot');
-        const c2 = document.getElementById('scint-plot');
-        const c3 = document.getElementById('phase-screen');
-        [c1, c2, c3].forEach(c => {
-            const rect = c.getBoundingClientRect();
-            if (rect.width > 0 && rect.height > 0) {
-                c.width = rect.width * 2;
-                c.height = rect.height * 2;
-            } else {
-                c.width = 600;
-                c.height = 300;
-            }
-        });
+        let autoPlayInterval = null;
 
         function computeR0(lambda, Cn2, elevation, altitude) {
             const k = 2 * Math.PI / lambda;
@@ -125,7 +155,7 @@
             const k = 2 * Math.PI / lambda;
             const zenithAngle = Math.acos(Math.sin(elevation * Math.PI / 180));
             const h = altitude * 1000;
-            const D = 0.1; // Aperture diameter
+            const D = 0.1;
             const wander = 2.42 * Cn2 * Math.pow(h, 3) * Math.pow(D, -1/3) / Math.pow(Math.cos(zenithAngle), 3);
             return Math.sqrt(Math.max(wander, 0)) * 1e6;
         }
@@ -145,7 +175,6 @@
             document.getElementById('cn2-val').textContent = (Cn2 * 1e14).toFixed(1);
             document.getElementById('alt-val').textContent = altitude.toFixed(0);
             
-            // Stats
             const r0 = computeR0(lambda, Cn2, elevation, altitude);
             const scint = computeScintillation(lambda, Cn2, elevation, altitude);
             const wander = computeBeamWander(lambda, Cn2, elevation, altitude);
@@ -157,56 +186,51 @@
             document.getElementById('loss').textContent = loss.toFixed(2);
             
             // r0 vs elevation
-            const ctx1 = c1.getContext('2d');
-            ctx1.clearRect(0, 0, c1.width, c1.height);
-            ctx1.strokeStyle = '#00d4aa';
-            ctx1.lineWidth = 2;
-            ctx1.beginPath();
+            const r0Points = [];
             for (let el = 5; el <= 90; el += 1) {
                 const r = computeR0(lambda, Cn2, el, altitude);
-                const x = ((el - 5) / 85) * c1.width;
-                const y = c1.height - Math.log10(r * 100 + 0.01) / Math.log10(50) * c1.height * 0.85 - c1.height * 0.05;
-                if (el === 5) ctx1.moveTo(x, y);
-                else ctx1.lineTo(x, y);
+                const x = ((el - 5) / 85) * 600;
+                const y = 280 - Math.min(Math.log10(r * 100 + 0.01) / Math.log10(50), 1) * 260;
+                r0Points.push(`${x},${y}`);
             }
-            ctx1.stroke();
+            document.getElementById('r0-line').setAttribute('points', r0Points.join(' '));
             
-            // Mark current
-            const curX = ((elevation - 5) / 85) * c1.width;
-            const curY = c1.height - Math.log10(r0 * 100 + 0.01) / Math.log10(50) * c1.height * 0.85 - c1.height * 0.05;
-            ctx1.fillStyle = '#e63946';
-            ctx1.beginPath();
-            ctx1.arc(curX, curY, 8, 0, 2 * Math.PI);
-            ctx1.fill();
+            const curX = ((elevation - 5) / 85) * 600;
+            const curY = 280 - Math.min(Math.log10(r0 * 100 + 0.01) / Math.log10(50), 1) * 260;
+            document.getElementById('r0-dot').setAttribute('cx', curX);
+            document.getElementById('r0-dot').setAttribute('cy', curY);
             
             // Scintillation vs elevation
-            const ctx2 = c2.getContext('2d');
-            ctx2.clearRect(0, 0, c2.width, c2.height);
-            ctx2.strokeStyle = '#ffd166';
-            ctx2.lineWidth = 2;
-            ctx2.beginPath();
+            const scintPoints = [];
             for (let el = 5; el <= 90; el += 1) {
                 const s = computeScintillation(lambda, Cn2, el, altitude);
-                const x = ((el - 5) / 85) * c2.width;
-                const y = c2.height - (s / 5) * c2.height * 0.85 - c2.height * 0.05;
-                if (el === 5) ctx2.moveTo(x, y);
-                else ctx2.lineTo(x, y);
+                const x = ((el - 5) / 85) * 600;
+                const y = 280 - Math.min(s / 5, 1) * 260;
+                scintPoints.push(`${x},${y}`);
             }
-            ctx2.stroke();
+            document.getElementById('scint-line').setAttribute('points', scintPoints.join(' '));
             
-            // Phase screen
-            const ctx3 = c3.getContext('2d');
-            ctx3.clearRect(0, 0, c3.width, c3.height);
-            const N = 64;
-            const cellW = c3.width / N;
-            const cellH = c3.height / N;
-            for (let i = 0; i < N; i++) {
-                for (let j = 0; j < N; j++) {
-                    const phase = Math.sin(i * 0.3) * Math.cos(j * 0.3) * Cn2 * 1e14 * Math.random();
-                    const intensity = Math.floor((phase + 1) * 127.5);
-                    ctx3.fillStyle = `rgb(${intensity}, ${intensity}, ${255 - intensity})`;
-                    ctx3.fillRect(i * cellW, j * cellH, cellW, cellH);
-                }
+            const scintCurY = 280 - Math.min(scint / 5, 1) * 260;
+            document.getElementById('scint-dot').setAttribute('cx', curX);
+            document.getElementById('scint-dot').setAttribute('cy', scintCurY);
+        }
+
+        function startAutoPlay() {
+            if (autoPlayInterval) return;
+            autoPlayInterval = setInterval(() => {
+                const slider = document.getElementById('elevation');
+                let val = parseFloat(slider.value);
+                val += 1;
+                if (val > 90) val = 5;
+                slider.value = val;
+                draw();
+            }, 100);
+        }
+
+        function stopAutoPlay() {
+            if (autoPlayInterval) {
+                clearInterval(autoPlayInterval);
+                autoPlayInterval = null;
             }
         }
 
@@ -215,6 +239,8 @@
         });
 
         draw();
+        startAutoPlay();
+        setTimeout(stopAutoPlay, 5000);
     </script>
 </body>
 </html>

@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nonlinear XPM — Space Photonics</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #050811; color: #e0e6ed; line-height: 1.6; }
+        .container { max-width: 1000px; margin: 0 auto; padding: 16px; }
+        nav { background: #1b263b; padding: 12px; border-radius: 10px; margin-bottom: 16px; display: flex; flex-wrap: wrap; gap: 8px; }
+        nav a { color: #e0e6ed; text-decoration: none; padding: 8px 14px; border-radius: 6px; font-size: 0.9em; background: #0d1b2a; }
+        nav a:hover, nav a.active { background: #00d4aa; color: #050811; }
+        h1 { font-size: 1.5em; color: #00d4aa; margin: 16px 0 8px; }
+        .subtitle { color: #778da9; font-size: 0.9em; margin-bottom: 16px; }
+        .card { background: #1b263b; border-radius: 12px; padding: 18px; margin-bottom: 16px; border: 1px solid #415a77; }
+        .card h2 { font-size: 1.15em; color: #00d4aa; margin-bottom: 12px; }
+        svg { width: 100%; background: #0d1b2a; border-radius: 8px; }
+        .controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin: 12px 0; }
+        .control-group label { display: block; font-size: 0.85em; color: #778da9; margin-bottom: 4px; }
+        input[type="range"] { width: 100%; -webkit-appearance: none; height: 6px; border-radius: 3px; background: #415a77; }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: #00d4aa; cursor: pointer; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 12px 0; }
+        .stat-box { background: #0d1b2a; padding: 14px; border-radius: 8px; text-align: center; }
+        .stat-value { font-size: 1.5em; font-weight: bold; color: #00d4aa; }
+        .stat-label { font-size: 0.8em; color: #778da9; }
+        .btn { padding: 10px 20px; background: #2d6a4f; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9em; margin: 4px; }
+        .btn:hover { background: #40916c; }
+        .btn-secondary { background: #1b4d6e; }
+        .btn-secondary:hover { background: #2a6f97; }
+        footer { text-align: center; padding: 30px; color: #778da9; font-size: 0.8em; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav>
+            <a href="../index.html">🏠 Dashboard</a>
+            <a href="opa-analysis.html">🔭 OPA</a>
+            <a href="atmospheric.html">🌫️ Atmosphere</a>
+            <a href="thermal.html">🌡️ Thermal</a>
+            <a href="link-budget.html">📡 Link Budget</a>
+            <a href="hypersonic.html">🚀 Hypersonic</a>
+            <a href="architecture.html">🏗️ Architecture</a>
+            <a href="digital-twin.html">🎮 3D Twin</a>
+            <a href="mrr-sim.html">💍 MRR</a>
+            <a href="mzi-sim.html">🔲 MZI</a>
+            <a href="nonlinear-sim.html" class="active">🌀 XPM</a>
+        </nav>
+
+        <h1>🌀 Nonlinear Optics — XPM & Kerr Effect</h1>
+        <p class="subtitle">Cross-phase modulation, self-phase modulation, and Pockels effect</p>
+
+        <div style="margin: 12px 0;">
+            <button class="btn" onclick="startAutoPlay()">▶️ Auto Animate</button>
+            <button class="btn btn-secondary" onclick="stopAutoPlay()">⏹️ Stop</button>
+        </div>
+
+        <div class="card">
+            <h2>XPM Configuration</h2>
+            <div class="controls">
+                <div class="control-group">
+                    <label>Pump Power (mW): <span id="pump-val">10</span></label>
+                    <input type="range" id="pump-power" min="1" max="100" value="10" step="1">
+                </div>
+                <div class="control-group">
+                    <label>Fiber Length (m): <span id="len-val">1</span></label>
+                    <input type="range" id="fiber-length" min="0.1" max="10" value="1" step="0.1">
+                </div>
+                <div class="control-group">
+                    <label>γ (W⁻¹km⁻¹): <span id="gamma-val">70</span></label>
+                    <input type="range" id="gamma" min="1" max="200" value="70" step="1">
+                </div>
+                <div class="control-group">
+                    <label>Effect</label>
+                    <select id="effect-type" style="width:100%; padding:8px; background:#0d1b2a; border:1px solid #415a77; border-radius:6px; color:#e0e6ed;">
+                        <option value="xpm">Cross-Phase Modulation (XPM)</option>
+                        <option value="spm">Self-Phase Modulation (SPM)</option>
+                        <option value="pockels">Pockels Effect (EO)</option>
+                        <option value="kerr">Kerr Effect</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-box"><div class="stat-value" id="phase-shift">-</div><div class="stat-label">Phase Shift (rad)</div></div>
+                <div class="stat-box"><div class="stat-value" id="nonlinear-length">-</div><div class="stat-label">L_NL (m)</div></div>
+                <div class="stat-box"><div class="stat-value" id="soliton-order">-</div><div class="stat-label">Soliton Order</div></div>
+                <div class="stat-box"><div class="stat-value" id="bandwidth">-</div><div class="stat-label">SPM BW (nm)</div></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>XPM in Photonic Crystal Fiber</h2>
+            <svg id="xpm-schematic" viewBox="0 0 600 250" preserveAspectRatio="xMidYMid meet">
+                <rect width="600" height="250" fill="#0d1b2a"/>
+                <!-- Fiber -->
+                <rect x="100" y="100" width="400" height="50" rx="25" fill="none" stroke="#415a77" stroke-width="3"/>
+                <text x="300" y="185" text-anchor="middle" fill="#778da9" font-size="12">Photonic Crystal Fiber (PCF)</text>
+                
+                <!-- Pump pulse -->
+                <rect x="80" y="80" width="40" height="20" rx="5" fill="#e63946" opacity="0.8" id="pump-pulse"/>
+                <text x="100" y="75" text-anchor="middle" fill="#e63946" font-size="10">Pump</text>
+                
+                <!-- Probe pulse -->
+                <rect x="80" y="150" width="40" height="20" rx="5" fill="#00d4aa" opacity="0.8" id="probe-pulse"/>
+                <text x="100" y="185" text-anchor="middle" fill="#00d4aa" font-size="10">Probe</text>
+                
+                <!-- Phase modulation indicator -->
+                <path d="M 200 60 Q 250 30 300 60" fill="none" stroke="#ffd166" stroke-width="2" stroke-dasharray="5,3"/>
+                <text x="250" y="50" text-anchor="middle" fill="#ffd166" font-size="11">Δφ = 2γP_pL</text>
+                
+                <!-- Output -->
+                <text x="520" y="130" fill="#778da9" font-size="11">Phase</text>
+                <text x="520" y="145" fill="#778da9" font-size="11">Modulated</text>
+                
+                <!-- Animated pulses -->
+                <circle r="5" fill="#e63946" opacity="0.9">
+                    <animate attributeName="cx" values="100;500" dur="1.5s" repeatCount="indefinite"/>
+                    <animate attributeName="cy" values="90;90" dur="1.5s" repeatCount="indefinite"/>
+                </circle>
+                <circle r="4" fill="#00d4aa" opacity="0.9">
+                    <animate attributeName="cx" values="100;500" dur="1.5s" repeatCount="indefinite"/>
+                    <animate attributeName="cy" values="160;155;160;165;160" dur="0.3s" repeatCount="indefinite"/>
+                </circle>
+            </svg>
+        </div>
+
+        <div class="card">
+            <h2>Phase Shift vs Pump Power</h2>
+            <svg id="phase-plot" viewBox="0 0 600 300" preserveAspectRatio="none">
+                <rect width="600" height="300" fill="#0d1b2a"/>
+                <polyline id="ph-line" fill="none" stroke="#00d4aa" stroke-width="2"/>
+                <line x1="0" y1="250" x2="600" y2="250" stroke="#415a77" stroke-width="1"/>
+                <text x="300" y="290" text-anchor="middle" fill="#778da9" font-size="12">Pump Power (mW)</text>
+                <text x="20" y="20" fill="#778da9" font-size="12">Phase Shift (rad)</text>
+            </svg>
+        </div>
+
+        <div class="card">
+            <h2>Refractive Index Change</h2>
+            <svg id="index-plot" viewBox="0 0 600 250" preserveAspectRatio="none">
+                <rect width="600" height="250" fill="#0d1b2a"/>
+                <!-- n0 line -->
+                <line x1="50" y1="125" x2="550" y2="125" stroke="#415a77" stroke-width="1" stroke-dasharray="3,3"/>
+                <text x="30" y="130" fill="#415a77" font-size="10">n₀</text>
+                <!-- n2I curve -->
+                <polyline id="ni-line" fill="none" stroke="#00d4aa" stroke-width="2"/>
+                <text x="300" y="30" text-anchor="middle" fill="#00d4aa" font-size="12">n = n₀ + n₂I</text>
+                <!-- Intensity profile -->
+                <polyline id="int-line" fill="none" stroke="#e63946" stroke-width="2" opacity="0.6"/>
+            </svg>
+        </div>
+
+        <div class="card">
+            <h2>Effect Comparison</h2>
+            <svg id="comparison-plot" viewBox="0 0 600 300" preserveAspectRatio="xMidYMid meet">
+                <rect width="600" height="300" fill="#0d1b2a"/>
+                <!-- XPM -->
+                <rect x="80" y="100" width="100" height="150" fill="rgba(0,212,170,0.3)" stroke="#00d4aa" stroke-width="2"/>
+                <text x="130" y="270" text-anchor="middle" fill="#00d4aa" font-size="11">XPM</text>
+                <text x="130" y="90" text-anchor="middle" fill="#e0e6ed" font-size="10">Pump→Probe</text>
+                
+                <!-- SPM -->
+                <rect x="200" y="120" width="100" height="130" fill="rgba(144,224,239,0.3)" stroke="#90e0ef" stroke-width="2"/>
+                <text x="250" y="270" text-anchor="middle" fill="#90e0ef" font-size="11">SPM</text>
+                <text x="250" y="110" text-anchor="middle" fill="#e0e6ed" font-size="10">Self→Self</text>
+                
+                <!-- Pockels -->
+                <rect x="320" y="80" width="100" height="170" fill="rgba(255,209,102,0.3)" stroke="#ffd166" stroke-width="2"/>
+                <text x="370" y="270" text-anchor="middle" fill="#ffd166" font-size="11">Pockels</text>
+                <text x="370" y="70" text-anchor="middle" fill="#e0e6ed" font-size="10">E-field→n</text>
+                
+                <!-- Kerr -->
+                <rect x="440" y="140" width="100" height="110" fill="rgba(255,107,157,0.3)" stroke="#ff6b9d" stroke-width="2"/>
+                <text x="490" y="270" text-anchor="middle" fill="#ff6b9d" font-size="11">Kerr</text>
+                <text x="490" y="130" text-anchor="middle" fill="#e0e6ed" font-size="10">I→n</text>
+            </svg>
+        </div>
+
+        <footer><p>Space Photonics Digital Twin — Nonlinear Optics Module</p></footer>
+    </div>
+
+    <script>
+        let autoPlayInterval = null;
+
+        function computeXPM(pumpPower, length, gamma) {
+            const P_p = pumpPower * 1e-3; // W
+            const L = length; // m
+            const g = gamma; // W⁻¹km⁻¹ -> W⁻¹m⁻¹
+            const gamma_m = g / 1000;
+            
+            // Phase shift
+            const dphi = 2 * gamma_m * P_p * L;
+            
+            // Nonlinear length
+            const L_NL = 1 / (gamma_m * P_p);
+            
+            // Soliton order
+            const T0 = 1e-12; // 1 ps pulse
+            const beta2 = -20e-27; // -20 ps²/km
+            const L_D = T0 * T0 / Math.abs(beta2);
+            const N_soliton = Math.sqrt(L_D / L_NL);
+            
+            // SPM bandwidth broadening
+            const delta_lambda = 0.1 * N_soliton * N_soliton; // nm (approximate)
+            
+            return { dphi, L_NL, N_soliton, delta_lambda };
+        }
+
+        function draw() {
+            const pumpPower = parseFloat(document.getElementById('pump-power').value);
+            const length = parseFloat(document.getElementById('fiber-length').value);
+            const gamma = parseFloat(document.getElementById('gamma').value);
+            const effect = document.getElementById('effect-type').value;
+            
+            document.getElementById('pump-val').textContent = pumpPower;
+            document.getElementById('len-val').textContent = length.toFixed(1);
+            document.getElementById('gamma-val').textContent = gamma;
+            
+            const { dphi, L_NL, N_soliton, delta_lambda } = computeXPM(pumpPower, length, gamma);
+            
+            document.getElementById('phase-shift').textContent = dphi.toExponential(2);
+            document.getElementById('nonlinear-length').textContent = L_NL.toFixed(2);
+            document.getElementById('soliton-order').textContent = N_soliton.toFixed(1);
+            document.getElementById('bandwidth').textContent = delta_lambda.toFixed(2);
+            
+            // Phase shift vs pump power
+            const phPoints = [];
+            for (let p = 1; p <= 100; p++) {
+                const { dphi: dp } = computeXPM(p, length, gamma);
+                const x = (p / 100) * 600;
+                const y = 280 - Math.min(dp / 0.1, 1) * 250;
+                phPoints.push(`${x},${y}`);
+            }
+            document.getElementById('ph-line').setAttribute('points', phPoints.join(' '));
+            
+            // Refractive index change
+            const niPoints = [];
+            const intPoints = [];
+            const n2 = 2.6e-20; // m²/W for silica
+            for (let x = 0; x <= 600; x += 5) {
+                const z = (x / 600) * length; // position in fiber
+                const P_at_z = pumpPower * 1e-3 * Math.exp(-0.2 * z); // with 0.2 dB/m loss
+                const dn = n2 * P_at_z / (Math.PI * 2.5e-6 * 2.5e-6); // index change
+                const y_ni = 125 - dn * 1e15 * 50;
+                niPoints.push(`${x},${y_ni}`);
+                
+                // Gaussian intensity profile
+                const sigma = 100;
+                const I = Math.exp(-Math.pow((x - 300) / sigma, 2));
+                const y_int = 240 - I * 100;
+                intPoints.push(`${x},${y_int}`);
+            }
+            document.getElementById('ni-line').setAttribute('points', niPoints.join(' '));
+            document.getElementById('int-line').setAttribute('points', intPoints.join(' '));
+        }
+
+        function startAutoPlay() {
+            if (autoPlayInterval) return;
+            autoPlayInterval = setInterval(() => {
+                const slider = document.getElementById('pump-power');
+                let val = parseFloat(slider.value);
+                val += 2;
+                if (val > 100) val = 1;
+                slider.value = val;
+                draw();
+            }, 100);
+        }
+
+        function stopAutoPlay() {
+            if (autoPlayInterval) {
+                clearInterval(autoPlayInterval);
+                autoPlayInterval = null;
+            }
+        }
+
+        ['pump-power', 'fiber-length', 'gamma', 'effect-type'].forEach(id => {
+            document.getElementById(id).addEventListener('input', draw);
+            document.getElementById(id).addEventListener('change', draw);
+        });
+
+        draw();
+        startAutoPlay();
+        setTimeout(stopAutoPlay, 5000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MZI Simulation — Space Photonics</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #050811; color: #e0e6ed; line-height: 1.6; }
+        .container { max-width: 1000px; margin: 0 auto; padding: 16px; }
+        nav { background: #1b263b; padding: 12px; border-radius: 10px; margin-bottom: 16px; display: flex; flex-wrap: wrap; gap: 8px; }
+        nav a { color: #e0e6ed; text-decoration: none; padding: 8px 14px; border-radius: 6px; font-size: 0.9em; background: #0d1b2a; }
+        nav a:hover, nav a.active { background: #00d4aa; color: #050811; }
+        h1 { font-size: 1.5em; color: #00d4aa; margin: 16px 0 8px; }
+        .subtitle { color: #778da9; font-size: 0.9em; margin-bottom: 16px; }
+        .card { background: #1b263b; border-radius: 12px; padding: 18px; margin-bottom: 16px; border: 1px solid #415a77; }
+        .card h2 { font-size: 1.15em; color: #00d4aa; margin-bottom: 12px; }
+        svg { width: 100%; background: #0d1b2a; border-radius: 8px; }
+        .controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin: 12px 0; }
+        .control-group label { display: block; font-size: 0.85em; color: #778da9; margin-bottom: 4px; }
+        input[type="range"] { width: 100%; -webkit-appearance: none; height: 6px; border-radius: 3px; background: #415a77; }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: #00d4aa; cursor: pointer; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 12px 0; }
+        .stat-box { background: #0d1b2a; padding: 14px; border-radius: 8px; text-align: center; }
+        .stat-value { font-size: 1.5em; font-weight: bold; color: #00d4aa; }
+        .stat-label { font-size: 0.8em; color: #778da9; }
+        .btn { padding: 10px 20px; background: #2d6a4f; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9em; margin: 4px; }
+        .btn:hover { background: #40916c; }
+        .btn-secondary { background: #1b4d6e; }
+        .btn-secondary:hover { background: #2a6f97; }
+        footer { text-align: center; padding: 30px; color: #778da9; font-size: 0.8em; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav>
+            <a href="../index.html">🏠 Dashboard</a>
+            <a href="opa-analysis.html">🔭 OPA</a>
+            <a href="atmospheric.html">🌫️ Atmosphere</a>
+            <a href="thermal.html">🌡️ Thermal</a>
+            <a href="link-budget.html">📡 Link Budget</a>
+            <a href="hypersonic.html">🚀 Hypersonic</a>
+            <a href="architecture.html">🏗️ Architecture</a>
+            <a href="digital-twin.html">🎮 3D Twin</a>
+            <a href="mrr-sim.html">💍 MRR</a>
+            <a href="mzi-sim.html" class="active">🔲 MZI</a>
+            <a href="nonlinear-sim.html">🌀 XPM</a>
+        </nav>
+
+        <h1>🔲 Mach-Zehnder Interferometer (MZI)</h1>
+        <p class="subtitle">Phase modulation, switching, and matrix multiplication</p>
+
+        <div style="margin: 12px 0;">
+            <button class="btn" onclick="startAutoPlay()">▶️ Auto Animate</button>
+            <button class="btn btn-secondary" onclick="stopAutoPlay()">⏹️ Stop</button>
+        </div>
+
+        <div class="card">
+            <h2>MZI Configuration</h2>
+            <div class="controls">
+                <div class="control-group">
+                    <label>Phase Shift (°): <span id="phi-val">0</span></label>
+                    <input type="range" id="phase" min="0" max="360" value="0" step="1">
+                </div>
+                <div class="control-group">
+                    <label>Splitting Ratio: <span id="split-val">0.5</span></label>
+                    <input type="range" id="splitting" min="0.1" max="0.9" value="0.5" step="0.05">
+                </div>
+                <div class="control-group">
+                    <label>Voltage (V): <span id="v-val">0</span></label>
+                    <input type="range" id="voltage" min="0" max="10" value="0" step="0.1">
+                </div>
+                <div class="control-group">
+                    <label>Platform</label>
+                    <select id="platform" style="width:100%; padding:8px; background:#0d1b2a; border:1px solid #415a77; border-radius:6px; color:#e0e6ed;">
+                        <option value="tfln">TFLN (Vπ=4.7V)</option>
+                        <option value="si">Silicon (Vπ=15V)</option>
+                        <option value="inp">InP (Vπ=3V)</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-box"><div class="stat-value" id="bar-trans">-</div><div class="stat-label">Bar Transmission</div></div>
+                <div class="stat-box"><div class="stat-value" id="cross-trans">-</div><div class="stat-label">Cross Transmission</div></div>
+                <div class="stat-box"><div class="stat-value" id="extinction">-</div><div class="stat-label">Extinction (dB)</div></div>
+                <div class="stat-box"><div class="stat-value" id="vpi">-</div><div class="stat-label">Vπ (V)</div></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>MZI Device Schematic</h2>
+            <svg id="mzi-schematic" viewBox="0 0 600 350" preserveAspectRatio="xMidYMid meet">
+                <rect width="600" height="350" fill="#0d1b2a"/>
+                
+                <!-- Input waveguides -->
+                <line x1="50" y1="100" x2="150" y2="100" stroke="#00d4aa" stroke-width="3"/>
+                <line x1="50" y1="250" x2="150" y2="250" stroke="#00d4aa" stroke-width="3"/>
+                
+                <!-- First coupler -->
+                <line x1="150" y1="100" x2="200" y2="150" stroke="#00d4aa" stroke-width="3"/>
+                <line x1="150" y1="250" x2="200" y2="150" stroke="#00d4aa" stroke-width="3"/>
+                
+                <!-- Arms -->
+                <line x1="200" y1="150" x2="400" y2="150" stroke="#90e0ef" stroke-width="3" id="arm1"/>
+                <line x1="200" y1="200" x2="400" y2="200" stroke="#90e0ef" stroke-width="3" id="arm2"/>
+                
+                <!-- Phase heater on arm 1 -->
+                <rect x="280" y="135" width="40" height="30" fill="none" stroke="#ffd166" stroke-width="2" rx="5"/>
+                <text x="300" y="155" text-anchor="middle" fill="#ffd166" font-size="11">Δφ</text>
+                
+                <!-- Second coupler -->
+                <line x1="400" y1="150" x2="450" y2="100" stroke="#00d4aa" stroke-width="3"/>
+                <line x1="400" y1="200" x2="450" y2="250" stroke="#00d4aa" stroke-width="3"/>
+                
+                <!-- Output waveguides -->
+                <line x1="450" y1="100" x2="550" y2="100" stroke="#00d4aa" stroke-width="3"/>
+                <line x1="450" y1="250" x2="550" y2="250" stroke="#00d4aa" stroke-width="3"/>
+                
+                <!-- Labels -->
+                <text x="30" y="95" fill="#778da9" font-size="12">In 1</text>
+                <text x="30" y="255" fill="#778da9" font-size="12">In 2</text>
+                <text x="520" y="95" fill="#778da9" font-size="12">Out 1</text>
+                <text x="520" y="255" fill="#778da9" font-size="12">Out 2</text>
+                
+                <!-- Animated photons -->
+                <circle r="4" fill="#00d4aa">
+                    <animate attributeName="cx" values="50;150;200;300;400;450;550" dur="2s" repeatCount="indefinite"/>
+                    <animate attributeName="cy" values="100;100;125;150;150;125;100" dur="2s" repeatCount="indefinite"/>
+                </circle>
+                <circle r="4" fill="#ff6b9d">
+                    <animate attributeName="cx" values="50;150;200;300;400;450;550" dur="2s" repeatCount="indefinite" begin="1s"/>
+                    <animate attributeName="cy" values="250;250;225;200;200;225;250" dur="2s" repeatCount="indefinite" begin="1s"/>
+                </circle>
+                
+                <!-- Output power indicators -->
+                <circle cx="550" cy="100" r="8" fill="none" stroke="#00d4aa" stroke-width="2" id="out1-indicator"/>
+                <circle cx="550" cy="250" r="8" fill="none" stroke="#00d4aa" stroke-width="2" id="out2-indicator"/>
+            </svg>
+        </div>
+
+        <div class="card">
+            <h2>Transfer Function</h2>
+            <svg id="transfer-plot" viewBox="0 0 600 300" preserveAspectRatio="none">
+                <rect width="600" height="300" fill="#0d1b2a"/>
+                <polyline id="bar-line" fill="none" stroke="#00d4aa" stroke-width="2"/>
+                <polyline id="cross-line" fill="none" stroke="#ff6b9d" stroke-width="2"/>
+                <line x1="300" y1="0" x2="300" y2="300" stroke="#415a77" stroke-width="1" stroke-dasharray="5,5"/>
+                <text x="10" y="20" fill="#00d4aa" font-size="12">Bar</text>
+                <text x="10" y="40" fill="#ff6b9d" font-size="12">Cross</text>
+            </svg>
+        </div>
+
+        <div class="card">
+            <h2>2×2 Matrix Operation</h2>
+            <p style="font-size: 0.85em; color: #778da9; margin-bottom: 12px;">Each MZI implements a unitary 2×2 transformation for photonic matrix multiplication</p>
+            <svg id="matrix-viz" viewBox="0 0 600 200" preserveAspectRatio="xMidYMid meet">
+                <rect width="600" height="200" fill="#0d1b2a"/>
+                <!-- Matrix brackets -->
+                <path d="M 180 30 L 180 170 M 170 30 Q 160 100 170 170" fill="none" stroke="#415a77" stroke-width="3"/>
+                <path d="M 420 30 L 420 170 M 430 30 Q 440 100 430 170" fill="none" stroke="#415a77" stroke-width="3"/>
+                <!-- Matrix elements -->
+                <text x="240" y="80" text-anchor="middle" fill="#00d4aa" font-size="24" id="m11">1.0</text>
+                <text x="360" y="80" text-anchor="middle" fill="#90e0ef" font-size="24" id="m12">0.0</text>
+                <text x="240" y="140" text-anchor="middle" fill="#90e0ef" font-size="24" id="m21">0.0</text>
+                <text x="360" y="140" text-anchor="middle" fill="#00d4aa" font-size="24" id="m22">1.0</text>
+                <!-- Labels -->
+                <text x="80" y="90" text-anchor="middle" fill="#778da9" font-size="14">Input</text>
+                <text x="80" y="150" text-anchor="middle" fill="#778da9" font-size="14">Vector</text>
+                <text x="520" y="90" text-anchor="middle" fill="#778da9" font-size="14">Output</text>
+                <text x="520" y="150" text-anchor="middle" fill="#778da9" font-size="14">Vector</text>
+            </svg>
+        </div>
+
+        <footer><p>Space Photonics Digital Twin — MZI Simulation Module</p></footer>
+    </div>
+
+    <script>
+        let autoPlayInterval = null;
+
+        const vpiValues = { tfln: 4.7, si: 15, inp: 3.0 };
+
+        function computeMZI(phase_deg, splitting_ratio, voltage, platform) {
+            const phi = phase_deg * Math.PI / 180;
+            const vpi = vpiValues[platform];
+            const phase_from_voltage = (voltage / vpi) * Math.PI;
+            const total_phi = phi + phase_from_voltage;
+            
+            // Transfer matrix
+            const theta = Math.acos(Math.sqrt(splitting_ratio));
+            const cos_t = Math.cos(theta);
+            const sin_t = Math.sin(theta);
+            
+            const bar = cos_t * cos_t + sin_t * sin_t * Math.cos(total_phi);
+            const cross = sin_t * sin_t * (1 - Math.cos(total_phi));
+            
+            const bar_dB = 10 * Math.log10(Math.abs(bar) + 1e-10);
+            const cross_dB = 10 * Math.log10(Math.abs(cross) + 1e-10);
+            const extinction = -bar_dB;
+            
+            return { bar, cross, bar_dB, cross_dB, extinction, vpi };
+        }
+
+        function draw() {
+            const phase = parseFloat(document.getElementById('phase').value);
+            const splitting = parseFloat(document.getElementById('splitting').value);
+            const voltage = parseFloat(document.getElementById('voltage').value);
+            const platform = document.getElementById('platform').value;
+            
+            document.getElementById('phi-val').textContent = phase.toFixed(0);
+            document.getElementById('split-val').textContent = splitting.toFixed(2);
+            document.getElementById('v-val').textContent = voltage.toFixed(1);
+            
+            const { bar, cross, bar_dB, cross_dB, extinction, vpi } = computeMZI(phase, splitting, voltage, platform);
+            
+            document.getElementById('bar-trans').textContent = bar_dB.toFixed(1) + ' dB';
+            document.getElementById('cross-trans').textContent = cross_dB.toFixed(1) + ' dB';
+            document.getElementById('extinction').textContent = extinction.toFixed(1) + ' dB';
+            document.getElementById('vpi').textContent = vpi.toFixed(1);
+            
+            // Update output indicators
+            const out1R = 8 + bar * 12;
+            const out2R = 8 + cross * 12;
+            document.getElementById('out1-indicator').setAttribute('r', out1R);
+            document.getElementById('out2-indicator').setAttribute('r', out2R);
+            
+            // Transfer function plot
+            const barPoints = [];
+            const crossPoints = [];
+            for (let p = 0; p <= 360; p += 2) {
+                const { bar: b, cross: c } = computeMZI(p, splitting, 0, platform);
+                const x = (p / 360) * 600;
+                const y_bar = 280 - b * 260;
+                const y_cross = 280 - c * 260;
+                barPoints.push(`${x},${y_bar}`);
+                crossPoints.push(`${x},${y_cross}`);
+            }
+            document.getElementById('bar-line').setAttribute('points', barPoints.join(' '));
+            document.getElementById('cross-line').setAttribute('points', crossPoints.join(' '));
+            
+            // Matrix elements
+            const theta = Math.acos(Math.sqrt(splitting));
+            const phi = phase * Math.PI / 180;
+            const m11 = Math.cos(theta) * Math.cos(theta) + Math.sin(theta) * Math.sin(theta) * Math.cos(phi);
+            const m12 = Math.cos(theta) * Math.sin(theta) * (1 - Math.cos(phi));
+            const m21 = m12;
+            const m22 = Math.sin(theta) * Math.sin(theta) + Math.cos(theta) * Math.cos(theta) * Math.cos(phi);
+            
+            document.getElementById('m11').textContent = m11.toFixed(2);
+            document.getElementById('m12').textContent = m12.toFixed(2);
+            document.getElementById('m21').textContent = m21.toFixed(2);
+            document.getElementById('m22').textContent = m22.toFixed(2);
+        }
+
+        function startAutoPlay() {
+            if (autoPlayInterval) return;
+            autoPlayInterval = setInterval(() => {
+                const slider = document.getElementById('phase');
+                let val = parseFloat(slider.value);
+                val += 2;
+                if (val > 360) val = 0;
+                slider.value = val;
+                draw();
+            }, 50);
+        }
+
+        function stopAutoPlay() {
+            if (autoPlayInterval) {
+                clearInterval(autoPlayInterval);
+                autoPlayInterval = null;
+            }
+        }
+
+        ['phase', 'splitting', 'voltage', 'platform'].forEach(id => {
+            document.getElementById(id).addEventListener('input', draw);
+            document.getElementById(id).addEventListener('change', draw);
+        });
+
+        draw();
+        startAutoPlay();
+        setTimeout(stopAutoPlay, 5000);
+    </script>
+</body>
+</html>
