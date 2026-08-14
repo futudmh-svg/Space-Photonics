@@ -106,7 +106,7 @@
         </nav>
 
         <h1>🏭 Foundry Fabrication Roadmap</h1>
-        <p class="subtitle">All-Optical Photonic Devices — TFLN + Si₃N₄ + Ag-Chalcogenide</p>
+        <p class="subtitle">All-Optical Photonic Devices — TFLN + Si₃N₄ + PPLN</p>
 
         <!-- Overview -->
         <div class="card">
@@ -116,7 +116,7 @@
                 <tr><td>Multi-face OPA</td><td>TFLN + Si₃N₄</td><td>Beam steering, fast switching</td><td><span class="badge info">TRL 6–7</span></td></tr>
                 <tr><td>All-optical switch</td><td>Ag-Ge-In-S-CsI</td><td>Kerr/XPM gating, routing</td><td><span class="badge warn">TRL 4–5</span></td></tr>
                 <tr><td>Low-loss mesh</td><td>Si₃N₄</td><td>Waveguide routing, AWGR</td><td><span class="badge ok">TRL 7–8</span></td></tr>
-                <tr><td>Photonic accelerator</td><td>Si₃N₄ MZI + Ag-chalc.</td><td>Matrix-vector multiplication</td><td><span class="badge warn">TRL 3–4</span></td></tr>
+                <tr><td>Photonic accelerator</td><td>Si₃N₄ MZI + PPLN</td><td>Matrix-vector multiplication</td><td><span class="badge warn">TRL 3–4</span></td></tr>
                 <tr><td>SPAD array</td><td>InGaAs/InP</td><td>Quantum-limited detection</td><td><span class="badge ok">TRL 8</span></td></tr>
                 <tr><td>Hybrid package</td><td>All above + CMOS</td><td>Full transceiver node</td><td><span class="badge info">TRL 5–6</span></td></tr>
             </table>
@@ -197,31 +197,40 @@
             </table>
         </div>
 
-        <!-- Chalcogenide -->
+        <!-- PPLN -->
         <div class="card">
-            <h2>🧪 Ag-Doped Chalcogenide Fabrication</h2>
+            <h2>🔬 PPLN Waveguide Fabrication</h2>
             <p style="font-size: 0.85em; color: #778da9; margin-bottom: 12px;">
-                Material system: Ge₂₀In₅S₇₅ + CsI (5 at%) + Ag (1–3%). Target: nonlinear switching with n₂ ~ 10⁻¹⁷–10⁻¹⁸ m²/W.
+                Periodically-Poled Lithium Niobate (PPLN) for cascaded χ⁽²⁾ nonlinear detection. Material: MgO-doped congruent LN. Poling period: ~6.4 μm for 1550→777.5 nm SFG.
             </p>
 
             <h3>Process Steps</h3>
             <div class="process-flow">
-                <div class="process-step"><div class="step-num">1</div><div class="step-name">Substrate prep</div></div>
+                <div class="process-step"><div class="step-num">1</div><div class="step-name">LN substrate prep</div></div>
                 <div class="process-arrow">→</div>
-                <div class="process-step"><div class="step-num">2</div><div class="step-name">Co-evaporation</div></div>
+                <div class="process-step"><div class="step-num">2</div><div class="step-name">Ti indiffusion</div></div>
                 <div class="process-arrow">→</div>
-                <div class="process-step"><div class="step-num">3</div><div class="step-name">Ag photodoping</div></div>
+                <div class="process-step"><div class="step-num">3</div><div class="step-name">Photolithography</div></div>
                 <div class="process-arrow">→</div>
-                <div class="process-step"><div class="step-num">4</div><div class="step-name">Annealing</div></div>
+                <div class="process-step"><div class="step-num">4</div><div class="step-name">Periodic poling</div></div>
                 <div class="process-arrow">→</div>
-                <div class="process-step"><div class="step-num">5</div><div class="step-name">Waveguide define</div></div>
+                <div class="process-step"><div class="step-num">5</div><div class="step-name">Waveguide etch</div></div>
                 <div class="process-arrow">→</div>
-                <div class="process-step"><div class="step-num">6</div><div class="step-name">Cladding</div></div>
+                <div class="process-step"><div class="step-num">6</div><div class="step-name">Facet polish</div></div>
                 <div class="process-arrow">→</div>
-                <div class="process-step"><div class="step-num">7</div><div class="step-name">Facet polish</div></div>
+                <div class="process-step"><div class="step-num">7</div><div class="step-name">AR coating</div></div>
             </div>
 
-            <h3>Nonlinear Characterization</h3>
+            <h3>PPLN Characterization</h3>
+            <table>
+                <tr><th>Test</th><th>Method</th><th>Acceptance</th></tr>
+                <tr><td>Poling period</td><td>SEM + optical</td><td>6.4 ± 0.1 μm</td></tr>
+                <tr><td>Normalized efficiency</td><td>SHG measurement</td><td>&gt; 200 %/W/cm²</td></tr>
+                <tr><td>Cascaded phase shift</td><td>MZI interferometer</td><td>&gt; π rad @ 100 mW pump</td></tr>
+                <tr><td>Propagation loss</td><td>Cutback</td><td>&lt; 0.2 dB/cm</td></tr>
+                <tr><td>Thermal stability</td><td>Oven test</td><td>±0.5°C, Δλ &lt; 0.05 nm</td></tr>
+            </table>
+        </div>
             <table>
                 <tr><th>Test</th><th>Method</th><th>Acceptance</th></tr>
                 <tr><td>n₂ measurement</td><td>Z-scan or SPM</td><td>&gt;5×10⁻¹⁸ m²/W</td></tr>
@@ -251,8 +260,8 @@
 ├───────────────────┼─────────────────────┤
 │         PHOTONIC DIE (bottom)            │
 │   ┌─────────────────────────────────┐   │
-│   │  OPA  │  Switch  │  Si₃N₄ mesh  │   │
-│   │  array│  matrix  │  + chalc.    │   │
+│   │  OPA  │  PPLN    │  Si₃N₄ mesh  │   │
+│   │  array│  receiver│  + TFLN      │   │
 │   └─────────────────────────────────┘   │
 │              ┌─────────┐                │
 │              │  Facet  │  ← Fiber or lens
@@ -298,7 +307,7 @@
                 <tr><th>Partner</th><th>Location</th><th>Capability</th><th>Status</th></tr>
                 <tr><td>图灵量子 (TuringQ)</td><td>Shanghai</td><td>TFLN MPW, 200 mm</td><td><span class="badge ok">Active, pilot line</span></td></tr>
                 <tr><td>中科院微电子所</td><td>Beijing</td><td>Si₃N₄ PDK, 300 mm</td><td><span class="badge ok">Available</span></td></tr>
-                <tr><td>宁波大学 (partner lab)</td><td>Ningbo</td><td>Chalcogenide growth, custom</td><td><span class="badge info">R&D scale</span></td></tr>
+                <tr><td>宁波大学 (partner lab)</td><td>Ningbo</td><td>PPLN poling, custom</td><td><span class="badge info">R&D scale</span></td></tr>
                 <tr><td>哈工大 (HIT)</td><td>Harbin</td><td>Space qualification, test</td><td><span class="badge info">Collaboration</span></td></tr>
                 <tr><td>三安光电</td><td>Xiamen</td><td>InP/Si photonics, foundry</td><td><span class="badge info">Potential</span></td></tr>
             </table>
@@ -310,7 +319,7 @@
             <table>
                 <tr><th>Item</th><th>Unit Cost</th><th>Driver</th></tr>
                 <tr><td>TFLN-Si₃N₄ wafer (200 mm)</td><td>$2,000–3,000</td><td>LiNbO₃ substrate, bonding yield</td></tr>
-                <tr><td>Chalcogenide switch chip</td><td>$500–800</td><td>Deposition time, Ag doping control</td></tr>
+                <tr><td>PPLN receiver chip</td><td>$500–800</td><td>Poling time, QPM period control</td></tr>
                 <tr><td>CMOS control die</td><td>$200–400</td><td>Node: 22 nm FD-SOI</td></tr>
                 <tr><td>3D assembly + test</td><td>$1,000–1,500</td><td>Alignment time, hermeticity</td></tr>
                 <tr><td><strong>Total transceiver module</strong></td><td><strong>$4,000–6,000</strong></td><td>—</td></tr>
@@ -332,7 +341,7 @@
                 </div>
                 <div class="timeline-item">
                     <div class="timeline-year">2028</div>
-                    <div class="timeline-text">Chalcogenide switch module — packaged, FWM demo</div>
+                    <div class="timeline-text">PPLN receiver module — packaged, SFG demo</div>
                 </div>
                 <div class="timeline-item">
                     <div class="timeline-year">2029</div>
@@ -351,7 +360,7 @@
 
         <footer>
             <p>Space Photonics — Foundry Fabrication Roadmap</p>
-            <p>TFLN × Si₃N₄ × Ag-Chalcogenide — Domestic, Radiation-Tolerant, Space-Qualified</p>
+            <p>TFLN × Si₃N₄ × PPLN — Domestic, Radiation-Tolerant, Space-Qualified</p>
         </footer>
     </div>
 </body>
