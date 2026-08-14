@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VLEO Mega-Constellation — Space Photonics</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #050811; color: #e0e6ed; line-height: 1.6; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 16px; }
+        nav { background: #1b263b; padding: 12px; border-radius: 10px; margin-bottom: 16px; display: flex; flex-wrap: wrap; gap: 8px; }
+        nav a { color: #e0e6ed; text-decoration: none; padding: 8px 14px; border-radius: 6px; font-size: 0.9em; background: #0d1b2a; }
+        nav a:hover, nav a.active { background: #00d4aa; color: #050811; }
+        h1 { font-size: 1.5em; color: #00d4aa; margin: 16px 0 8px; }
+        h2 { font-size: 1.15em; color: #00d4aa; margin: 16px 0 8px; }
+        h3 { font-size: 1em; color: #90e0ef; margin: 12px 0 6px; }
+        .subtitle { color: #778da9; font-size: 0.9em; margin-bottom: 16px; }
+        .card { background: #1b263b; border-radius: 12px; padding: 18px; margin-bottom: 16px; border: 1px solid #415a77; }
+        .card h2 { margin-top: 0; }
+
+        .badge { display: inline-block; padding: 4px 10px; border-radius: 12px; font-size: 0.75em; margin: 2px; }
+        .ok { background: #2d6a4f; color: #95d5b2; }
+        .info { background: #1b4d6e; color: #90e0ef; }
+        .warn { background: #6c5b1e; color: #ffd166; }
+
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.85em; }
+        th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid #415a77; }
+        th { color: #00d4aa; font-weight: 600; }
+        tr:hover td { background: rgba(0,212,170,0.05); }
+
+        pre { background: #0d1b2a; padding: 14px; border-radius: 8px; overflow-x: auto; font-size: 0.8em; color: #e0e6ed; line-height: 1.5; border: 1px solid #415a77; }
+
+        .orbit-viz { width: 100%; height: 320px; background: #0d1b2a; border-radius: 8px; margin: 12px 0; }
+
+        .mesh-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin: 12px 0; }
+        .mesh-node {
+            background: #0d1b2a;
+            border-radius: 10px;
+            padding: 14px;
+            border: 1px solid #415a77;
+            text-align: center;
+            transition: border-color 0.3s;
+        }
+        .mesh-node:hover { border-color: #00d4aa; }
+        .mesh-node .node-id { font-size: 1.2em; color: #00d4aa; font-weight: bold; }
+        .mesh-node .node-role { font-size: 0.8em; color: #778da9; margin-top: 4px; }
+        .mesh-node .node-links { font-size: 0.75em; color: #90e0ef; margin-top: 6px; }
+
+        .c3-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 12px 0; }
+        .c3-card {
+            background: linear-gradient(135deg, #0d1b2a, #1b263b);
+            border: 1px solid #415a77;
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+        }
+        .c3-card .c3-icon { font-size: 2em; margin-bottom: 8px; }
+        .c3-card .c3-title { font-weight: bold; color: #00d4aa; font-size: 0.95em; }
+        .c3-card .c3-desc { font-size: 0.8em; color: #778da9; margin-top: 6px; }
+
+        .timeline { display: flex; flex-wrap: wrap; gap: 10px; margin: 12px 0; }
+        .timeline-item {
+            background: #0d1b2a;
+            border-left: 3px solid #00d4aa;
+            border-radius: 0 8px 8px 0;
+            padding: 10px 14px;
+            flex: 1;
+            min-width: 140px;
+        }
+        .timeline-year { font-size: 0.75em; color: #00d4aa; font-weight: bold; }
+        .timeline-text { font-size: 0.8em; color: #e0e6ed; margin-top: 4px; }
+
+        footer { text-align: center; padding: 30px; color: #778da9; font-size: 0.8em; }
+
+        @media (max-width: 800px) {
+            .c3-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav>
+            <a href="../index.html">🏠 Dashboard</a>
+            <a href="opa-analysis.html">🔭 OPA</a>
+            <a href="atmospheric.html">🌫️ Atmosphere</a>
+            <a href="thermal.html">🌡️ Thermal</a>
+            <a href="link-budget.html">📡 Link Budget</a>
+            <a href="hypersonic.html">🚀 Hypersonic</a>
+            <a href="architecture.html">🏗️ Architecture</a>
+            <a href="digital-twin.html">🎮 3D Twin</a>
+            <a href="mrr-sim.html">💍 MRR</a>
+            <a href="mzi-sim.html">🔲 MZI</a>
+            <a href="nonlinear-sim.html">🌀 XPM</a>
+            <a href="vleo-constellation.html" class="active">🌐 VLEO</a>
+            <a href="foundry.html">🏭 Foundry</a>
+        </nav>
+
+        <h1>🌐 VLEO Mega-Constellation</h1>
+        <p class="subtitle">Orbital Photonic Fabric — Integrated Computing, Communications & Sensing</p>
+
+        <!-- Vision -->
+        <div class="card">
+            <h2>✨ Vision</h2>
+            <p style="font-size: 0.9em; color: #e0e1dd;">
+                Hundreds to thousands of satellites in Very Low Earth Orbit (VLEO, ~200–400 km) operating not as independent nodes, but as a single, coherent <strong>photonic fabric</strong>. Integrated Computing, Communications, and Sensing — <strong>3C</strong> — unified through all-optical inter-satellite links (OISL) and on-board photonic processing.
+            </p>
+        </div>
+
+        <!-- Architecture Diagram -->
+        <div class="card">
+            <h2>🏗️ Architecture Overview</h2>
+            <pre>
+┌─────────────────────────────────────────────────────────────────────┐
+│                    ORBITAL PHOTONIC FABRIC                          │
+│                                                                     │
+│   ┌─────┐     ┌─────┐     ┌─────┐     ┌─────┐     ┌─────┐        │
+│   │ SAT │◄───►│ SAT │◄───►│ SAT │◄───►│ SAT │◄───►│ SAT │ ...    │
+│   │ 001 │ OISL│ 002 │ OISL│ 003 │ OISL│ 004 │ OISL│ 005 │        │
+│   └──┬──┘     └──┬──┘     └──┬──┘     └──┬──┘     └──┬──┘        │
+│      │           │           │           │           │             │
+│      └───────────┴───────────┴───────────┴───────────┘             │
+│                         MESH OPTICAL BACKBONE                      │
+│                              (n×n OPA)                             │
+└─────────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                    GROUND / AIR INTEGRATION                         │
+│                                                                     │
+│   Ground Stations ◄──► HAPs ◄──► Aircraft ◄──► Hypersonic Targets │
+│   (Optical + RF)     (Stratospheric   (AOFSL)      (Tracking)     │
+│                       Relay Balloons)                               │
+└─────────────────────────────────────────────────────────────────────┘
+            </pre>
+        </div>
+
+        <!-- The 3C Integration -->
+        <div class="card">
+            <h2>🔀 The 3C Integration</h2>
+            <div class="c3-grid">
+                <div class="c3-card">
+                    <div class="c3-icon">🧮</div>
+                    <div class="c3-title">Computing (C₁)</div>
+                    <div class="c3-desc">Photonic accelerator mesh<br/>MZI matrix ops<br/>Kerr nonlinear gate<br/>The constellation <em>is</em> the computer</div>
+                </div>
+                <div class="c3-card">
+                    <div class="c3-icon">📡</div>
+                    <div class="c3-title">Communications (C₂)</div>
+                    <div class="c3-desc">All-optical mesh network<br/>400 Gbps × 6 faces<br/>No O-E-O conversion<br/>Wavelength + time-slot routing</div>
+                </div>
+                <div class="c3-card">
+                    <div class="c3-icon">🔭</div>
+                    <div class="c3-title">Sensing (C₃)</div>
+                    <div class="c3-desc">Distributed aperture array<br/>Multi-face OPA LIDAR<br/>Synthetic aperture &lt;1 m<br/>Quantum-limited SPAD ranging</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Communications Table -->
+        <div class="card">
+            <h2>📡 Communications (C₂) — All-Optical Mesh</h2>
+            <table>
+                <tr><th>Link Type</th><th>Bandwidth</th><th>Range</th><th>Technology</th></tr>
+                <tr><td>Intra-plane OISL</td><td>100–400 Gbps</td><td>500–2000 km</td><td>Coherent DWDM + OPA</td></tr>
+                <tr><td>Inter-plane OISL</td><td>100 Gbps</td><td>2000–5000 km</td><td>PPM + OPA</td></tr>
+                <tr><td>Crosslink (any-to-any)</td><td>10–40 Gbps</td><td>&lt;500 km</td><td>Direct OPA</td></tr>
+                <tr><td>Downlink / uplink</td><td>10–100 Gbps</td><td>VLEO-ground</td><td>AOFSL adaptive</td></tr>
+                <tr><td>HAP relay</td><td>10 Gbps</td><td>Stratospheric</td><td>Free-space + fiber</td></tr>
+            </table>
+        </div>
+
+        <!-- Constellation Topology -->
+        <div class="card">
+            <h2>🌍 Constellation Topology</h2>
+            <table>
+                <tr><th>Parameter</th><th>Value</th></tr>
+                <tr><td>Orbit altitude</td><td>200–400 km (VLEO)</td></tr>
+                <tr><td>Inclination</td><td>50°–85° (polar + sun-sync)</td></tr>
+                <tr><td>Planes</td><td>12–24</td></tr>
+                <tr><td>Satellites per plane</td><td>40–80</td></tr>
+                <tr><td>Total constellation</td><td>500–2000 nodes (scalable to 10k+)</td></tr>
+                <tr><td>Mesh degree</td><td>4–6 per node</td></tr>
+                <tr><td>Average path length</td><td>2–4 hops</td></tr>
+                <tr><td>Reconfiguration time</td><td>&lt;1 ms (TFLN phase control)</td></tr>
+            </table>
+
+            <h3>OPA Face Allocation (6 per satellite)</h3>
+            <div class="mesh-grid">
+                <div class="mesh-node">
+                    <div class="node-id">↗️</div>
+                    <div class="node-role">Forward (+X)</div>
+                    <div class="node-links">Intra-plane</div>
+                </div>
+                <div class="mesh-node">
+                    <div class="node-id">↖️</div>
+                    <div class="node-role">Aft (−X)</div>
+                    <div class="node-links">Intra-plane</div>
+                </div>
+                <div class="mesh-node">
+                    <div class="node-id">➡️</div>
+                    <div class="node-role">Starboard (+Y)</div>
+                    <div class="node-links">Inter-plane</div>
+                </div>
+                <div class="mesh-node">
+                    <div class="node-id">⬅️</div>
+                    <div class="node-role">Port (−Y)</div>
+                    <div class="node-links">Inter-plane</div>
+                </div>
+                <div class="mesh-node">
+                    <div class="node-id">⬇️</div>
+                    <div class="node-role">Nadir (Ground/Air)</div>
+                    <div class="node-links">AOFSL downlink</div>
+                </div>
+                <div class="mesh-node">
+                    <div class="node-id">⬆️</div>
+                    <div class="node-role">Zenith (Deep space)</div>
+                    <div class="node-links">Sparse crosslink</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Signal Processing Chain -->
+        <div class="card">
+            <h2>⚡ All-Optical Signal Processing Chain</h2>
+            <pre>
+┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
+│   RECEIVE   │───►│   ROUTE     │───►│  COMPUTE    │───►│  TRANSMIT   │
+│   OPA Face  │    │  (Si₃N₄)    │    │ (Ag-chalc.) │    │   OPA Face  │
+│             │    │             │    │             │    │             │
+│ TFLN phase  │    │ AWGR +      │    │ Kerr-based  │    │ TFLN phase  │
+│ demux       │    │ thermal tuners│   │ XPM switch  │    │ mux + beam  │
+│ coherent RX │    │ label decode │    │ reservoir   │    │ steering    │
+└─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘
+            </pre>
+        </div>
+
+        <!-- Digital Twin -->
+        <div class="card">
+            <h2>🎮 3D Visualization & Digital Twin</h2>
+            <div class="c3-grid">
+                <div class="c3-card">
+                    <div class="c3-icon">🌍</div>
+                    <div class="c3-title">Strategic View</div>
+                    <div class="c3-desc">Full constellation<br/>Link health<br/>Coverage gaps</div>
+                </div>
+                <div class="c3-card">
+                    <div class="c3-icon">🛰️</div>
+                    <div class="c3-title">Tactical View</div>
+                    <div class="c3-desc">Single-satellite drill-down<br/>Beam steering angles<br/>Real-time throughput</div>
+                </div>
+                <div class="c3-card">
+                    <div class="c3-icon">📊</div>
+                    <div class="c3-title">Analytic View</div>
+                    <div class="c3-desc">Signal flow animation<br/>Latency heatmap<br/>Synthetic aperture phasing</div>
+                </div>
+            </div>
+
+            <h3>Rendering Stack</h3>
+            <table>
+                <tr><th>Element</th><th>Rendering</th><th>Data Source</th></tr>
+                <tr><td>Earth</td><td>Photorealistic + cloud layer</td><td>Blue Marble + MODIS</td></tr>
+                <tr><td>Orbits</td><td>Animated trajectory tubes</td><td>SGP4 propagated, 1 Hz</td></tr>
+                <tr><td>Satellites</td><td>LOD models</td><td>Telemetry pose</td></tr>
+                <tr><td>Optical links</td><td>Glowing beam lines</td><td>Link budget calc</td></tr>
+                <tr><td>Data packets</td><td>Photon particles</td><td>Traffic matrix</td></tr>
+                <tr><td>Coverage</td><td>Heat map swaths</td><td>Sensor FOV projection</td></tr>
+            </table>
+        </div>
+
+        <!-- Performance Targets -->
+        <div class="card">
+            <h2>🎯 Key Performance Targets</h2>
+            <table>
+                <tr><th>Metric</th><th>Target</th><th>Notes</th></tr>
+                <tr><td>Constellation size</td><td>500–2000 satellites</td><td>Scalable to 10k+</td></tr>
+                <tr><td>Per-node OISL capacity</td><td>400 Gbps × 6 faces</td><td>2.4 Tbps aggregate</td></tr>
+                <tr><td>Fabric aggregate throughput</td><td>&gt;1 Pbps</td><td>Mesh-wide</td></tr>
+                <tr><td>End-to-end latency</td><td>&lt;10 ms</td><td>Intra-constellation, optical-only</td></tr>
+                <tr><td>Reconfiguration time</td><td>&lt;1 ms</td><td>TFLN phase control</td></tr>
+                <tr><td>On-board compute</td><td>10 TFLOPS photonic + 1 TFLOPS digital</td><td>Per node</td></tr>
+                <tr><td>Tracking refresh rate</td><td>&gt;100 Hz</td><td>Hypersonic target</td></tr>
+                <tr><td>Synthetic spatial resolution</td><td>&lt;1 m</td><td>100 km effective aperture</td></tr>
+            </table>
+        </div>
+
+        <!-- Risk & Mitigation -->
+        <div class="card">
+            <h2>⚠️ Risk & Mitigation</h2>
+            <table>
+                <tr><th>Risk</th><th>Mitigation</th></tr>
+                <tr><td>VLEO atmospheric drag</td><td>Electric propulsion, aerodynamic design, frequent station-keeping</td></tr>
+                <tr><td>OPA pointing accuracy</td><td>Hybrid coarse-fine: CMOS tracker + MEMS FSM + OPA</td></tr>
+                <tr><td>Radiation damage</td><td>Rad-hard TFLN, shielded chalcogenide, redundant paths</td></tr>
+                <tr><td>Thermal management</td><td>VLEO natural convection, radiator panels</td></tr>
+                <tr><td>Fabric fragmentation</td><td>Self-healing mesh routing, predictive topology maintenance</td></tr>
+            </table>
+        </div>
+
+        <!-- Roadmap -->
+        <div class="card">
+            <h2>📅 Enabling Technologies Roadmap</h2>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-year">2026–2027</div>
+                    <div class="timeline-text">Single-satellite OPA demonstration</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-year">2027–2028</div>
+                    <div class="timeline-text">2-satellite OISL + photonic routing</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-year">2028–2030</div>
+                    <div class="timeline-text">10-node mesh, distributed computing</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-year">2030–2032</div>
+                    <div class="timeline-text">100-node operational pilot</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-year">2032–2035</div>
+                    <div class="timeline-text">1000+ node full constellation</div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>Space Photonics — VLEO Mega-Constellation Architecture</p>
+            <p>Integrated 3C Fabric: Computing × Communications × Sensing</p>
+        </footer>
+    </div>
+</body>
+</html>

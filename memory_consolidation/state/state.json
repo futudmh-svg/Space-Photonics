@@ -1,21 +1,22 @@
 {
   "diary": {
-    "count": 1,
-    "last_ts": "2026-08-14T03:54:57.190607",
+    "count": 3,
+    "last_ts": "2026-08-15T03:55:45.572657",
     "last_error": "'text'",
-    "last_day": 2
+    "last_day": 2,
+    "last_skip": "no_sessions_today"
   },
   "compact": {
-    "count": 1,
-    "last_ts": "2026-08-14T03:55:32.269695",
+    "count": 3,
+    "last_ts": "2026-08-15T03:56:20.395052",
     "last_error": "HTTP Error 429: Too Many Requests",
     "last_invoke": 1
   },
   "stm": {
-    "count": 1,
-    "last_ts": "2026-08-14T04:00:35.698793",
-    "last_sessions": 1,
-    "last_messages": 4,
-    "last_chars": 4479
+    "count": 2,
+    "last_ts": "2026-08-15T04:12:45.463224",
+    "last_sessions": 7,
+    "last_messages": 209,
+    "last_chars": 6344
   }
 }

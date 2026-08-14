@@ -77,6 +77,14 @@
 |------|-------------|--------|
 | `calculations/vleo_triangulation.py` | VLEO-to-hypersonic link budget | TODO |
 
+## Architecture Documents
+
+| Document | Description |
+|----------|-------------|
+| `architecture/constellation_tracking.md` | Hypersonic target tracking via multi-satellite triangulation |
+| `architecture/vleo_mega_constellation.md` | 500–2000 node VLEO photonic fabric: 3C integration, mesh networking, digital twin |
+| `architecture/foundry_fabrication.md` | TFLN + Si₃N₄ + chalcogenide foundry flow, hybrid CMOS integration, radiation hardening |
+
 ---
 
-*Last updated: 2026-08-13*
+*Last updated: 2026-08-15*
