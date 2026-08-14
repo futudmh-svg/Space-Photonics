@@ -3,42 +3,159 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Space Photonics Digital Twin</title>
+    <title>Space Photonics — Multi-Face OPA Digital Twin</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #0a0e27;
+            background: #050811;
             color: #e0e6ed;
             line-height: 1.6;
-            padding: 20px;
         }
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        h1 {
-            font-size: 1.5em;
-            color: #64ffda;
-            margin-bottom: 8px;
-        }
-        .subtitle {
-            color: #8892b0;
-            font-size: 0.9em;
+        .container { max-width: 900px; margin: 0 auto; padding: 16px; }
+        
+        /* Header */
+        header {
+            text-align: center;
+            padding: 30px 16px;
+            background: linear-gradient(135deg, #0d1b2a 0%, #1b263b 50%, #0d1b2a 100%);
+            border-radius: 16px;
             margin-bottom: 20px;
+            border: 1px solid #415a77;
         }
+        h1 { font-size: 1.6em; color: #00d4aa; margin-bottom: 6px; }
+        .subtitle { color: #778da9; font-size: 0.9em; }
+        
+        /* Cards */
         .card {
-            background: #111936;
+            background: #1b263b;
             border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 12px;
-            border: 1px solid #1e2a4a;
+            padding: 18px;
+            margin-bottom: 16px;
+            border: 1px solid #415a77;
         }
         .card h2 {
-            font-size: 1.1em;
-            color: #64ffda;
+            font-size: 1.15em;
+            color: #00d4aa;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        /* GitHub Status */
+        #github-status {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        .gh-stat {
+            background: #0d1b2a;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .gh-stat-value {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #00d4aa;
+        }
+        .gh-stat-label {
+            font-size: 0.8em;
+            color: #778da9;
+        }
+        
+        /* Multi-Face OPA */
+        .face-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin: 12px 0;
+        }
+        .face-card {
+            background: #0d1b2a;
+            border-radius: 10px;
+            padding: 12px;
+            border: 1px solid #415a77;
+        }
+        .face-card h3 {
+            font-size: 0.95em;
+            color: #e0e1dd;
             margin-bottom: 8px;
         }
+        .face-canvas {
+            width: 100%;
+            height: 150px;
+            background: #050811;
+            border-radius: 6px;
+        }
+        .face-controls {
+            margin-top: 8px;
+        }
+        .face-controls label {
+            font-size: 0.8em;
+            color: #778da9;
+        }
+        .face-controls input {
+            width: 100%;
+            margin-top: 4px;
+        }
+        
+        /* Hypersonic Tracker */
+        #tracker-canvas {
+            width: 100%;
+            height: 300px;
+            background: #050811;
+            border-radius: 8px;
+            margin: 12px 0;
+        }
+        .tracker-controls {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .control-group label {
+            display: block;
+            font-size: 0.8em;
+            color: #778da9;
+            margin-bottom: 4px;
+        }
+        .control-group input, .control-group select {
+            width: 100%;
+            padding: 8px;
+            background: #0d1b2a;
+            border: 1px solid #415a77;
+            border-radius: 6px;
+            color: #e0e6ed;
+            font-size: 0.9em;
+        }
+        
+        /* Link Budget Calculator */
+        .calc-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin: 12px 0;
+        }
+        .calc-result {
+            background: #0d1b2a;
+            padding: 14px;
+            border-radius: 8px;
+            text-align: center;
+            margin-top: 12px;
+        }
+        .calc-result-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #00d4aa;
+        }
+        .calc-result-label {
+            font-size: 0.85em;
+            color: #778da9;
+        }
+        
+        /* Buttons */
         .btn {
             display: block;
             width: 100%;
@@ -51,40 +168,16 @@
             text-align: center;
             text-decoration: none;
             margin: 8px 0;
-        }
-        .btn-secondary {
-            background: #1b4d6e;
-        }
-        #opa-canvas {
-            width: 100%;
-            height: 250px;
-            background: #0a0e27;
-            border-radius: 8px;
-            margin: 12px 0;
-        }
-        .slider-container {
-            margin: 12px 0;
-        }
-        input[type="range"] {
-            width: 100%;
-            -webkit-appearance: none;
-            height: 6px;
-            border-radius: 3px;
-            background: #1e2a4a;
-        }
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            background: #64ffda;
             cursor: pointer;
         }
-        #repo-info {
-            font-size: 0.85em;
-            color: #8892b0;
-        }
-        .status {
+        .btn:hover { background: #40916c; }
+        .btn-secondary { background: #1b4d6e; }
+        .btn-secondary:hover { background: #2a6f97; }
+        .btn-danger { background: #6c2e2e; }
+        .btn-danger:hover { background: #9e3a3a; }
+        
+        /* Status badges */
+        .badge {
             display: inline-block;
             padding: 4px 10px;
             border-radius: 12px;
@@ -93,130 +186,474 @@
         }
         .ok { background: #2d6a4f; color: #95d5b2; }
         .warn { background: #6c5b1e; color: #ffd166; }
+        .info { background: #1b4d6e; color: #90e0ef; }
+        
+        /* Sliders */
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #415a77;
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #00d4aa;
+            cursor: pointer;
+        }
+        
         footer {
             text-align: center;
-            padding: 20px;
-            color: #8892b0;
+            padding: 30px;
+            color: #778da9;
             font-size: 0.8em;
+        }
+        
+        @media (max-width: 600px) {
+            .face-grid, .tracker-controls, .calc-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🛰️ Space Photonics</h1>
-        <p class="subtitle">Digital Twin — Auto-updates from GitHub</p>
-
-        <!-- Live Repo Status -->
-        <div class="card">
-            <h2>📡 Repository Status</h2>
-            <div id="repo-info">Loading...</div>
-        </div>
-
-        <!-- Quick Actions -->
-        <div class="card">
-            <h2>⚡ Quick Links</h2>
-            <a href="https://github.com/futudmh-svg/Space-Photonics" class="btn">📂 Open GitHub Repo</a>
-            <a href="https://github.com/futudmh-svg/Space-Photonics/tree/main/space-photonics/twin" class="btn btn-secondary">📁 Browse Code</a>
-        </div>
-
-        <!-- Interactive OPA -->
-        <div class="card">
-            <h2>🔭 OPA Beam Steering</h2>
-            <p style="font-size: 0.85em; color: #8892b0; margin-bottom: 8px;">
-                64 elements, 1550 nm. Drag to steer.
-            </p>
-            <div class="slider-container">
-                <label>Angle: <span id="angle-val">15</span>°</label>
-                <input type="range" id="steer" min="-30" max="30" value="15" step="0.5">
+        <!-- Header -->
+        <header>
+            <h1>🛰️ Space Photonics</h1>
+            <p class="subtitle">Multi-Face OPA Digital Twin for Hypersonic Tracking</p>
+            <div style="margin-top: 12px;">
+                <span class="badge ok">v0.3.0</span>
+                <span class="badge info">Multi-Beam</span>
+                <span class="badge ok">4-Face OPA</span>
             </div>
-            <canvas id="opa-canvas"></canvas>
+        </header>
+
+        <!-- GitHub Integration -->
+        <div class="card">
+            <h2>🔗 GitHub Repository</h2>
+            <div id="github-status">
+                <div class="gh-stat">
+                    <div class="gh-stat-value" id="gh-stars">-</div>
+                    <div class="gh-stat-label">⭐ Stars</div>
+                </div>
+                <div class="gh-stat">
+                    <div class="gh-stat-value" id="gh-forks">-</div>
+                    <div class="gh-stat-label">🍴 Forks</div>
+                </div>
+                <div class="gh-stat">
+                    <div class="gh-stat-value" id="gh-commits">-</div>
+                    <div class="gh-stat-label">📝 Commits</div>
+                </div>
+                <div class="gh-stat">
+                    <div class="gh-stat-value" id="gh-updated">-</div>
+                    <div class="gh-stat-label">🕐 Updated</div>
+                </div>
+            </div>
+            <div style="margin-top: 12px;">
+                <a href="https://github.com/futudmh-svg/Space-Photonics" class="btn">📂 Open GitHub Repo</a>
+                <a href="https://github.com/futudmh-svg/Space-Photonics/tree/main/space-photonics/twin" class="btn btn-secondary">📁 Browse Source Code</a>
+            </div>
+        </div>
+
+        <!-- Multi-Face OPA -->
+        <div class="card">
+            <h2>🔭 Multi-Face OPA (4 Faces)</h2>
+            <p style="font-size: 0.85em; color: #778da9; margin-bottom: 12px;">
+                4 faces × 64 elements each. Independent steering for full spherical coverage.
+                Drag sliders to steer each face.
+            </p>
+            <div class="face-grid">
+                <div class="face-card">
+                    <h3>Face 1 — Forward (+X)</h3>
+                    <canvas id="face1" class="face-canvas"></canvas>
+                    <div class="face-controls">
+                        <label>Azimuth: <span id="f1-az-val">0</span>°</label>
+                        <input type="range" id="f1-az" min="-45" max="45" value="0">
+                        <label>Elevation: <span id="f1-el-val">0</span>°</label>
+                        <input type="range" id="f1-el" min="-45" max="45" value="0">
+                    </div>
+                </div>
+                <div class="face-card">
+                    <h3>Face 2 — Aft (-X)</h3>
+                    <canvas id="face2" class="face-canvas"></canvas>
+                    <div class="face-controls">
+                        <label>Azimuth: <span id="f2-az-val">180</span>°</label>
+                        <input type="range" id="f2-az" min="135" max="225" value="180">
+                        <label>Elevation: <span id="f2-el-val">0</span>°</label>
+                        <input type="range" id="f2-el" min="-45" max="45" value="0">
+                    </div>
+                </div>
+                <div class="face-card">
+                    <h3>Face 3 — Starboard (+Y)</h3>
+                    <canvas id="face3" class="face-canvas"></canvas>
+                    <div class="face-controls">
+                        <label>Azimuth: <span id="f3-az-val">90</span>°</label>
+                        <input type="range" id="f3-az" min="45" max="135" value="90">
+                        <label>Elevation: <span id="f3-el-val">0</span>°</label>
+                        <input type="range" id="f3-el" min="-45" max="45" value="0">
+                    </div>
+                </div>
+                <div class="face-card">
+                    <h3>Face 4 — Port (-Y)</h3>
+                    <canvas id="face4" class="face-canvas"></canvas>
+                    <div class="face-controls">
+                        <label>Azimuth: <span id="f4-az-val">270</span>°</label>
+                        <input type="range" id="f4-az" min="225" max="315" value="270">
+                        <label>Elevation: <span id="f4-el-val">0</span>°</label>
+                        <input type="range" id="f4-el" min="-45" max="45" value="0">
+                    </div>
+                </div>
+            </div>
+            <button class="btn" onclick="syncAllFaces()">🔄 Sync All Faces to Track Target</button>
+        </div>
+
+        <!-- Hypersonic Tracker -->
+        <div class="card">
+            <h2>🚀 Hypersonic Vehicle Tracker</h2>
+            <p style="font-size: 0.85em; color: #778da9; margin-bottom: 12px;">
+                Real-time tracking simulation. The satellite (center) tracks a hypersonic vehicle (moving dot).
+            </p>
+            <canvas id="tracker-canvas"></canvas>
+            <div class="tracker-controls">
+                <div class="control-group">
+                    <label>Vehicle Speed (Mach)</label>
+                    <select id="vehicle-speed">
+                        <option value="5">Mach 5</option>
+                        <option value="10" selected>Mach 10</option>
+                        <option value="15">Mach 15</option>
+                        <option value="20">Mach 20</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>Tracking Mode</label>
+                    <select id="track-mode">
+                        <option value="single">Single Face</option>
+                        <option value="multi" selected>Multi-Face Handoff</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>Target Distance (km)</label>
+                    <input type="range" id="target-dist" min="50" max="500" value="200">
+                </div>
+                <div class="control-group">
+                    <label>Atmosphere</label>
+                    <select id="atmosphere">
+                        <option value="clear">Clear</option>
+                        <option value="turbulent" selected>Turbulent</option>
+                        <option value="fog">Fog</option>
+                    </select>
+                </div>
+            </div>
+            <button class="btn" onclick="startTracking()">▶️ Start Tracking Simulation</button>
+            <button class="btn btn-danger" onclick="stopTracking()">⏹️ Stop</button>
+        </div>
+
+        <!-- Link Budget Calculator -->
+        <div class="card">
+            <h2>📡 Link Budget Calculator</h2>
+            <div class="calc-grid">
+                <div class="control-group">
+                    <label>TX Power (W)</label>
+                    <input type="range" id="tx-power" min="0.1" max="10" value="1" step="0.1">
+                    <span id="tx-power-val" style="font-size: 0.8em; color: #778da9;">1.0 W</span>
+                </div>
+                <div class="control-group">
+                    <label>Distance (km)</label>
+                    <input type="range" id="link-dist" min="50" max="500" value="200">
+                    <span id="link-dist-val" style="font-size: 0.8em; color: #778da9;">200 km</span>
+                </div>
+                <div class="control-group">
+                    <label>Wavelength (nm)</label>
+                    <select id="link-wavelength">
+                        <option value="1550" selected>1550 nm</option>
+                        <option value="1064">1064 nm</option>
+                        <option value="780">780 nm</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>Aperture (cm)</label>
+                    <input type="range" id="aperture" min="5" max="50" value="20">
+                    <span id="aperture-val" style="font-size: 0.8em; color: #778da9;">20 cm</span>
+                </div>
+            </div>
+            <div class="calc-result">
+                <div class="calc-result-value" id="link-budget">-45.2</div>
+                <div class="calc-result-label">Link Margin (dB)</div>
+            </div>
         </div>
 
         <!-- Component Status -->
         <div class="card">
-            <h2>🔬 Components</h2>
-            <span class="status ok">TFLN OPA ✅</span>
-            <span class="status ok">BTO OPA ✅</span>
-            <span class="status ok">Ag-Chalcogenide ✅</span>
-            <span class="status ok">Nested Control ✅</span>
-            <span class="status ok">Atmosphere ✅</span>
-            <span class="status warn">Link Budget ⚠️</span>
+            <h2>🔬 System Components</h2>
+            <div style="margin: 10px 0;">
+                <span class="badge ok">TFLN OPA ✅</span>
+                <span class="badge ok">BTO OPA ✅</span>
+                <span class="badge ok">Ag-Chalcogenide Amp ✅</span>
+                <span class="badge ok">4-Face Array ✅</span>
+                <span class="badge ok">Optical PLL ✅</span>
+                <span class="badge ok">Kalman Tracker ✅</span>
+                <span class="badge ok">Atmosphere Model ✅</span>
+                <span class="badge ok">VLEO Thermal ✅</span>
+                <span class="badge warn">Link Budget ⚠️</span>
+            </div>
         </div>
 
         <footer>
-            <p>Auto-deployed from GitHub</p>
-            <p id="last-updated">Checking...</p>
+            <p>Space Photonics Digital Twin v0.3.0</p>
+            <p>Auto-synced from <a href="https://github.com/futudmh-svg/Space-Photonics">GitHub</a></p>
+            <p id="sync-time">Last sync: now</p>
         </footer>
     </div>
 
     <script>
-        // Fetch latest repo info from GitHub API
-        async function fetchRepoInfo() {
+        // ===== GitHub API Integration =====
+        async function fetchGitHubData() {
             try {
                 const res = await fetch('https://api.github.com/repos/futudmh-svg/Space-Photonics');
                 const data = await res.json();
-                document.getElementById('repo-info').innerHTML = `
-                    <strong>${data.name}</strong><br>
-                    ⭐ ${data.stargazers_count} stars | 🍴 ${data.forks_count} forks<br>
-                    Last push: ${new Date(data.pushed_at).toLocaleString()}<br>
-                    Default branch: ${data.default_branch}
-                `;
-                document.getElementById('last-updated').textContent = 
-                    'Last sync: ' + new Date().toLocaleTimeString();
+                document.getElementById('gh-stars').textContent = data.stargazers_count;
+                document.getElementById('gh-forks').textContent = data.forks_count;
+                
+                const commitRes = await fetch('https://api.github.com/repos/futudmh-svg/Space-Photonics/commits?per_page=1');
+                const commits = await commitRes.json();
+                document.getElementById('gh-commits').textContent = 
+                    (await fetch('https://api.github.com/repos/futudmh-svg/Space-Photonics/commits?per_page=1&page=1')
+                        .then(r => r.headers.get('link')?.match(/page=(\d+)>; rel="last"/)?.[1] || '...');
+                
+                const pushed = new Date(data.pushed_at);
+                const now = new Date();
+                const diff = Math.floor((now - pushed) / 60000);
+                document.getElementById('gh-updated').textContent = 
+                    diff < 60 ? `${diff}m ago` : `${Math.floor(diff/60)}h ago`;
+                
+                document.getElementById('sync-time').textContent = 
+                    'Last sync: ' + now.toLocaleTimeString();
             } catch (e) {
-                document.getElementById('repo-info').textContent = 'Unable to fetch repo info';
+                console.error('GitHub fetch failed:', e);
             }
         }
-        fetchRepoInfo();
-        setInterval(fetchRepoInfo, 30000); // Refresh every 30s
+        fetchGitHubData();
+        setInterval(fetchGitHubData, 30000);
 
-        // OPA Simulation
-        const canvas = document.getElementById('opa-canvas');
-        const ctx = canvas.getContext('2d');
-        canvas.width = canvas.offsetWidth * 2;
-        canvas.height = canvas.offsetHeight * 2;
-
-        function draw() {
-            const angle = parseFloat(document.getElementById('steer').value);
-            document.getElementById('angle-val').textContent = angle.toFixed(1);
-
+        // ===== Multi-Face OPA Visualization =====
+        function drawFacePattern(canvasId, azimuth, elevation, faceColor) {
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+            canvas.width = canvas.offsetWidth * 2;
+            canvas.height = canvas.offsetHeight * 2;
+            
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.strokeStyle = '#64ffda';
+            
+            // Draw array elements
+            const N = 64;
+            const d = 10;
+            const steeringRad = azimuth * Math.PI / 180;
+            const elRad = elevation * Math.PI / 180;
+            
+            // Draw beam pattern
+            ctx.strokeStyle = faceColor;
             ctx.lineWidth = 2;
             ctx.beginPath();
-
-            const steeringRad = angle * Math.PI / 180;
-            const k = 2 * Math.PI / 1550e-9;
-            const d = 10e-6;
-            const N = 64;
-
-            for (let thetaDeg = -30; thetaDeg <= 30; thetaDeg += 0.2) {
+            
+            for (let thetaDeg = -45; thetaDeg <= 45; thetaDeg += 0.5) {
                 const theta = thetaDeg * Math.PI / 180;
                 let real = 0, imag = 0;
                 for (let n = 0; n < N; n++) {
-                    const phase = k * d * n * (Math.sin(theta) - Math.sin(steeringRad));
+                    const phase = (2 * Math.PI / 1.55) * d * n * 0.001 * (Math.sin(theta) - Math.sin(steeringRad)) * Math.cos(elRad);
                     real += Math.cos(phase);
                     imag += Math.sin(phase);
                 }
                 const I = 10 * Math.log10((real * real + imag * imag) / (N * N) + 1e-10);
-                const x = (thetaDeg + 30) / 60 * canvas.width;
+                const x = (thetaDeg + 45) / 90 * canvas.width;
                 const y = canvas.height - ((I + 60) / 65 * canvas.height * 0.8 + canvas.height * 0.1);
-                if (thetaDeg === -30) ctx.moveTo(x, y);
+                if (thetaDeg === -45) ctx.moveTo(x, y);
                 else ctx.lineTo(x, y);
             }
             ctx.stroke();
-
-            // Labels
-            ctx.fillStyle = '#8892b0';
-            ctx.font = '20px sans-serif';
-            for (let a = -30; a <= 30; a += 10) {
-                const x = (a + 30) / 60 * canvas.width;
-                ctx.fillText(a + '°', x - 15, canvas.height - 20);
+            
+            // Draw element indicators
+            ctx.fillStyle = '#415a77';
+            for (let i = 0; i < 8; i++) {
+                const x = (i / 7) * canvas.width;
+                ctx.fillRect(x - 1, canvas.height - 30, 2, 20);
             }
         }
 
-        document.getElementById('steer').addEventListener('input', draw);
-        draw();
+        const faceColors = ['#00d4aa', '#90e0ef', '#ffd166', '#e63946'];
+        
+        function updateAllFaces() {
+            for (let f = 1; f <= 4; f++) {
+                const az = parseFloat(document.getElementById(`f${f}-az`).value);
+                const el = parseFloat(document.getElementById(`f${f}-el`).value);
+                document.getElementById(`f${f}-az-val`).textContent = az.toFixed(0);
+                document.getElementById(`f${f}-el-val`).textContent = el.toFixed(0);
+                drawFacePattern(`face${f}`, az, el, faceColors[f-1]);
+            }
+        }
+
+        for (let f = 1; f <= 4; f++) {
+            document.getElementById(`f${f}-az`).addEventListener('input', updateAllFaces);
+            document.getElementById(`f${f}-el`).addEventListener('input', updateAllFaces);
+        }
+
+        function syncAllFaces() {
+            // Simulate all faces tracking a common target
+            const targetAz = 30;
+            const targetEl = 15;
+            for (let f = 1; f <= 4; f++) {
+                document.getElementById(`f${f}-az`).value = targetAz + (f-1) * 5;
+                document.getElementById(`f${f}-el`).value = targetEl;
+            }
+            updateAllFaces();
+        }
+
+        // ===== Hypersonic Tracker Animation =====
+        const trackerCanvas = document.getElementById('tracker-canvas');
+        const trackerCtx = trackerCanvas.getContext('2d');
+        let trackingAnimation = null;
+        let vehiclePos = { x: 0.2, y: 0.5, angle: 0 };
+        let trackingActive = false;
+
+        function resizeTracker() {
+            trackerCanvas.width = trackerCanvas.offsetWidth * 2;
+            trackerCanvas.height = trackerCanvas.offsetHeight * 2;
+        }
+        resizeTracker();
+        window.addEventListener('resize', resizeTracker);
+
+        function drawTracker() {
+            const w = trackerCanvas.width;
+            const h = trackerCanvas.height;
+            trackerCtx.clearRect(0, 0, w, h);
+            
+            // Draw satellite (center)
+            trackerCtx.fillStyle = '#00d4aa';
+            trackerCtx.beginPath();
+            trackerCtx.arc(w/2, h/2, 15, 0, 2 * Math.PI);
+            trackerCtx.fill();
+            trackerCtx.fillStyle = '#e0e6ed';
+            trackerCtx.font = '24px sans-serif';
+            trackerCtx.fillText('🛰️', w/2 - 12, h/2 + 8);
+            
+            // Draw coverage zones for each face
+            const colors = ['rgba(0, 212, 170, 0.2)', 'rgba(144, 224, 239, 0.2)', 
+                          'rgba(255, 209, 102, 0.2)', 'rgba(230, 57, 70, 0.2)'];
+            for (let i = 0; i < 4; i++) {
+                trackerCtx.fillStyle = colors[i];
+                trackerCtx.beginPath();
+                trackerCtx.moveTo(w/2, h/2);
+                trackerCtx.arc(w/2, h/2, 150, (i * Math.PI/2) - 0.3, ((i+1) * Math.PI/2) + 0.3);
+                trackerCtx.closePath();
+                trackerCtx.fill();
+            }
+            
+            // Draw vehicle
+            const vx = vehiclePos.x * w;
+            const vy = vehiclePos.y * h;
+            trackerCtx.fillStyle = '#e63946';
+            trackerCtx.beginPath();
+            trackerCtx.arc(vx, vy, 10, 0, 2 * Math.PI);
+            trackerCtx.fill();
+            trackerCtx.fillStyle = '#e0e6ed';
+            trackerCtx.font = '20px sans-serif';
+            trackerCtx.fillText('🚀', vx - 10, vy + 6);
+            
+            // Draw tracking line
+            trackerCtx.strokeStyle = '#ffd166';
+            trackerCtx.lineWidth = 2;
+            trackerCtx.setLineDash([5, 5]);
+            trackerCtx.beginPath();
+            trackerCtx.moveTo(w/2, h/2);
+            trackerCtx.lineTo(vx, vy);
+            trackerCtx.stroke();
+            trackerCtx.setLineDash([]);
+            
+            // Labels
+            trackerCtx.fillStyle = '#778da9';
+            trackerCtx.font = '16px sans-serif';
+            trackerCtx.fillText('VLEO Satellite', w/2 - 50, h/2 + 40);
+            trackerCtx.fillText('Hypersonic Vehicle', vx - 60, vy - 20);
+            
+            // Distance
+            const dist = Math.sqrt((vx - w/2)**2 + (vy - h/2)**2);
+            trackerCtx.fillText(`Distance: ${(dist/10).toFixed(0)} km`, 20, 30);
+        }
+
+        function animateTracker() {
+            if (!trackingActive) return;
+            
+            const speed = parseFloat(document.getElementById('vehicle-speed').value) * 0.0005;
+            vehiclePos.angle += speed;
+            vehiclePos.x = 0.5 + 0.3 * Math.cos(vehiclePos.angle);
+            vehiclePos.y = 0.5 + 0.3 * Math.sin(vehiclePos.angle);
+            
+            drawTracker();
+            trackingAnimation = requestAnimationFrame(animateTracker);
+        }
+
+        function startTracking() {
+            trackingActive = true;
+            animateTracker();
+        }
+
+        function stopTracking() {
+            trackingActive = false;
+            if (trackingAnimation) cancelAnimationFrame(trackingAnimation);
+        }
+
+        // ===== Link Budget Calculator =====
+        function calculateLinkBudget() {
+            const txPower = parseFloat(document.getElementById('tx-power').value);
+            const dist = parseFloat(document.getElementById('link-dist').value);
+            const wavelength = parseFloat(document.getElementById('link-wavelength').value) * 1e-9;
+            const aperture = parseFloat(document.getElementById('aperture').value) * 0.01;
+            
+            // Free space path loss
+            const c = 3e8;
+            const freq = c / wavelength;
+            const fsl = 20 * Math.log10(4 * Math.PI * dist * 1000 / wavelength);
+            
+            // TX gain (dBi)
+            const txGain = 10 * Math.log10((Math.PI * aperture / wavelength) ** 2);
+            
+            // RX gain (same aperture)
+            const rxGain = txGain;
+            
+            // Atmospheric loss (simplified)
+            const atmLoss = 2; // dB
+            
+            // Pointing loss (1 mrad error)
+            const pointingLoss = 3;
+            
+            // Calculate received power
+            const txPowerDbm = 10 * Math.log10(txPower * 1000);
+            const rxPower = txPowerDbm + txGain + rxGain - fsl - atmLoss - pointingLoss;
+            
+            // Receiver sensitivity (typical for optical)
+            const rxSensitivity = -60;
+            
+            const margin = rxPower - rxSensitivity;
+            
+            document.getElementById('link-budget').textContent = margin.toFixed(1);
+            document.getElementById('tx-power-val').textContent = txPower.toFixed(1) + ' W';
+            document.getElementById('link-dist-val').textContent = dist + ' km';
+            document.getElementById('aperture-val').textContent = aperture * 100 + ' cm';
+        }
+
+        document.getElementById('tx-power').addEventListener('input', calculateLinkBudget);
+        document.getElementById('link-dist').addEventListener('input', calculateLinkBudget);
+        document.getElementById('link-wavelength').addEventListener('change', calculateLinkBudget);
+        document.getElementById('aperture').addEventListener('input', calculateLinkBudget);
+
+        // Initialize
+        updateAllFaces();
+        drawTracker();
+        calculateLinkBudget();
     </script>
 </body>
 </html>
