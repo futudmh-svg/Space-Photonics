@@ -26,6 +26,10 @@ from .orbit_target import VLEOPropagator, HypersonicVehicle, OrbitConfig, Vehicl
 from .control_loop import NestedControlSystem, OpticalPhaseLockedLoop, DigitalKalmanTracker
 from .atmospheric_channel import AtmosphericChannel, AtmosphericConfig
 from .thermal_model import VLEOThermalModel, VLEOThermalConfig
+from .bto_phase_shifter import (
+    BTOPhaseShifter, BTOPhaseShifterConfig,
+    BTOOPA, BTOOPAConfig
+)
 from .config_manager import (
     load_config, save_config, get_default_config,
     get_high_performance_config, get_fast_config,

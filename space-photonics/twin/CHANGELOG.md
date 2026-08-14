@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.3.0] - 2026-08-14
+
+### Added
+- **BTO Phase Shifters**: Barium Titanate (BaTiO₃) alternative to TFLN
+  - 30x lower drive voltage (~mV vs ~20V)
+  - Sub-100 ps switching (vs μs thermal tuning)
+  - Direct TFLN vs BTO comparison utility
+- **GitHub Codespaces**: One-click cloud development
+  - `.devcontainer/devcontainer.json` with Python 3.11 + Jupyter
+  - Auto-installs dependencies on launch
+  - Pre-configured VS Code extensions
+
+### Changed
+- **README**: Added Codespaces badge and quick-start
+
 ## [0.2.0] - 2026-08-14
 
 ### Added

@@ -66,7 +66,16 @@ python demo.py
 python visualize.py results/simulation_results.json plots/
 ```
 
-## Components
+## What's Inside
+
+| Technology | Status | Notes |
+|-----------|--------|-------|
+| TFLN OPA Phase Shifters | ✅ | Mature, thermal tuning |
+| **BTO Phase Shifters** | ✅ **New** | 30x lower voltage, ps switching |
+| Ag-Chalcogenide Amplifier | ✅ | All-optical gain |
+| Nested Control (Optical PLL + Kalman) | ✅ | ns + μs loops |
+| Atmospheric Channel | ✅ | Turbulence, scintillation |
+| VLEO Thermal Model | ✅ | Atomic oxygen, aerothermal |
 
 ### `opa_beamsteer.py`
 Multi-face optical phased array with TFLN phase shifters:
@@ -88,6 +97,31 @@ Orbital mechanics and target tracking:
 - Hypersonic vehicle trajectory
 - Slant range and elevation geometry
 - Azimuth calculation
+
+### `bto_phase_shifter.py` ⭐ NEW
+Barium Titanate (BTO) phase shifters — alternative to TFLN:
+- **900 pm/V** electro-optic coefficient (30x TFLN)
+- **< 0.1 V·cm** drive voltage product
+- **< 100 ps** switching (no thermal tuning)
+- Compare TFLN vs BTO performance directly
+
+```python
+from twin.bto_phase_shifter import BTOOPA, BTOOPAConfig
+from twin.opa_beamsteer import OPABeamSteerer, OPAConfig
+
+# BTO OPA — much lower voltage
+bto_opa = BTOOPA(BTOOPAConfig(num_elements=64))
+bto_opa.set_steering_angle(15.0)
+
+# Compare with TFLN
+tfln_opa = OPABeamSteerer(OPAConfig(num_elements=64))
+tfln_opa.set_steering_angle(15.0)
+```
+
+Run the comparison:
+```bash
+python3 -c "from twin.bto_phase_shifter import compare_tfln_vs_bto; compare_tfln_vs_bto()"
+```
 
 ### `control_loop.py`
 Nested tracking loops:
