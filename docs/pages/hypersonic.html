@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hypersonic Tracking — Space Photonics</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #050811; color: #e0e6ed; line-height: 1.6; }
+        .container { max-width: 1000px; margin: 0 auto; padding: 16px; }
+        nav { background: #1b263b; padding: 12px; border-radius: 10px; margin-bottom: 16px; display: flex; flex-wrap: wrap; gap: 8px; }
+        nav a { color: #e0e6ed; text-decoration: none; padding: 8px 14px; border-radius: 6px; font-size: 0.9em; background: #0d1b2a; }
+        nav a:hover, nav a.active { background: #00d4aa; color: #050811; }
+        h1 { font-size: 1.5em; color: #00d4aa; margin: 16px 0 8px; }
+        .subtitle { color: #778da9; font-size: 0.9em; margin-bottom: 16px; }
+        .card { background: #1b263b; border-radius: 12px; padding: 18px; margin-bottom: 16px; border: 1px solid #415a77; }
+        .card h2 { font-size: 1.15em; color: #00d4aa; margin-bottom: 12px; }
+        canvas { width: 100%; background: #0d1b2a; border-radius: 8px; margin: 12px 0; }
+        .controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin: 12px 0; }
+        .control-group label { display: block; font-size: 0.85em; color: #778da9; margin-bottom: 4px; }
+        input[type="range"], select { width: 100%; padding: 8px; background: #0d1b2a; border: 1px solid #415a77; border-radius: 6px; color: #e0e6ed; }
+        input[type="range"] { -webkit-appearance: none; height: 6px; padding: 0; }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: #00d4aa; cursor: pointer; }
+        .btn { display: block; width: 100%; padding: 12px; background: #2d6a4f; color: white; border: none; border-radius: 8px; font-size: 1em; text-align: center; margin: 8px 0; cursor: pointer; }
+        .btn:hover { background: #40916c; }
+        .btn-danger { background: #6c2e2e; }
+        .btn-danger:hover { background: #9e3a3a; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 12px 0; }
+        .stat-box { background: #0d1b2a; padding: 14px; border-radius: 8px; text-align: center; }
+        .stat-value { font-size: 1.5em; font-weight: bold; color: #00d4aa; }
+        .stat-label { font-size: 0.8em; color: #778da9; }
+        footer { text-align: center; padding: 30px; color: #778da9; font-size: 0.8em; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav>
+            <a href="../index.html">🏠 Dashboard</a>
+            <a href="opa-analysis.html">🔭 OPA</a>
+            <a href="atmospheric.html">🌫️ Atmosphere</a>
+            <a href="thermal.html">🌡️ Thermal</a>
+            <a href="link-budget.html">📡 Link Budget</a>
+            <a href="hypersonic.html" class="active">🚀 Hypersonic</a>
+        </nav>
+
+        <h1>🚀 Hypersonic Vehicle Tracker</h1>
+        <p class="subtitle">Real-time satellite tracking simulation with multi-face handoff</p>
+
+        <div class="card">
+            <h2>Vehicle Parameters</h2>
+            <div class="controls">
+                <div class="control-group">
+                    <label>Speed (Mach): <span id="mach-val">10</span></label>
+                    <input type="range" id="mach" min="5" max="20" value="10">
+                </div>
+                <div class="control-group">
+                    <label>Altitude (km): <span id="alt-val">30</span></label>
+                    <input type="range" id="altitude" min="20" max="50" value="30">
+                </div>
+                <div class="control-group">
+                    <label>Flight Path Angle (°): <span id="fpa-val">0</span></label>
+                    <input type="range" id="fpa" min="-20" max="20" value="0">
+                </div>
+                <div class="control-group">
+                    <label>Satellite Altitude (km): <span id="sat-alt-val">250</span></label>
+                    <input type="range" id="sat-alt" min="200" max="400" value="250">
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Tracking Simulation</h2>
+            <canvas id="tracker" height="350"></canvas>
+            <div class="stats-grid">
+                <div class="stat-box"><div class="stat-value" id="track-error">-</div><div class="stat-label">Pointing Error (μrad)</div></div>
+                <div class="stat-box"><div class="stat-value" id="active-face">-</div><div class="stat-label">Active Face</div></div>
+                <div class="stat-box"><div class="stat-value" id="slant-range">-</div><div class="stat-label">Slant Range (km)</div></div>
+                <div class="stat-box"><div class="stat-value" id="doppler">-</div><div class="stat-label">Doppler Shift (GHz)</div></div>
+            </div>
+            <button class="btn" onclick="startSim()">▶️ Start Simulation</button>
+            <button class="btn btn-danger" onclick="stopSim()">⏹️ Stop</button>
+        </div>
+
+        <div class="card">
+            <h2>Face Handoff Timeline</h2>
+            <canvas id="handoff" height="200"></canvas>
+        </div>
+
+        <footer><p>Space Photonics Digital Twin — Hypersonic Tracking Module</p></footer>
+    </div>
+
+    <script>
+        const tracker = document.getElementById('tracker');
+        const handoff = document.getElementById('handoff');
+        [tracker, handoff].forEach(c => { c.width = c.offsetWidth * 2; c.height = c.offsetHeight * 2; });
+
+        let animId = null;
+        let simTime = 0;
+        let vehiclePos = { x: -300, y: 30000, vx: 0, vy: 0 };
+        const satellite = { x: 0, y: 250000 };
+        const faceHistory = [];
+
+        function updateVehicle() {
+            const mach = parseFloat(document.getElementById('mach').value);
+            const alt = parseFloat(document.getElementById('altitude').value) * 1000;
+            const fpa = parseFloat(document.getElementById('fpa').value) * Math.PI / 180;
+            const v = mach * 343;
+            
+            vehiclePos.vx = v * Math.cos(fpa);
+            vehiclePos.vy = v * Math.sin(fpa);
+            vehiclePos.x += vehiclePos.vx * 0.1;
+            vehiclePos.y += vehiclePos.vy * 0.1;
+            
+            if (vehiclePos.x > 500000) vehiclePos.x = -300000;
+        }
+
+        function selectFace(azimuth) {
+            azimuth = ((azimuth % 360) + 360) % 360;
+            if (azimuth >= 315 || azimuth < 45) return 1; // Forward +X
+            if (azimuth >= 45 && azimuth < 135) return 3; // Starboard +Y
+            if (azimuth >= 135 && azimuth < 225) return 2; // Aft -X
+            return 4; // Port -Y
+        }
+
+        function drawTracker() {
+            const ctx = tracker.getContext('2d');
+            ctx.clearRect(0, 0, tracker.width, tracker.height);
+            
+            // Ground line
+            ctx.strokeStyle = '#415a77';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            const groundY = tracker.height * 0.85;
+            ctx.moveTo(0, groundY);
+            ctx.lineTo(tracker.width, groundY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            // Satellite
+            const satX = tracker.width / 2;
+            const satY = tracker.height * 0.15;
+            ctx.fillStyle = '#00d4aa';
+            ctx.beginPath();
+            ctx.arc(satX, satY, 12, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.fillStyle = '#e0e6ed';
+            ctx.font = '20px sans-serif';
+            ctx.fillText('🛰️', satX - 12, satY + 6);
+            
+            // Vehicle
+            const scale = tracker.width / 600000;
+            const vX = satX + vehiclePos.x * scale;
+            const vY = groundY - (vehiclePos.y / 1000) * (tracker.height * 0.7 / 50);
+            ctx.fillStyle = '#e63946';
+            ctx.beginPath();
+            ctx.arc(vX, vY, 8, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.fillText('🚀', vX - 10, vY + 6);
+            
+            // Tracking line
+            const dx = vX - satX;
+            const dy = vY - satY;
+            const az = Math.atan2(dx, -dy) * 180 / Math.PI;
+            const face = selectFace(az);
+            
+            const colors = ['', '#00d4aa', '#90e0ef', '#ffd166', '#e63946'];
+            ctx.strokeStyle = colors[face];
+            ctx.lineWidth = 2;
+            ctx.setLineDash([3, 3]);
+            ctx.beginPath();
+            ctx.moveTo(satX, satY);
+            ctx.lineTo(vX, vY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            // Face coverage arcs
+            for (let i = 0; i < 4; i++) {
+                const startAngle = (i * 90 - 45) * Math.PI / 180;
+                const endAngle = (i * 90 + 45) * Math.PI / 180;
+                ctx.strokeStyle = colors[i + 1];
+                ctx.globalAlpha = 0.3;
+                ctx.lineWidth = 20;
+                ctx.beginPath();
+                ctx.arc(satX, satY, 40, startAngle - Math.PI / 2, endAngle - Math.PI / 2);
+                ctx.stroke();
+                ctx.globalAlpha = 1;
+            }
+            
+            // Stats
+            const dist = Math.sqrt(dx * dx + dy * dy) / scale;
+            const slant = Math.sqrt(dist * dist + (satellite.y - vehiclePos.y) ** 2);
+            const doppler = (vehiclePos.vx / 3e8) * 193.5;
+            const pointingError = Math.abs(az - (face - 1) * 90) * 1000;
+            
+            document.getElementById('track-error').textContent = pointingError.toFixed(1);
+            document.getElementById('active-face').textContent = face;
+            document.getElementById('active-face').style.color = colors[face];
+            document.getElementById('slant-range').textContent = (slant / 1000).toFixed(0);
+            document.getElementById('doppler').textContent = (doppler * 1e-9).toFixed(2);
+            
+            faceHistory.push({ time: simTime, face: face });
+            if (faceHistory.length > 200) faceHistory.shift();
+        }
+
+        function drawHandoff() {
+            const ctx = handoff.getContext('2d');
+            ctx.clearRect(0, 0, handoff.width, handoff.height);
+            
+            const colors = ['', '#00d4aa', '#90e0ef', '#ffd166', '#e63946'];
+            const faceNames = ['', '+X Forward', '-X Aft', '+Y Starboard', '-Y Port'];
+            
+            for (let i = 0; i < faceHistory.length - 1; i++) {
+                const x = (i / 200) * handoff.width;
+                const nextX = ((i + 1) / 200) * handoff.width;
+                const face = faceHistory[i].face;
+                const y = handoff.height - (face / 4) * handoff.height * 0.8 - handoff.height * 0.1;
+                
+                ctx.strokeStyle = colors[face];
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+                ctx.lineTo(nextX, y);
+                ctx.stroke();
+            }
+            
+            // Labels
+            ctx.fillStyle = '#e0e6ed';
+            ctx.font = '14px sans-serif';
+            for (let f = 1; f <= 4; f++) {
+                const y = handoff.height - (f / 4) * handoff.height * 0.8 - handoff.height * 0.1;
+                ctx.fillText(faceNames[f], 10, y + 4);
+            }
+        }
+
+        function animate() {
+            simTime += 0.1;
+            updateVehicle();
+            drawTracker();
+            drawHandoff();
+            animId = requestAnimationFrame(animate);
+        }
+
+        function startSim() {
+            if (animId) cancelAnimationFrame(animId);
+            simTime = 0;
+            vehiclePos = { x: -300000, y: 30000, vx: 0, vy: 0 };
+            faceHistory.length = 0;
+            animate();
+        }
+
+        function stopSim() {
+            if (animId) {
+                cancelAnimationFrame(animId);
+                animId = null;
+            }
+        }
+
+        ['mach', 'altitude', 'fpa', 'sat-alt'].forEach(id => {
+            document.getElementById(id).addEventListener('input', () => {
+                document.getElementById(id.replace('-', '') + '-val').textContent = document.getElementById(id).value;
+            });
+        });
+
+        // Initial draw
+        drawTracker();
+    </script>
+</body>
+</html>

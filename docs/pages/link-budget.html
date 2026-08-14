@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Link Budget — Space Photonics</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #050811; color: #e0e6ed; line-height: 1.6; }
+        .container { max-width: 1000px; margin: 0 auto; padding: 16px; }
+        nav { background: #1b263b; padding: 12px; border-radius: 10px; margin-bottom: 16px; display: flex; flex-wrap: wrap; gap: 8px; }
+        nav a { color: #e0e6ed; text-decoration: none; padding: 8px 14px; border-radius: 6px; font-size: 0.9em; background: #0d1b2a; }
+        nav a:hover, nav a.active { background: #00d4aa; color: #050811; }
+        h1 { font-size: 1.5em; color: #00d4aa; margin: 16px 0 8px; }
+        .subtitle { color: #778da9; font-size: 0.9em; margin-bottom: 16px; }
+        .card { background: #1b263b; border-radius: 12px; padding: 18px; margin-bottom: 16px; border: 1px solid #415a77; }
+        .card h2 { font-size: 1.15em; color: #00d4aa; margin-bottom: 12px; }
+        canvas { width: 100%; background: #0d1b2a; border-radius: 8px; margin: 12px 0; }
+        .controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin: 12px 0; }
+        .control-group label { display: block; font-size: 0.85em; color: #778da9; margin-bottom: 4px; }
+        input[type="range"], select { width: 100%; padding: 8px; background: #0d1b2a; border: 1px solid #415a77; border-radius: 6px; color: #e0e6ed; }
+        input[type="range"] { -webkit-appearance: none; height: 6px; padding: 0; }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: #00d4aa; cursor: pointer; }
+        .budget-table { width: 100%; border-collapse: collapse; margin: 16px 0; }
+        .budget-table th { background: #0d1b2a; padding: 10px; text-align: left; font-size: 0.9em; }
+        .budget-table td { padding: 10px; border-bottom: 1px solid #415a77; font-size: 0.9em; }
+        .budget-table td:last-child { text-align: right; font-weight: bold; color: #00d4aa; }
+        .positive { color: #95d5b2; }
+        .negative { color: #e63946; }
+        .result-box { background: #0d1b2a; padding: 20px; border-radius: 10px; text-align: center; margin: 16px 0; }
+        .result-value { font-size: 2.5em; font-weight: bold; color: #00d4aa; }
+        .result-label { font-size: 0.9em; color: #778da9; margin-top: 4px; }
+        footer { text-align: center; padding: 30px; color: #778da9; font-size: 0.8em; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav>
+            <a href="../index.html">🏠 Dashboard</a>
+            <a href="opa-analysis.html">🔭 OPA</a>
+            <a href="atmospheric.html">🌫️ Atmosphere</a>
+            <a href="thermal.html">🌡️ Thermal</a>
+            <a href="link-budget.html" class="active">📡 Link Budget</a>
+            <a href="hypersonic.html">🚀 Hypersonic</a>
+        </nav>
+
+        <h1>📡 Link Budget Calculator</h1>
+        <p class="subtitle">Complete optical link analysis for VLEO-to-hypersonic communication</p>
+
+        <div class="card">
+            <h2>Link Parameters</h2>
+            <div class="controls">
+                <div class="control-group">
+                    <label>TX Power (W): <span id="tx-val">1.0</span></label>
+                    <input type="range" id="tx-power" min="0.1" max="10" value="1.0" step="0.1">
+                </div>
+                <div class="control-group">
+                    <label>Distance (km): <span id="dist-val">200</span></label>
+                    <input type="range" id="distance" min="50" max="500" value="200">
+                </div>
+                <div class="control-group">
+                    <label>TX Aperture (cm): <span id="tx-ap-val">20</span></label>
+                    <input type="range" id="tx-aperture" min="5" max="50" value="20">
+                </div>
+                <div class="control-group">
+                    <label>RX Aperture (cm): <span id="rx-ap-val">20</span></label>
+                    <input type="range" id="rx-aperture" min="5" max="50" value="20">
+                </div>
+                <div class="control-group">
+                    <label>Wavelength (nm): <span id="lambda-val">1550</span></label>
+                    <input type="range" id="wavelength" min="500" max="2000" value="1550" step="10">
+                </div>
+                <div class="control-group">
+                    <label>Elevation (°): <span id="el-val">30</span></label>
+                    <input type="range" id="elevation" min="5" max="90" value="30">
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Link Budget Breakdown</h2>
+            <table class="budget-table">
+                <tr><th>Parameter</th><th>Value</th></tr>
+                <tr><td>TX Power (dBm)</td><td id="tx-dbm">-</td></tr>
+                <tr><td>TX Gain (dBi)</td><td id="tx-gain">-</td></tr>
+                <tr><td>RX Gain (dBi)</td><td id="rx-gain">-</td></tr>
+                <tr><td>Free Space Loss (dB)</td><td id="fsl" class="negative">-</td></tr>
+                <tr><td>Atmospheric Loss (dB)</td><td id="atm-loss" class="negative">-</td></tr>
+                <tr><td>Pointing Loss (dB)</td><td id="point-loss" class="negative">-</td></tr>
+                <tr><td>Scintillation Loss (dB)</td><td id="scint-loss" class="negative">-</td></tr>
+                <tr><td>RX Power (dBm)</td><td id="rx-power">-</td></tr>
+                <tr><td>RX Sensitivity (dBm)</td><td id="rx-sens" class="negative">-</td></tr>
+                <tr style="border-top: 2px solid #00d4aa;"><td><strong>Link Margin (dB)</strong></td><td id="margin"><strong>-</strong></td></tr>
+            </table>
+        </div>
+
+        <div class="result-box">
+            <div class="result-value" id="final-margin">-</div>
+            <div class="result-label">Link Margin (dB)</div>
+        </div>
+
+        <div class="card">
+            <h2>Margin vs Distance</h2>
+            <canvas id="margin-plot" height="300"></canvas>
+        </div>
+
+        <footer><p>Space Photonics Digital Twin — Link Budget Module</p></footer>
+    </div>
+
+    <script>
+        const c1 = document.getElementById('margin-plot');
+        c1.width = c1.offsetWidth * 2;
+        c1.height = c1.offsetHeight * 2;
+
+        function computeBudget() {
+            const txPower = parseFloat(document.getElementById('tx-power').value);
+            const distance = parseFloat(document.getElementById('distance').value) * 1000;
+            const txAperture = parseFloat(document.getElementById('tx-aperture').value) * 0.01;
+            const rxAperture = parseFloat(document.getElementById('rx-aperture').value) * 0.01;
+            const lambda = parseFloat(document.getElementById('wavelength').value) * 1e-9;
+            const elevation = parseFloat(document.getElementById('elevation').value);
+            
+            document.getElementById('tx-val').textContent = txPower.toFixed(1);
+            document.getElementById('dist-val').textContent = (distance / 1000).toFixed(0);
+            document.getElementById('tx-ap-val').textContent = (txAperture * 100).toFixed(0);
+            document.getElementById('rx-ap-val').textContent = (rxAperture * 100).toFixed(0);
+            document.getElementById('lambda-val').textContent = (lambda * 1e9).toFixed(0);
+            document.getElementById('el-val').textContent = elevation.toFixed(0);
+            
+            const txDbm = 10 * Math.log10(txPower * 1000);
+            const txGain = 10 * Math.log10((Math.PI * txAperture / lambda) ** 2);
+            const rxGain = 10 * Math.log10((Math.PI * rxAperture / lambda) ** 2);
+            const fsl = 20 * Math.log10(4 * Math.PI * distance / lambda);
+            const atmLoss = 0.1 + 0.05 * (90 - elevation) / 85;
+            const pointLoss = 3;
+            const scintLoss = 2;
+            const rxSens = -60;
+            
+            const rxPower = txDbm + txGain + rxGain - fsl - atmLoss - pointLoss - scintLoss;
+            const margin = rxPower - rxSens;
+            
+            document.getElementById('tx-dbm').textContent = txDbm.toFixed(1) + ' dBm';
+            document.getElementById('tx-gain').textContent = txGain.toFixed(1) + ' dBi';
+            document.getElementById('rx-gain').textContent = rxGain.toFixed(1) + ' dBi';
+            document.getElementById('fsl').textContent = '-' + fsl.toFixed(1) + ' dB';
+            document.getElementById('atm-loss').textContent = '-' + atmLoss.toFixed(2) + ' dB';
+            document.getElementById('point-loss').textContent = '-' + pointLoss.toFixed(1) + ' dB';
+            document.getElementById('scint-loss').textContent = '-' + scintLoss.toFixed(1) + ' dB';
+            document.getElementById('rx-power').textContent = rxPower.toFixed(1) + ' dBm';
+            document.getElementById('rx-sens').textContent = rxSens.toFixed(1) + ' dBm';
+            document.getElementById('margin').textContent = margin.toFixed(1) + ' dB';
+            document.getElementById('final-margin').textContent = margin.toFixed(1);
+            document.getElementById('final-margin').style.color = margin > 0 ? '#00d4aa' : '#e63946';
+            
+            // Plot
+            const ctx = c1.getContext('2d');
+            ctx.clearRect(0, 0, c1.width, c1.height);
+            ctx.strokeStyle = '#00d4aa';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            
+            for (let d = 50; d <= 500; d += 10) {
+                const dist = d * 1000;
+                const fsl_d = 20 * Math.log10(4 * Math.PI * dist / lambda);
+                const rxP = txDbm + txGain + rxGain - fsl_d - atmLoss - pointLoss - scintLoss;
+                const m = rxP - rxSens;
+                const x = ((d - 50) / 450) * c1.width;
+                const y = c1.height - ((m + 20) / 60) * c1.height * 0.8 - c1.height * 0.1;
+                if (d === 50) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+            
+            // Zero line
+            ctx.strokeStyle = '#e63946';
+            ctx.setLineDash([5, 5]);
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            const zeroY = c1.height - (20 / 60) * c1.height * 0.8 - c1.height * 0.1;
+            ctx.moveTo(0, zeroY);
+            ctx.lineTo(c1.width, zeroY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            // Current point
+            const curX = ((distance / 1000 - 50) / 450) * c1.width;
+            const curY = c1.height - ((margin + 20) / 60) * c1.height * 0.8 - c1.height * 0.1;
+            ctx.fillStyle = '#ffd166';
+            ctx.beginPath();
+            ctx.arc(curX, curY, 10, 0, 2 * Math.PI);
+            ctx.fill();
+        }
+
+        ['tx-power', 'distance', 'tx-aperture', 'rx-aperture', 'wavelength', 'elevation'].forEach(id => {
+            document.getElementById(id).addEventListener('input', computeBudget);
+        });
+
+        computeBudget();
+    </script>
+</body>
+</html>
