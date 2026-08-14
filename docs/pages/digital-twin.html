@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Digital Twin — Space Photonics</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #050811; color: #e0e6ed; line-height: 1.6; overflow-x: hidden; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 16px; }
+        nav { background: #1b263b; padding: 12px; border-radius: 10px; margin-bottom: 16px; display: flex; flex-wrap: wrap; gap: 8px; }
+        nav a { color: #e0e6ed; text-decoration: none; padding: 8px 14px; border-radius: 6px; font-size: 0.9em; background: #0d1b2a; }
+        nav a:hover, nav a.active { background: #00d4aa; color: #050811; }
+        h1 { font-size: 1.5em; color: #00d4aa; margin: 16px 0 8px; }
+        .subtitle { color: #778da9; font-size: 0.9em; margin-bottom: 16px; }
+        .card { background: #1b263b; border-radius: 12px; padding: 18px; margin-bottom: 16px; border: 1px solid #415a77; }
+        .card h2 { font-size: 1.15em; color: #00d4aa; margin-bottom: 12px; }
+        #three-canvas { width: 100%; height: 500px; background: #050811; border-radius: 8px; }
+        .info-panel { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin: 12px 0; }
+        .info-item { background: #0d1b2a; padding: 12px; border-radius: 8px; }
+        .info-label { font-size: 0.8em; color: #778da9; }
+        .info-value { font-size: 1.1em; color: #00d4aa; font-weight: bold; }
+        .controls { display: flex; gap: 10px; flex-wrap: wrap; margin: 12px 0; }
+        .btn { padding: 10px 20px; background: #2d6a4f; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9em; }
+        .btn:hover { background: #40916c; }
+        .btn-secondary { background: #1b4d6e; }
+        .btn-secondary:hover { background: #2a6f97; }
+        footer { text-align: center; padding: 30px; color: #778da9; font-size: 0.8em; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav>
+            <a href="../index.html">🏠 Dashboard</a>
+            <a href="opa-analysis.html">🔭 OPA</a>
+            <a href="atmospheric.html">🌫️ Atmosphere</a>
+            <a href="thermal.html">🌡️ Thermal</a>
+            <a href="link-budget.html">📡 Link Budget</a>
+            <a href="hypersonic.html">🚀 Hypersonic</a>
+            <a href="architecture.html">🏗️ Architecture</a>
+            <a href="digital-twin.html" class="active">🎮 3D Twin</a>
+        </nav>
+
+        <h1>🎮 3D Digital Twin</h1>
+        <p class="subtitle">Interactive photonic system visualization — Laser → Kerr Comb → XPM → MZI → MRR → OPA</p>
+
+        <div class="card">
+            <h2>🔄 Photonic Signal Flow</h2>
+            <div id="three-canvas"></div>
+            <div class="controls">
+                <button class="btn" onclick="animateSignal()">▶️ Animate Signal</button>
+                <button class="btn btn-secondary" onclick="resetView()">🔄 Reset View</button>
+                <button class="btn btn-secondary" onclick="toggleRotation()">🔄 Auto-Rotate</button>
+            </div>
+            <div class="info-panel">
+                <div class="info-item">
+                    <div class="info-label">Laser Power</div>
+                    <div class="info-value" id="laser-power">10 mW</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Comb Lines</div>
+                    <div class="info-value" id="comb-lines">64</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">XPM Phase Shift</div>
+                    <div class="info-value" id="xpm-phase">10⁻⁷ rad</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Matrix Size</div>
+                    <div class="info-value" id="matrix-size">4×4</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">MRR Q-Factor</div>
+                    <div class="info-value" id="mrr-q">10⁵</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">OPA Beams</div>
+                    <div class="info-value" id="opa-beams">3 active</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>🔬 Component Details</h2>
+            <div id="component-info">
+                <p style="color: #778da9;">Click on a component in the 3D view to see details...</p>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>Space Photonics — 3D Digital Twin</p>
+    </footer>
+
+    <script>
+        // Three.js Setup
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x050811);
+        
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / 500, 0.1, 1000);
+        camera.position.set(0, 5, 10);
+        
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        const canvasContainer = document.getElementById('three-canvas');
+        renderer.setSize(canvasContainer.clientWidth, 500);
+        canvasContainer.appendChild(renderer.domElement);
+        
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0x404040, 2);
+        scene.add(ambientLight);
+        
+        const pointLight = new THREE.PointLight(0x00d4aa, 1, 100);
+        pointLight.position.set(0, 10, 0);
+        scene.add(pointLight);
+        
+        // Components
+        const components = [];
+        
+        // Laser Source
+        function createLaserSource() {
+            const geometry = new THREE.CylinderGeometry(0.3, 0.3, 1, 32);
+            const material = new THREE.MeshPhongMaterial({ 
+                color: 0xe63946,
+                emissive: 0xe63946,
+                emissiveIntensity: 0.5
+            });
+            const laser = new THREE.Mesh(geometry, material);
+            laser.position.set(-8, 0, 0);
+            laser.rotation.z = Math.PI / 2;
+            laser.userData = { 
+                name: 'Laser Source', 
+                info: '1550 nm CW laser, 10 mW output power, <100 kHz linewidth'
+            };
+            scene.add(laser);
+            components.push(laser);
+            return laser;
+        }
+        
+        // EO-Kerr Comb
+        function createKerrComb() {
+            const geometry = new THREE.TorusGeometry(0.5, 0.1, 16, 100);
+            const material = new THREE.MeshPhongMaterial({ 
+                color: 0xffd166,
+                emissive: 0xffd166,
+                emissiveIntensity: 0.3
+            });
+            const comb = new THREE.Mesh(geometry, material);
+            comb.position.set(-5, 0, 0);
+            comb.userData = { 
+                name: 'EO-Kerr Comb', 
+                info: 'Si₃N₄ microresonator, 100 GHz spacing, 64 comb lines'
+            };
+            scene.add(comb);
+            components.push(comb);
+            return comb;
+        }
+        
+        // XPM Nonlinear Interaction
+        function createXPM() {
+            const geometry = new THREE.SphereGeometry(0.4, 32, 32);
+            const material = new THREE.MeshPhongMaterial({ 
+                color: 0x00d4aa,
+                emissive: 0x00d4aa,
+                emissiveIntensity: 0.5,
+                transparent: true,
+                opacity: 0.8
+            });
+            const xpm = new THREE.Mesh(geometry, material);
+            xpm.position.set(-2, 0, 0);
+            xpm.userData = { 
+                name: 'XPM Nonlinear Interaction', 
+                info: 'Cross-phase modulation in PCF, γ=70 W⁻¹km⁻¹, phase shift 10⁻⁷ rad/photon'
+            };
+            scene.add(xpm);
+            components.push(xpm);
+            return xpm;
+        }
+        
+        // MZI Mesh
+        function createMZIMesh() {
+            const group = new THREE.Group();
+            
+            // Create 4x4 grid of MZIs
+            for (let i = 0; i < 4; i++) {
+                for (let j = 0; j < 4; j++) {
+                    const geometry = new THREE.BoxGeometry(0.3, 0.3, 0.3);
+                    const material = new THREE.MeshPhongMaterial({ 
+                        color: 0x90e0ef,
+                        emissive: 0x90e0ef,
+                        emissiveIntensity: 0.3
+                    });
+                    const mzi = new THREE.Mesh(geometry, material);
+                    mzi.position.set(j * 0.5 - 0.75, i * 0.5 - 0.75, 0);
+                    group.add(mzi);
+                }
+            }
+            
+            group.position.set(1, 0, 0);
+            group.userData = { 
+                name: 'MZI Mesh', 
+                info: '4×4 photonic matrix multiplier, Vπ=4.7V, switching time 158 ps'
+            };
+            scene.add(group);
+            components.push(group);
+            return group;
+        }
+        
+        // MRR Weight Bank
+        function createMRRBank() {
+            const group = new THREE.Group();
+            
+            for (let i = 0; i < 4; i++) {
+                const geometry = new THREE.TorusGeometry(0.2, 0.05, 16, 50);
+                const material = new THREE.MeshPhongMaterial({ 
+                    color: 0xff6b9d,
+                    emissive: 0xff6b9d,
+                    emissiveIntensity: 0.4
+                });
+                const mrr = new THREE.Mesh(geometry, material);
+                mrr.position.set(i * 0.5 - 0.75, 0, 0);
+                group.add(mrr);
+            }
+            
+            group.position.set(4, 0, 0);
+            group.userData = { 
+                name: 'MRR Weight Bank', 
+                info: 'High-Q micro-ring resonators, Q>10⁵, 16-bit weight precision'
+            };
+            scene.add(group);
+            components.push(group);
+            return group;
+        }
+        
+        // OPA Array
+        function createOPA() {
+            const group = new THREE.Group();
+            
+            // Create 4-face OPA
+            const positions = [
+                [0, 0, 1], [0, 0, -1], [1, 0, 0], [-1, 0, 0]
+            ];
+            
+            positions.forEach((pos, idx) => {
+                const geometry = new THREE.PlaneGeometry(0.5, 0.5);
+                const material = new THREE.MeshPhongMaterial({ 
+                    color: [0x00d4aa, 0x90e0ef, 0xffd166, 0xe63946][idx],
+                    emissive: [0x00d4aa, 0x90e0ef, 0xffd166, 0xe63946][idx],
+                    emissiveIntensity: 0.4,
+                    side: THREE.DoubleSide
+                });
+                const face = new THREE.Mesh(geometry, material);
+                face.position.set(pos[0] * 0.5, pos[1], pos[2] * 0.5);
+                face.lookAt(0, 0, 0);
+                group.add(face);
+            });
+            
+            group.position.set(7, 0, 0);
+            group.userData = { 
+                name: '4-Face OPA', 
+                info: '64 elements per face, 62°×11° FOV, <1μs steering'
+            };
+            scene.add(group);
+            components.push(group);
+            return group;
+        }
+        
+        // Signal Path
+        function createSignalPath() {
+            const points = [
+                new THREE.Vector3(-8, 0, 0),
+                new THREE.Vector3(-5, 0, 0),
+                new THREE.Vector3(-2, 0, 0),
+                new THREE.Vector3(1, 0, 0),
+                new THREE.Vector3(4, 0, 0),
+                new THREE.Vector3(7, 0, 0)
+            ];
+            
+            const geometry = new THREE.BufferGeometry().setFromPoints(points);
+            const material = new THREE.LineBasicMaterial({ 
+                color: 0x00d4aa,
+                linewidth: 2
+            });
+            const line = new THREE.Line(geometry, material);
+            scene.add(line);
+            
+            // Animated signal particle
+            const particleGeometry = new THREE.SphereGeometry(0.1, 16, 16);
+            const particleMaterial = new THREE.MeshBasicMaterial({ 
+                color: 0xffffff,
+                emissive: 0xffffff,
+                emissiveIntensity: 1
+            });
+            const particle = new THREE.Mesh(particleGeometry, particleMaterial);
+            scene.add(particle);
+            
+            return { line, particle, points };
+        }
+        
+        // Create all components
+        const laser = createLaserSource();
+        const comb = createKerrComb();
+        const xpm = createXPM();
+        const mzi = createMZIMesh();
+        const mrr = createMRRBank();
+        const opa = createOPA();
+        const signalPath = createSignalPath();
+        
+        // Animation
+        let signalProgress = 0;
+        let autoRotate = false;
+        
+        function animateSignal() {
+            signalProgress = 0;
+        }
+        
+        function resetView() {
+            camera.position.set(0, 5, 10);
+            controls.reset();
+        }
+        
+        function toggleRotation() {
+            autoRotate = !autoRotate;
+            controls.autoRotate = autoRotate;
+        }
+        
+        // Raycaster for click interaction
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+        
+        renderer.domElement.addEventListener('click', (event) => {
+            const rect = renderer.domElement.getBoundingClientRect();
+            mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+            mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+            
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(components, true);
+            
+            if (intersects.length > 0) {
+                const obj = intersects[0].object;
+                let target = obj;
+                while (target.parent && !target.userData.name) {
+                    target = target.parent;
+                }
+                
+                if (target.userData.name) {
+                    document.getElementById('component-info').innerHTML = `
+                        <h3 style="color: #00d4aa; margin-bottom: 8px;">${target.userData.name}</h3>
+                        <p style="color: #e0e6ed;">${target.userData.info}</p>
+                    `;
+                }
+            }
+        });
+        
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // Rotate components
+            comb.rotation.z += 0.01;
+            mrr.children.forEach((mrr_ring, i) => {
+                mrr_ring.rotation.z += 0.02 * (i + 1);
+            });
+            
+            // Animate signal particle
+            if (signalProgress < 1) {
+                signalProgress += 0.005;
+                const idx = Math.floor(signalProgress * (signalPath.points.length - 1));
+                const nextIdx = Math.min(idx + 1, signalPath.points.length - 1);
+                const t = (signalProgress * (signalPath.points.length - 1)) - idx;
+                
+                signalPath.particle.position.lerpVectors(
+                    signalPath.points[idx],
+                    signalPath.points[nextIdx],
+                    t
+                );
+            }
+            
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        
+        // Handle resize
+        window.addEventListener('resize', () => {
+            const width = canvasContainer.clientWidth;
+            const height = 500;
+            renderer.setSize(width, height);
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+        });
+        
+        animate();
+    </script>
+</body>
+</html>
