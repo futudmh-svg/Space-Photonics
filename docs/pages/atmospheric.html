@@ -92,7 +92,16 @@
         const c1 = document.getElementById('r0-plot');
         const c2 = document.getElementById('scint-plot');
         const c3 = document.getElementById('phase-screen');
-        [c1, c2, c3].forEach(c => { c.width = c.offsetWidth * 2; c.height = c.offsetHeight * 2; });
+        [c1, c2, c3].forEach(c => {
+            const rect = c.getBoundingClientRect();
+            if (rect.width > 0 && rect.height > 0) {
+                c.width = rect.width * 2;
+                c.height = rect.height * 2;
+            } else {
+                c.width = 600;
+                c.height = 300;
+            }
+        });
 
         function computeR0(lambda, Cn2, elevation, altitude) {
             const k = 2 * Math.PI / lambda;

@@ -208,8 +208,14 @@
         const c4 = document.getElementById('grating-map');
         
         function setupCanvas(c) {
-            c.width = c.offsetWidth * 2;
-            c.height = c.offsetHeight * 2;
+            const rect = c.getBoundingClientRect();
+            if (rect.width > 0 && rect.height > 0) {
+                c.width = rect.width * 2;
+                c.height = rect.height * 2;
+            } else {
+                c.width = 600;
+                c.height = 300;
+            }
         }
         [c1, c2, c3, c4].forEach(setupCanvas);
 

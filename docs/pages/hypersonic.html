@@ -92,7 +92,16 @@
     <script>
         const tracker = document.getElementById('tracker');
         const handoff = document.getElementById('handoff');
-        [tracker, handoff].forEach(c => { c.width = c.offsetWidth * 2; c.height = c.offsetHeight * 2; });
+        [tracker, handoff].forEach(c => {
+            const rect = c.getBoundingClientRect();
+            if (rect.width > 0 && rect.height > 0) {
+                c.width = rect.width * 2;
+                c.height = rect.height * 2;
+            } else {
+                c.width = 600;
+                c.height = c.id === 'tracker' ? 350 : 200;
+            }
+        });
 
         let animId = null;
         let simTime = 0;

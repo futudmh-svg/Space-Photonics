@@ -109,8 +109,14 @@
 
     <script>
         const c1 = document.getElementById('margin-plot');
-        c1.width = c1.offsetWidth * 2;
-        c1.height = c1.offsetHeight * 2;
+        const rect = c1.getBoundingClientRect();
+        if (rect.width > 0 && rect.height > 0) {
+            c1.width = rect.width * 2;
+            c1.height = rect.height * 2;
+        } else {
+            c1.width = 600;
+            c1.height = 300;
+        }
 
         function computeBudget() {
             const txPower = parseFloat(document.getElementById('tx-power').value);
