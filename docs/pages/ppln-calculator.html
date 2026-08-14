@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PPLN Performance Calculator — Space Photonics</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #050811; color: #e0e6ed; line-height: 1.6; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 16px; }
+        nav { background: #1b263b; padding: 12px; border-radius: 10px; margin-bottom: 16px; display: flex; flex-wrap: wrap; gap: 8px; }
+        nav a { color: #e0e6ed; text-decoration: none; padding: 8px 14px; border-radius: 6px; font-size: 0.9em; background: #0d1b2a; }
+        nav a:hover, nav a.active { background: #00d4aa; color: #050811; }
+        h1 { font-size: 1.5em; color: #00d4aa; margin: 16px 0 8px; }
+        h2 { font-size: 1.15em; color: #00d4aa; margin: 16px 0 8px; }
+        .subtitle { color: #778da9; font-size: 0.9em; margin-bottom: 16px; }
+        .card { background: #1b263b; border-radius: 12px; padding: 18px; margin-bottom: 16px; border: 1px solid #415a77; }
+        .calc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        @media (max-width: 768px) { .calc-grid { grid-template-columns: 1fr; } }
+        .input-group { margin-bottom: 14px; }
+        .input-group label { display: block; font-size: 0.85em; color: #90e0ef; margin-bottom: 4px; }
+        .input-group input[type="range"] { width: 100%; margin: 4px 0; }
+        .input-group .value { color: #ffd166; font-family: monospace; font-size: 1em; }
+        .result-box { background: #0d1b2a; border: 2px solid #00d4aa; border-radius: 10px; padding: 16px; margin: 12px 0; }
+        .result-box h3 { color: #00d4aa; margin-bottom: 8px; font-size: 1em; }
+        .result-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #415a77; font-size: 0.9em; }
+        .result-label { color: #90e0ef; }
+        .result-value { color: #ffd166; font-family: monospace; font-weight: bold; }
+        .equation { background: #0d1b2a; border-left: 3px solid #00d4aa; padding: 12px 16px; margin: 12px 0; font-family: monospace; font-size: 0.8em; border-radius: 0 6px 6px 0; overflow-x: auto; color: #e0e1dd; }
+        .viz-container { background: #050811; border-radius: 8px; padding: 12px; margin: 12px 0; }
+        .phase-match-viz { display: flex; align-items: center; justify-content: center; gap: 4px; margin: 8px 0; }
+        .domain { width: 20px; height: 40px; border-radius: 2px; }
+        .domain-up { background: #00d4aa; }
+        .domain-down { background: #e63946; }
+        .temp-warning { color: #e63946; font-size: 0.85em; margin-top: 8px; }
+        footer { text-align: center; padding: 30px; color: #778da9; font-size: 0.8em; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav>
+            <a href="../index.html">🏠 Dashboard</a>
+            <a href="../pages/architecture.html">🏛️ Architecture</a>
+            <a href="../pages/digital-twin.html">🎮 3D Twin</a>
+            <a href="../pages/opa-analysis.html">📡 OPA</a>
+            <a href="../pages/link-budget.html">📊 Link Budget</a>
+            <a href="../pages/hypersonic.html">🚀 Hypersonic</a>
+            <a href="../pages/vleo-constellation.html">🌐 VLEO</a>
+            <a href="../pages/vehicle-terminal.html">🛰️ Terminal</a>
+            <a href="../pages/ehf-optical-trade.html">📡 EHF vs Opt</a>
+            <a href="../pages/ppln-calculator.html">🔢 PPLN Calc</a>
+            <a href="../pages/research-gaps.html">🔬 Gaps</a>
+            <a href="../pages/foundry.html">🏭 Foundry</a>
+        </nav>
+
+        <h1>🔢 PPLN Performance Calculator</h1>
+        <p class="subtitle">Interactive design tool for Periodically-Poled Lithium Niobate receivers</p>
+
+        <div class="calc-grid">
+            <div class="card">
+                <h2>Input Parameters</h2>
+                
+                <div class="input-group">
+                    <label>Signal Wavelength (λ_s) <span class="value" id="val-lambda-s">1550</span> nm</label>
+                    <input type="range" id="lambda-s" min="1450" max="1650" value="1550" step="10">
+                </div>
+
+                <div class="input-group">
+                    <label>Pump Wavelength (λ_p) <span class="value" id="val-lambda-p">1560</span> nm</label>
+                    <input type="range" id="lambda-p" min="1500" max="1600" value="1560" step="10">
+                </div>
+
+                <div class="input-group">
+                    <label>Crystal Length (L) <span class="value" id="val-length">30</span> mm</label>
+                    <input type="range" id="length" min="10" max="50" value="30" step="5">
+                </div>
+
+                <div class="input-group">
+                    <label>Pump Power (P_p) <span class="value" id="val-pump-power">200</span> mW</label>
+                    <input type="range" id="pump-power" min="50" max="500" value="200" step="25">
+                </div>
+
+                <div class="input-group">
+                    <label>Waveguide Width (w) <span class="value" id="val-width">5</span> μm</label>
+                    <input type="range" id="width" min="3" max="10" value="5" step="0.5">
+                </div>
+
+                <div class="input-group">
+                    <label>Waveguide Height (h) <span class="value" id="val-height">3</span> μm</label>
+                    <input type="range" id="height" min="2" max="6" value="3" step="0.5">
+                </div>
+
+                <div class="input-group">
+                    <label>Temperature (T) <span class="value" id="val-temp">25</span> °C</label>
+                    <input type="range" id="temp" min="0" max="80" value="25" step="1">
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Calculated Results</h2>
+                
+                <div class="result-box">
+                    <h3>Phase Matching</h3>
+                    <div class="result-row">
+                        <span class="result-label">SFG Wavelength (λ_i)</span>
+                        <span class="result-value" id="res-idler">777.5 nm</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="result-label">QPM Period (Λ)</span>
+                        <span class="result-value" id="res-qpm">6.42 μm</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="result-label">Phase Mismatch (Δk)</span>
+                        <span class="result-value" id="res-dk">0.0 rad/mm</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="result-label">Sinc²(ΔkL/2)</span>
+                        <span class="result-value" id="res-sinc">1.000</span>
+                    </div>
+                </div>
+
+                <div class="result-box">
+                    <h3>Conversion Efficiency</h3>
+                    <div class="result-row">
+                        <span class="result-label">Normalized Efficiency (η_norm)</span>
+                        <span class="result-value" id="res-eta-norm">250 %/W/cm²</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="result-label">Effective n₂</span>
+                        <span class="result-value" id="res-n2">6.2×10⁻¹² cm²/W</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="result-label">Single-Pass Conversion</span>
+                        <span class="result-value" id="res-conversion">-12.3 dB</span>
+                    </div>
+                </div>
+
+                <div class="result-box">
+                    <h3>Receiver Sensitivity</h3>
+                    <div class="result-row">
+                        <span class="result-label">Minimum Detectable Phase</span>
+                        <span class="result-value" id="res-min-phase">0.01 rad</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="result-label">Receiver Sensitivity</span>
+                        <span class="result-value" id="res-sensitivity">-62.5 dBm</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="result-label">Link Margin (P_rx = -26 dBm)</span>
+                        <span class="result-value" id="res-margin" style="color:#2a9d8f">+36.5 dB</span>
+                    </div>
+                </div>
+
+                <div id="temp-warning" class="temp-warning" style="display:none">
+                    ⚠️ Temperature drift warning: ΔT > ±0.5°C may cause significant phase mismatch!
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>QPM Domain Visualization</h2>
+            <p style="font-size:0.85em;color:#778da9;margin-bottom:12px">Alternating domains in the PPLN crystal. Each domain flip compensates for phase mismatch.</p>
+            <div class="viz-container">
+                <div class="phase-match-viz" id="domain-viz"></div>
+                <p style="text-align:center;color:#90e0ef;font-size:0.8em;margin-top:8px">
+                    ↑ +z (up) domains in green | ↓ -z (down) domains in red
+                </p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Physics Equations</h2>
+            <div class="equation">
+                <strong>Quasi-Phase Matching (QPM):</strong>
+                <br>Λ = 2π / |k_p + k_s - k_i| = 2π / |Δk|
+                <br>where k = 2πn(λ)/λ
+            </div>
+            <div class="equation">
+                <strong>Effective Nonlinearity (cascaded χ⁽²⁾):</strong>
+                <br>n₂,eff = (2ω_sω_i d_eff²) / (n_s n_i n_p c² ε₀) × (1/Δk)
+                <br>For LN: d_eff ≈ 16 pm/V, giving n₂,eff ~ 6×10⁻¹² cm²/W
+            </div>
+            <div class="equation">
+                <strong>Normalized Conversion Efficiency:</strong>
+                <br>η_norm = (P_i / P_s) / P_p = (8π² d_eff²) / (ε₀ c n³ λ²) × (L/Λ)² × sinc²(ΔkL/2)
+            </div>
+            <div class="equation">
+                <strong>Temperature Tuning:</strong>
+                <br>dΛ/dT = Λ × (α_LN + (1/n)(dn/dT))
+                <br>α_LN ≈ 15×10⁻⁶ /K, dn/dT ≈ 3.5×10⁻⁵ /K
+                <br>→ dΛ/dT ≈ 0.14 nm/K for Λ = 6.4 μm
+            </div>
+        </div>
+
+        <footer>© 2026 Space Photonics Systems — PPLN Design Tool</footer>
+    </div>
+
+    <script>
+        // Sellmeier equations for LN
+        function n_o(lambda, T) {
+            const lambda_um = lambda / 1000;
+            const f = (T - 24.5) * (T + 570.82);
+            return Math.sqrt(5.39121 + 0.07816/(lambda_um**2 - 0.04760) - 0.01965*lambda_um**2 + 2.5e-7*f);
+        }
+
+        function n_e(lambda, T) {
+            const lambda_um = lambda / 1000;
+            const f = (T - 24.5) * (T + 570.82);
+            return Math.sqrt(5.39121 + 0.20103/(lambda_um**2 - 0.04760) - 0.01965*lambda_um**2 + 2.5e-7*f);
+        }
+
+        function calculate() {
+            const lambda_s = parseFloat(document.getElementById('lambda-s').value);
+            const lambda_p = parseFloat(document.getElementById('lambda-p').value);
+            const L_mm = parseFloat(document.getElementById('length').value);
+            const P_p_mW = parseFloat(document.getElementById('pump-power').value);
+            const w_um = parseFloat(document.getElementById('width').value);
+            const h_um = parseFloat(document.getElementById('height').value);
+            const T_C = parseFloat(document.getElementById('temp').value);
+
+            // Update displayed values
+            document.getElementById('val-lambda-s').textContent = lambda_s;
+            document.getElementById('val-lambda-p').textContent = lambda_p;
+            document.getElementById('val-length').textContent = L_mm;
+            document.getElementById('val-pump-power').textContent = P_p_mW;
+            document.getElementById('val-width').textContent = w_um;
+            document.getElementById('val-height').textContent = h_um;
+            document.getElementById('val-temp').textContent = T_C;
+
+            // Calculate idler wavelength
+            const f_s = 3e8 / (lambda_s * 1e-9);
+            const f_p = 3e8 / (lambda_p * 1e-9);
+            const f_i = f_p + f_s;
+            const lambda_i = 3e8 / f_i * 1e9;
+
+            // Refractive indices
+            const n_s = n_o(lambda_s, T_C);
+            const n_p = n_o(lambda_p, T_C);
+            const n_i = n_e(lambda_i, T_C);
+
+            // Phase mismatch
+            const k_s = 2 * Math.PI * n_s / (lambda_s * 1e-9);
+            const k_p = 2 * Math.PI * n_p / (lambda_p * 1e-9);
+            const k_i = 2 * Math.PI * n_i / (lambda_i * 1e-9);
+            const dk = k_p + k_s - k_i;
+
+            // QPM period
+            const Lambda_um = 2 * Math.PI / Math.abs(dk) * 1e6;
+
+            // Sinc factor
+            const L_m = L_mm * 1e-3;
+            const sinc_arg = dk * L_m / 2;
+            const sinc2 = Math.abs(sinc_arg) < 1e-6 ? 1.0 : (Math.sin(sinc_arg) / sinc_arg) ** 2;
+
+            // Normalized efficiency (simplified)
+            const d_eff = 16e-12; // 16 pm/V
+            const eta_norm = 200 * (L_mm / 30) ** 2 * sinc2; // %/W/cm², approximate
+
+            // Effective n2
+            const n2_eff = 6e-12 * (L_mm / 30) * sinc2;
+
+            // Conversion efficiency
+            const A_cm2 = (w_um * h_um) * 1e-8;
+            const P_p_W = P_p_mW * 1e-3;
+            const conversion = eta_norm * P_p_W / A_cm2;
+            const conversion_dB = 10 * Math.log10(conversion / 100);
+
+            // Sensitivity (simplified model)
+            const min_phase = 0.01; // rad
+            const sensitivity_dBm = -60 - 10 * Math.log10(P_p_mW / 200) - 10 * Math.log10(L_mm / 30);
+
+            // Update results
+            document.getElementById('res-idler').textContent = lambda_i.toFixed(1) + ' nm';
+            document.getElementById('res-qpm').textContent = Lambda_um.toFixed(2) + ' μm';
+            document.getElementById('res-dk').textContent = (dk / 1000).toFixed(2) + ' rad/mm';
+            document.getElementById('res-sinc').textContent = sinc2.toFixed(3);
+            document.getElementById('res-eta-norm').textContent = eta_norm.toFixed(0) + ' %/W/cm²';
+            document.getElementById('res-n2').textContent = (n2_eff * 1e12).toFixed(1) + '×10⁻¹² cm²/W';
+            document.getElementById('res-conversion').textContent = conversion_dB.toFixed(1) + ' dB';
+            document.getElementById('res-min-phase').textContent = min_phase.toFixed(2) + ' rad';
+            document.getElementById('res-sensitivity').textContent = sensitivity_dBm.toFixed(1) + ' dBm';
+
+            // Temperature warning
+            const tempWarning = document.getElementById('temp-warning');
+            if (Math.abs(T_C - 25) > 0.5) {
+                tempWarning.style.display = 'block';
+                tempWarning.textContent = `⚠️ Temperature ${T_C}°C is ${(T_C - 25).toFixed(1)}°C from design point. Phase mismatch may occur!`;
+            } else {
+                tempWarning.style.display = 'none';
+            }
+
+            // Update domain visualization
+            const viz = document.getElementById('domain-viz');
+            viz.innerHTML = '';
+            const numDomains = Math.floor(L_mm / Lambda_um);
+            for (let i = 0; i < Math.min(numDomains, 40); i++) {
+                const domain = document.createElement('div');
+                domain.className = 'domain ' + (i % 2 === 0 ? 'domain-up' : 'domain-down');
+                viz.appendChild(domain);
+            }
+        }
+
+        // Attach listeners
+        ['lambda-s', 'lambda-p', 'length', 'pump-power', 'width', 'height', 'temp'].forEach(id => {
+            document.getElementById(id).addEventListener('input', calculate);
+        });
+
+        // Initial calculation
+        calculate();
+    </script>
+</body>
+</html>

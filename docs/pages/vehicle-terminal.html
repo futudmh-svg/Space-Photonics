@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hypersonic Vehicle Terminal — Space Photonics</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #050811; color: #e0e6ed; line-height: 1.6; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 16px; }
+        nav { background: #1b263b; padding: 12px; border-radius: 10px; margin-bottom: 16px; display: flex; flex-wrap: wrap; gap: 8px; }
+        nav a { color: #e0e6ed; text-decoration: none; padding: 8px 14px; border-radius: 6px; font-size: 0.9em; background: #0d1b2a; }
+        nav a:hover, nav a.active { background: #00d4aa; color: #050811; }
+        h1 { font-size: 1.5em; color: #00d4aa; margin: 16px 0 8px; }
+        h2 { font-size: 1.15em; color: #00d4aa; margin: 16px 0 8px; }
+        h3 { font-size: 1em; color: #90e0ef; margin: 12px 0 6px; }
+        .subtitle { color: #778da9; font-size: 0.9em; margin-bottom: 16px; }
+        .card { background: #1b263b; border-radius: 12px; padding: 18px; margin-bottom: 16px; border: 1px solid #415a77; }
+        .badge { display: inline-block; padding: 4px 10px; border-radius: 12px; font-size: 0.75em; margin: 2px; }
+        .ok { background: #2d6a4f; color: #95d5b2; }
+        .warn { background: #6c5b1e; color: #ffd166; }
+        .danger { background: #6c2e2e; color: #ff9999; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.85em; }
+        th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid #415a77; }
+        th { color: #00d4aa; font-weight: 600; background: #0d1b2a; }
+        .equation { background: #0d1b2a; border-left: 3px solid #00d4aa; padding: 12px 16px; margin: 12px 0; font-family: monospace; font-size: 0.85em; border-radius: 0 6px 6px 0; overflow-x: auto; }
+        .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        @media (max-width: 768px) { .two-col { grid-template-columns: 1fr; } }
+        .concept-card { background: #0d1b2a; border: 2px solid #415a77; border-radius: 10px; padding: 16px; }
+        .concept-card h3 { margin-top: 0; }
+        .concept-selected { border-color: #00d4aa; }
+        .spec-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #415a77; font-size: 0.85em; }
+        .spec-label { color: #90e0ef; }
+        .spec-value { color: #ffd166; font-family: monospace; }
+        footer { text-align: center; padding: 30px; color: #778da9; font-size: 0.8em; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav>
+            <a href="../index.html">🏠 Dashboard</a>
+            <a href="../pages/architecture.html">🏛️ Architecture</a>
+            <a href="../pages/digital-twin.html">🎮 3D Twin</a>
+            <a href="../pages/opa-analysis.html">📡 OPA</a>
+            <a href="../pages/link-budget.html">📊 Link Budget</a>
+            <a href="../pages/hypersonic.html">🚀 Hypersonic</a>
+            <a href="../pages/vleo-constellation.html">🌐 VLEO</a>
+            <a href="../pages/vehicle-terminal.html">🛰️ Terminal</a>
+            <a href="../pages/ehf-optical-trade.html">📡 EHF vs Opt</a>
+            <a href="../pages/ppln-calculator.html">🔢 PPLN Calc</a>
+            <a href="../pages/research-gaps.html">🔬 Gaps</a>
+            <a href="../pages/foundry.html">🏭 Foundry</a>
+        </nav>
+
+        <h1>🛰️ Hypersonic Vehicle Optical Terminal</h1>
+        <p class="subtitle">Design concepts for two-way optical communications at Mach 10</p>
+
+        <div class="card">
+            <h2>Design Requirements</h2>
+            <table>
+                <tr><th>Parameter</th><th>Requirement</th><th>Challenge Level</th></tr>
+                <tr><td>Operating speed</td><td>Mach 5-10 (1.7-3.4 km/s)</td><td><span class="danger">EXTREME</span></td></tr>
+                <tr><td>Surface temperature</td><td>1000-2200°C (stagnation point)</td><td><span class="danger">EXTREME</span></td></tr>
+                <tr><td>Plasma electron density</td><td>10¹⁷-10¹⁹ m⁻³</td><td><span class="warn">HIGH</span></td></tr>
+                <tr><td>Vibration (launch)</td><td>50-100 g RMS</td><td><span class="danger">EXTREME</span></td></tr>
+                <tr><td>Vibration (cruise)</td><td>5-20 g RMS</td><td><span class="warn">HIGH</span></td></tr>
+                <tr><td>Data rate (downlink)</td><td>≥ 1 Gbps</td><td><span class="ok">MODERATE</span></td></tr>
+                <tr><td>Data rate (uplink)</td><td>≥ 100 Mbps</td><td><span class="ok">MODERATE</span></td></tr>
+                <tr><td>Pointing accuracy</td><td>±100 μrad (1σ)</td><td><span class="warn">HIGH</span></td></tr>
+                <tr><td>Aerodynamic drag</td><td>&lt; 1% of total drag</td><td><span class="warn">HIGH</span></td></tr>
+                <tr><td>Mass</td><td>&lt; 5 kg</td><td><span class="warn">HIGH</span></td></tr>
+                <tr><td>Power</td><td>&lt; 50 W</td><td><span class="ok">MODERATE</span></td></tr>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2>Three Design Concepts</h2>
+            
+            <div class="two-col">
+                <div class="concept-card concept-selected">
+                    <h3>🥇 Concept A: Flush-Mounted Sapphire Window</h3>
+                    <p style="font-size:0.85em;color:#e0e1dd;margin-bottom:10px"><strong>Recommended</strong> — Best balance of aerodynamic and optical performance</p>
+                    
+                    <div class="spec-row"><span class="spec-label">Window material</span><span class="spec-value">Single-crystal sapphire (Al₂O₃)</span></div>
+                    <div class="spec-row"><span class="spec-label">Window diameter</span><span class="spec-value">50 mm</span></div>
+                    <div class="spec-row"><span class="spec-label">Window thickness</span><span class="spec-value">15 mm (graded)</span></div>
+                    <div class="spec-row"><span class="spec-label">Surface flatness</span><span class="spec-value">λ/10 @ 633 nm</span></div>
+                    <div class="spec-row"><span class="spec-label">Coating</span><span class="spec-value">AR @ 1550 nm, HR @ 780 nm</span></div>
+                    <div class="spec-row"><span class="spec-label">Max temperature</span><span class="spec-value">2050°C (melting point)</span></div>
+                    <div class="spec-row"><span class="spec-label">Thermal conductivity</span><span class="spec-value">35 W/m·K</span></div>
+                    <div class="spec-row"><span class="spec-label">Transmission @ 1550 nm</span><span class="spec-value">&gt;85%</span></div>
+                    
+                    <h4 style="color:#90e0ef;margin-top:12px">Internal Optics</h4>
+                    <div class="spec-row"><span class="spec-label">Beam expander</span><span class="spec-value">5× Galilean telescope</span></div>
+                    <div class="spec-row"><span class="spec-label">Pointing mechanism</span><span class="spec-value">Fast-steering mirror (FSM)</span></div>
+                    <div class="spec-row"><span class="spec-label">FSM range</span><span class="spec-value">±2°</span></div>
+                    <div class="spec-row"><span class="spec-label">FSM bandwidth</span><span class="spec-value">1 kHz</span></div>
+                    <div class="spec-row"><span class="spec-label">Detector</span><span class="spec-value">InGaAs APD or PPLN</span></div>
+                    
+                    <h4 style="color:#90e0ef;margin-top:12px">Thermal Management</h4>
+                    <p style="font-size:0.85em;color:#e0e1dd">Window bonded to titanium frame with compliant gasket. Active water cooling around perimeter. Internal optics at 25°C via TEC.</p>
+                </div>
+
+                <div class="concept-card">
+                    <h3>🥈 Concept B: Retractable Turret</h3>
+                    <p style="font-size:0.85em;color:#e0e1dd;margin-bottom:10px">Deployable after plasma decay. Lower thermal load but mechanical complexity.</p>
+                    
+                    <div class="spec-row"><span class="spec-label">Turret diameter</span><span class="spec-value">80 mm (retracted: 30 mm)</span></div>
+                    <div class="spec-row"><span class="spec-label">Deployment</span><span class="spec-value">Pneumatic actuator, 2s deploy</span></div>
+                    <div class="spec-row"><span class="spec-label">Window</span><span class="spec-value">ZnS or Ge (lower temp)</span></div>
+                    <div class="spec-row"><span class="spec-label">Gimbal range</span><span class="spec-value">±20° azimuth, ±15° elevation</span></div>
+                    <div class="spec-row"><span class="spec-label">Gimbal rate</span><span class="spec-value">10°/s</span></div>
+                    <div class="spec-row"><span class="spec-label">Aerodynamic fairing</span><span class="spec-value">Conformal, spring-loaded</span></div>
+                    
+                    <h4 style="color:#90e0ef;margin-top:12px">Pros</h4>
+                    <ul style="color:#e0e1dd;font-size:0.85em;margin-left:16px">
+                        <li>Can use lower-temp materials (ZnS)</li>
+                        <li>Larger aperture when deployed</li>
+                        <li>Wide field of regard</li>
+                    </ul>
+                    
+                    <h4 style="color:#90e0ef;margin-top:12px">Cons</h4>
+                    <ul style="color:#e0e1dd;font-size:0.85em;margin-left:16px">
+                        <li>Mechanical failure risk (deployment)</li>
+                        <li>Cannot operate during plasma phase</li>
+                        <li>Sealing challenges at Mach 10</li>
+                        <li>Adds 2-3 kg mass</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="concept-card" style="margin-top:16px">
+                <h3>🥉 Concept C: Fiber-Optic Feedthrough</h3>
+                <p style="font-size:0.85em;color:#e0e1dd;margin-bottom:10px">Minimal protrusion but limited power handling and pointing.</p>
+                
+                <div class="spec-row"><span class="spec-label">Fiber type</span><span class="spec-value">Single-mode, gold-coated</span></div>
+                <div class="spec-row"><span class="spec-label">Core diameter</span><span class="spec-value">10 μm</span></div>
+                <div class="spec-row"><span class="spec-label">Cladding</span><span class="spec-value">Silica, 125 μm</span></div>
+                <div class="spec-row"><span class="spec-label">Buffer</span><span class="spec-value">Gold coating to 800°C</span></div>
+                <div class="spec-row"><span class="spec-label">Termination</span><span class="spec-value">Flush with skin, lens-coupled</span></div>
+                <div class="spec-row"><span class="spec-label">Pointing</span><span class="spec-value">Vehicle body orientation only</span></div>
+                
+                <h4 style="color:#90e0ef;margin-top:12px">Limitations</h4>
+                <p style="font-size:0.85em;color:#e0e1dd">No beam steering — requires vehicle to point at satellite. Power limited to ~100 mW (fiber damage threshold). Cannot support high-bandwidth downlink.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Sapphire Window Thermal Analysis</h2>
+            <p>The window must survive a 2000°C surface while keeping internal optics at 25°C.</p>
+            
+            <div class="equation">
+                <div class="label">Steady-State Heat Conduction</div>
+                Q = k × A × (T_hot - T_cold) / d
+                <br><br>
+                k = 35 W/m·K (sapphire)
+                <br>
+                A = π × (25 mm)² = 1.96 × 10⁻³ m²
+                <br>
+                T_hot = 2000°C, T_cold = 25°C
+                <br>
+                d = 15 mm = 0.015 m
+                <br><br>
+                Q = 35 × 1.96×10⁻³ × (1975) / 0.015 = <strong>9.0 kW</strong>
+                <br><br>
+                This is enormous. Solutions:
+                <br>1. Transpiration cooling (bleed air through porous window)
+                <br>2. Ablative coating (sacrificial layer, replaces each flight)
+                <br>3. Reduced window size (25 mm → 15 mm, Q drops to 3.2 kW)
+            </div>
+            
+            <h3>Transpiration Cooling Concept</h3>
+            <p style="font-size:0.85em;color:#e0e1dd;margin-bottom:10px">Inject coolant (liquid nitrogen or water) through porous sapphire. Coolant evaporates at surface, creating protective film.</p>
+            <div class="equation">
+                Coolant mass flow: ṁ = Q / h_fg
+                <br>
+                For water: h_fg = 2260 kJ/kg
+                <br>
+                ṁ = 9000 / 2.26×10⁶ = <strong>4 g/s</strong>
+                <br><br>
+                For 300 s flight: 1.2 kg water required.
+                <br>This is feasible for a 1000+ kg vehicle.
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Pointing, Acquisition, Tracking (PAT)</h2>
+            <p>The vehicle terminal must acquire and track satellites while moving at Mach 10.</p>
+            
+            <h3>PAT Sequence</h3>
+            <table>
+                <tr><th>Step</th><th>Action</th><th>Duration</th><th>Accuracy</th></tr>
+                <tr><td>1. Open-loop point</td><td>Use GPS/INS to point at predicted satellite position</td><td>&lt; 1 s</td><td>±1°</td></tr>
+                <tr><td>2. Beacon detect</td><td>Satellite emits 1570 nm beacon. Terminal scans ±2°.</td><td>2-5 s</td><td>—</td></tr>
+                <tr><td>3. Coarse track</td><td>Quad-cell centroid tracking, FSM correction</td><td>Continuous</td><td>±1 mrad</td></tr>
+                <tr><td>4. Fine track</td><td>Coherent detection, phase-locked loop</td><td>Continuous</td><td>±100 μrad</td></tr>
+                <tr><td>5. Handoff</td><td>Next satellite predicted, pre-pointed</td><td>&lt; 100 ms</td><td>—</td></tr>
+            </table>
+
+            <h3>Line-of-Sight Kinematics</h3>
+            <div class="equation">
+                Vehicle velocity: v = 3430 m/s (Mach 10)
+                <br>
+                Satellite angular rate: ω = v / R = 3430 / 300000 = <strong>11.4 mrad/s = 0.65°/s</strong>
+                <br><br>
+                Required track bandwidth: f_3dB &gt; 5 × ω_max / θ_accuracy
+                <br>
+                = 5 × 0.65°/s / 0.006° = <strong>542 Hz</strong>
+                <br><br>
+                FSM must update at &gt; 1 kHz with &lt; 100 μrad resolution.
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Recommended Terminal Spec (Concept A)</h2>
+            <table>
+                <tr><th>Parameter</th><th>Specification</th></tr>
+                <tr><td>Optical aperture</td><td>50 mm sapphire window</td></tr>
+                <tr><td>Transmit power</td><td>500 mW @ 1550 nm (EDFA)</td></tr>
+                <tr><td>Receive sensitivity</td><td>-55 dBm (InGaAs APD)</td></tr>
+                <tr><td>Pointing mechanism</td><td>Fast-steering mirror, ±2°</td></tr>
+                <tr><td>Pointing bandwidth</td><td>1 kHz</td></tr>
+                <tr><td>Pointing accuracy</td><td>±50 μrad (1σ)</td></tr>
+                <tr><td>Beacon wavelength</td><td>1570 nm (dedicated laser)</td></tr>
+                <tr><td>Thermal protection</td><td>Transpiration cooling + ablative</td></tr>
+                <tr><td>Mass</td><td>3.5 kg</td></tr>
+                <tr><td>Power</td><td>35 W (laser + TEC + FSM)</td></tr>
+                <tr><td>Volume</td><td>20 × 15 × 10 cm</td></tr>
+                <tr><td>Operating temperature (external)</td><td>-50°C to +2200°C</td></tr>
+                <tr><td>Operating temperature (internal)</td><td>0°C to +50°C</td></tr>
+                <tr><td>Vibration survival</td><td>100 g RMS, 20-2000 Hz</td></tr>
+            </table>
+        </div>
+
+        <footer>© 2026 Space Photonics Systems — Hypersonic Vehicle Terminal Design</footer>
+    </div>
+</body>
+</html>

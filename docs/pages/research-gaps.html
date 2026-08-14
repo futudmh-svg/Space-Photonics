@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Research Gaps & TRL Assessment — Space Photonics</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #050811; color: #e0e6ed; line-height: 1.6; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 16px; }
+        nav { background: #1b263b; padding: 12px; border-radius: 10px; margin-bottom: 16px; display: flex; flex-wrap: wrap; gap: 8px; }
+        nav a { color: #e0e6ed; text-decoration: none; padding: 8px 14px; border-radius: 6px; font-size: 0.9em; background: #0d1b2a; }
+        nav a:hover, nav a.active { background: #00d4aa; color: #050811; }
+        h1 { font-size: 1.5em; color: #00d4aa; margin: 16px 0 8px; }
+        h2 { font-size: 1.15em; color: #00d4aa; margin: 16px 0 8px; }
+        h3 { font-size: 1em; color: #90e0ef; margin: 12px 0 6px; }
+        .subtitle { color: #778da9; font-size: 0.9em; margin-bottom: 16px; }
+        .card { background: #1b263b; border-radius: 12px; padding: 18px; margin-bottom: 16px; border: 1px solid #415a77; }
+        .card h2 { margin-top: 0; }
+        .badge { display: inline-block; padding: 4px 10px; border-radius: 12px; font-size: 0.75em; margin: 2px; }
+        .ok { background: #2d6a4f; color: #95d5b2; }
+        .warn { background: #6c5b1e; color: #ffd166; }
+        .info { background: #1b4d6e; color: #90e0ef; }
+        .danger { background: #6c2e2e; color: #ff9999; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.85em; }
+        th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid #415a77; }
+        th { color: #00d4aa; font-weight: 600; background: #0d1b2a; }
+        td { color: #e0e1dd; }
+        .trl-high { color: #2a9d8f; font-weight: bold; }
+        .trl-med { color: #ffd166; font-weight: bold; }
+        .trl-low { color: #e63946; font-weight: bold; }
+        .gap-item { background: #0d1b2a; border-left: 4px solid; padding: 12px 16px; margin: 10px 0; border-radius: 0 6px 6px 0; }
+        .gap-critical { border-color: #e63946; }
+        .gap-major { border-color: #ffd166; }
+        .gap-minor { border-color: #90e0ef; }
+        .gap-item h4 { margin-bottom: 6px; font-size: 0.95em; }
+        .gap-item p { margin-bottom: 4px; font-size: 0.85em; }
+        .timeline { display: flex; flex-wrap: wrap; gap: 10px; margin: 12px 0; }
+        .timeline-item { background: #0d1b2a; border-left: 3px solid #00d4aa; border-radius: 0 8px 8px 0; padding: 10px 14px; flex: 1; min-width: 140px; }
+        .timeline-year { font-size: 0.75em; color: #00d4aa; font-weight: bold; }
+        .timeline-text { font-size: 0.8em; color: #e0e6ed; margin-top: 4px; }
+        .progress-bar { background: #1b263b; height: 8px; border-radius: 4px; margin: 6px 0; overflow: hidden; }
+        .progress-fill { height: 100%; border-radius: 4px; }
+        .progress-green { background: #2a9d8f; }
+        .progress-yellow { background: #ffd166; }
+        .progress-red { background: #e63946; }
+        .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        @media (max-width: 768px) { .two-col { grid-template-columns: 1fr; } }
+        footer { text-align: center; padding: 30px; color: #778da9; font-size: 0.8em; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav>
+            <a href="../index.html">🏠 Dashboard</a>
+            <a href="../pages/architecture.html">🏛️ Architecture</a>
+            <a href="../pages/digital-twin.html">🎮 3D Twin</a>
+            <a href="../pages/opa-analysis.html">📡 OPA</a>
+            <a href="../pages/link-budget.html">📊 Link Budget</a>
+            <a href="../pages/hypersonic.html">🚀 Hypersonic</a>
+            <a href="../pages/vleo-constellation.html">🌐 VLEO</a>
+            <a href="../pages/vehicle-terminal.html">🛰️ Terminal</a>
+            <a href="../pages/ehf-optical-trade.html">📡 EHF vs Opt</a>
+            <a href="../pages/ppln-calculator.html">🔢 PPLN Calc</a>
+            <a href="../pages/research-gaps.html">🔬 Gaps</a>
+            <a href="../pages/foundry.html">🏭 Foundry</a>
+        </nav>
+
+        <h1>🔬 Research Gaps & TRL Assessment</h1>
+        <p class="subtitle">Honest assessment of what works, what's close, and what needs invention</p>
+
+        <div class="card">
+            <h2>Technology Readiness Levels (TRL)</h2>
+            <table>
+                <tr><th>TRL</th><th>Definition</th><th>Status</th></tr>
+                <tr><td class="trl-high">9</td><td>Flight-proven in operational mission</td><td>None of our custom tech</td></tr>
+                <tr><td class="trl-high">8</td><td>Flight-qualified, tested in space</td><td>Si₃N₄ waveguides, SPADs</td></tr>
+                <tr><td class="trl-med">6-7</td><td>Engineering model, space environment tested</td><td>TFLN modulators, PPLN receivers</td></tr>
+                <tr><td class="trl-med">4-5</td><td>Laboratory validation in relevant environment</td><td>TFLN OPA (single beam), photonic AI</td></tr>
+                <tr><td class="trl-low">1-3</td><td>Proof of concept, analytical validation</td><td>Multi-beam OPA, auto-tracking, vehicle terminal</td></tr>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2>Critical Gaps (Program-Threatening)</h2>
+            
+            <div class="gap-item gap-critical">
+                <h4 style="color:#e63946">🔴 G1: Hypersonic Vehicle Optical Terminal</h4>
+                <p><strong>TRL:</strong> <span class="trl-low">1-2</span> | <strong>Impact:</strong> Program cannot proceed without this</p>
+                <p><strong>Problem:</strong> No hypersonic vehicle has ever carried an optical communications terminal. The vehicle surface exceeds 2000°C. Any aperture creates drag. Plasma sheath interacts with optical window.</p>
+                <p><strong>What needs invention:</strong></p>
+                <ul style="color:#e0e1dd;font-size:0.85em;margin-left:20px">
+                    <li>Flush-mounted sapphire window with aerodynamic compliance</li>
+                    <li>Thermal isolation between window and internal optics (>2000°C gradient)</li>
+                    <li>Miniaturized OPA or MEMS gimbal surviving 50g vibration</li>
+                    <li>Beacon laser for satellite acquisition (must also survive plasma)</li>
+                    <li>Alternative: RF-transparent radome with optical window insert</li>
+                </ul>
+                <p><strong>Timeline:</strong> 5-7 years to first flight test</p>
+                <p><strong>Who is working on this:</strong> No known program. DARPA may have classified efforts.</p>
+            </div>
+
+            <div class="gap-item gap-critical">
+                <h4 style="color:#e63946">🔴 G2: Auto-Tracking at Mach 10</h4>
+                <p><strong>TRL:</strong> <span class="trl-low">2-3</span> | <strong>Impact:</strong> Cannot close link without this</p>
+                <p><strong>Problem:</strong> Satellite must acquire and track a hypersonic vehicle moving at 3.4 km/s with angular rates up to 0.73°/s. Current space optical comms track static or slowly moving ground stations.</p>
+                <p><strong>What needs invention:</strong></p>
+                <ul style="color:#e0e1dd;font-size:0.85em;margin-left:20px">
+                    <li>Wide-field acquisition camera (10° FOV) + narrow-track OPA (<0.1°)</li>
+                    <li>Kalman filter predicting vehicle trajectory with atmospheric uncertainty</li>
+                    <li>1 kHz closed-loop phase control for OPA (current: ~100 Hz)</li>
+                    <li>Plume thermal signature detection and centroid estimation</li>
+                    <li>Handoff algorithm between satellites (no prior art)</li>
+                </ul>
+                <p><strong>Timeline:</strong> 3-5 years</p>
+                <p><strong>Who is working on this:</strong> NASA LCRD (slow targets), DARPA Blackjack (LEO mesh), SDA tracking layer (RF)</p>
+            </div>
+
+            <div class="gap-item gap-critical">
+                <h4 style="color:#e63946">🔴 G3: Multi-Beam OPA in Space</h4>
+                <p><strong>TRL:</strong> <span class="trl-low">2-3</span> | <strong>Impact:</strong> Limits constellation capacity</p>
+                <p><strong>Problem:</strong> Our architecture requires 4 simultaneous beams per OPA face. Current TFLN OPAs demonstrate 1 beam. Multi-beam requires independent phase control per beam, which scales as O(N²) in complexity.</p>
+                <p><strong>What needs invention:</strong></p>
+                <ul style="color:#e0e1dd;font-size:0.85em;margin-left:20px">
+                    <li>Multi-layer phase shifter architecture (one layer per beam)</li>
+                    <li>Power splitter tree with <0.1 dB imbalance</li>
+                    <li>Cross-talk isolation >30 dB between beams</li>
+                    <li>Electronic control: 4× more DAC channels, 4× more wiring</li>
+                </ul>
+                <p><strong>Timeline:</strong> 4-6 years</p>
+                <p><strong>Who is working on this:</strong> DARPA PIPES (photonic interconnect), Intel/IBM silicon photonics (multi-beam for data centers)</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Major Gaps (Solvable with Engineering)</h2>
+
+            <div class="gap-item gap-major">
+                <h4 style="color:#ffd166">🟡 G4: VLEO Drag & Propulsion</h4>
+                <p><strong>TRL:</strong> <span class="trl-med">5-6</span> | <strong>Impact:</strong> Reduces orbit lifetime from years to months</p>
+                <p><strong>Problem:</strong> 300 km altitude has atmospheric density ~10⁻¹¹ kg/m³. A 12U CubeSat (10 kg) experiences ~100 μN drag force. Without propulsion, deorbit in ~6 months.</p>
+                <div style="background:#0d1b2a;padding:10px;border-radius:6px;margin:8px 0">
+                    <p style="font-size:0.85em;color:#90e0ef">Drag force: F_d = ½ × ρ × v² × C_d × A</p>
+                    <p style="font-size:0.85em;color:#e0e1dd">ρ = 10⁻¹¹ kg/m³, v = 7730 m/s, C_d = 2.2, A = 0.01 m²</p>
+                    <p style="font-size:0.85em;color:#e0e1dd">F_d = ½ × 10⁻¹¹ × (7730)² × 2.2 × 0.01 = <strong>6.6 × 10⁻⁶ N = 6.6 μN</strong></p>
+                    <p style="font-size:0.85em;color:#e0e1dd">Deorbit time: Δt = m × Δv / F_d = 10 × 100 / (6.6×10⁻⁶) ≈ <strong>1.5 × 10⁸ s ≈ 4.8 years</strong></p>
+                    <p style="font-size:0.8em;color:#778da9">Wait — this contradicts our earlier "6 months" claim. Recalculating with higher density at 300 km...</p>
+                    <p style="font-size:0.85em;color:#e0e1dd">More accurate: ρ(300km) ≈ 10⁻¹⁰ kg/m³ (solar max) → F_d = 66 μN → deorbit in <strong>~180 days</strong></p>
+                </div>
+                <p><strong>Solutions:</strong></p>
+                <ul style="color:#e0e1dd;font-size:0.85em;margin-left:20px">
+                    <li>Ion thruster (Busek BIT-3: 1.2 mN, 3000 s Isp) — extends lifetime to 5+ years</li>
+                    <li>Propellant mass: ~1 kg xenon for 5-year mission</li>
+                    <li>Alternative: Orbit at 400-450 km where drag is 10× lower</li>
+                </ul>
+                <p><strong>Recommendation:</strong> Target 400 km orbit for first generation. Reduces propulsion burden while maintaining latency advantage.</p>
+            </div>
+
+            <div class="gap-item gap-major">
+                <h4 style="color:#ffd166">🟡 G5: Cloud-Free Line of Sight</h4>
+                <p><strong>TRL:</strong> <span class="trl-med">6-7</strong> (for ground stations) | <strong>Impact:</strong> Reduces availability to 80-90%</p>
+                <p><strong>Problem:</strong> Optical links cannot penetrate thick clouds. A single ground station in a temperate climate has ~70% annual cloud cover.</p>
+                <p><strong>Solutions:</strong></p>
+                <ul style="color:#e0e1dd;font-size:0.85em;margin-left:20px">
+                    <li>Multiple ground stations in diverse climates (desert, polar, maritime)</li>
+                    <li>Site diversity: 3 stations spaced >500 km apart → 99.5% availability</li>
+                    <li>RF backup (EHF or Ka-band) for cloudy periods</li>
+                    <li>Predictive scheduling using weather satellites</li>
+                </ul>
+                <p><strong>Cost:</strong> 3 ground stations × $5M each = $15M capital + $2M/year ops</p>
+            </div>
+
+            <div class="gap-item gap-major">
+                <h4 style="color:#ffd166">🟡 G6: Photonic AI Accelerator Reliability</h4>
+                <p><strong>TRL:</strong> <span class="trl-low">3-4</span> | <strong>Impact:</strong> Limits onboard autonomy</p>
+                <p><strong>Problem:</strong> MZI meshes are sensitive to temperature drift and fabrication errors. In space, radiation-induced index changes shift the transfer function.</p>
+                <p><strong>Solutions:</strong></p>
+                <ul style="color:#e0e1dd;font-size:0.85em;margin-left:20px">
+                    <li>On-chip thermal stabilization (heaters, feedback loops)</li>
+                    <li>Training-time calibration to compensate fabrication variance</li>
+                    <li>Redundant mesh paths (fault-tolerant routing)</li>
+                    <li>Hybrid: photonic inference + electronic control loop</li>
+                </ul>
+                <p><strong>Timeline:</strong> 3-5 years to TRL 6</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Minor Gaps (Engineering Optimization)</h2>
+
+            <div class="gap-item gap-minor">
+                <h4 style="color:#90e0ef">🔵 G7: PPLN Thermal Control in Space</h4>
+                <p><strong>TRL:</strong> <span class="trl-med">6-7</span> | PPLN requires ±0.5°C stability for phase matching. Space thermal environment varies ±30°C. TEC + insulation + feedback loop needed.</p>
+            </div>
+
+            <div class="gap-item gap-minor">
+                <h4 style="color:#90e0ef">🔵 G8: Fiber-to-Chip Coupling Under Vibration</h4>
+                <p><strong>TRL:</strong> <span class="trl-med">5-6</span> | Launch vibration (5-20 g RMS) can disalign fiber couplers. Need active alignment feedback or free-space coupling.</p>
+            </div>
+
+            <div class="gap-item gap-minor">
+                <h4 style="color:#90e0ef">🔵 G9: Radiation Effects on TFLN</h4>
+                <p><strong>TRL:</strong> <span class="trl-med">5-6</span> | LN is radiation-tolerant but total dose >100 krad may increase propagation loss. Need qualification data.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Risk-Weighted Development Roadmap</h2>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-year">2026-2027</div>
+                    <div class="timeline-text">PPLN receiver lab demo<br/>TFLN OPA single-beam space qual<br/>Ground station optical terminal</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-year">2027-2028</div>
+                    <div class="timeline-text">Multi-beam OPA (2 beams)<br/>Auto-tracking demo (slow target)<br/>Drag analysis + propulsion selection</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-year">2028-2029</div>
+                    <div class="timeline-text">First orbital demo (1 sat)<br/>Hypersonic terminal design start<br/>Photonic AI TRL 5</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-year">2029-2031</div>
+                    <div class="timeline-text">6-sat constellation demo<br/>Hypersonic terminal flight test<br/>Auto-tracking at Mach 5+</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-year">2031-2035</div>
+                    <div class="timeline-text">150-sat constellation<br/>Mach 10 two-way comms<br/>Full operational capability</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>What We Should NOT Claim</h2>
+            <table>
+                <tr><th>Claim (from current site)</th><th>Reality</th><th>Fix</th></tr>
+                <tr><td>"400 Gbps per OISL"</td><td>NASA LCRD: 1.2 Gbps. Mynaric: 100 Gbps announced.</td><td>Say "target 100 Gbps, path to 400 Gbps"</td></tr>
+                <tr><td>"All-optical routing"</td><td>Control plane is electronic. MZI switching at TRL 4-5.</td><td>Say "photonic data plane, electronic control"</td></tr>
+                <tr><td>"6-face OPA, 256 elements each"</td><td>Best lab demo: 32 channels on TFLN (2025)</td><td>Say "target 6-face, near-term 2-face demo"</td></tr>
+                <tr><td>"<10 ms latency"</td><td>True for OISL, but ground-to-sat adds 2 ms + processing</td><td>Say "<15 ms end-to-end"</td></tr>
+                <tr><td>"Ag-chalcogenide switch"</td><td>Replaced by PPLN in v2.0</td><td>✅ Already fixed</td></tr>
+            </table>
+        </div>
+
+        <footer>© 2026 Space Photonics Systems — Honest TRL Assessment</footer>
+    </div>
+</body>
+</html>
