@@ -1,0 +1,23 @@
+# Replit Configuration
+# Click "Import from GitHub" on replit.com and paste:
+# https://github.com/futudmh-svg/Space-Photonics
+
+# To run the digital twin:
+# 1. In the Replit shell: cd space-photonics/twin
+# 2. Click the "Run" button (Replit will use main.py)
+# Or use: python3 -m twin --scenario tracking --duration 5.0
+
+entrypoint = "space-photonics/twin/demo.py"
+modules = ["python-3.11"]
+
+[env]
+PYTHONPATH = "/home/runner/${REPL_SLUG}/space-photonics/twin"
+
+[nix]
+channel = "stable-23_05"
+
+[unitTest]
+language = "python3"
+
+[gitHubImport]
+requiredFiles = [".replit", "replit.nix", "README.md"]
