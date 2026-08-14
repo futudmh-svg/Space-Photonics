@@ -294,7 +294,7 @@
                 <span class="badge ok">Kalman Tracker ✅</span>
                 <span class="badge ok">Atmosphere Model ✅</span>
                 <span class="badge ok">VLEO Thermal ✅</span>
-                <span class="badge warn">Link Budget ⚠️</span>
+                <span class="badge" id="link-budget-badge">Link Budget ⚠️</span>
             </div>
         </div>
 
@@ -442,6 +442,16 @@
             document.getElementById('tx-power-val').textContent = txPower.toFixed(1) + ' W';
             document.getElementById('link-dist-val').textContent = dist + ' km';
             document.getElementById('aperture-val').textContent = (aperture * 100).toFixed(0) + ' cm';
+            
+            // Update link budget badge
+            const badge = document.getElementById('link-budget-badge');
+            if (margin > 0) {
+                badge.className = 'badge ok';
+                badge.textContent = 'Link Budget ✅';
+            } else {
+                badge.className = 'badge warn';
+                badge.textContent = 'Link Budget ⚠️';
+            }
         }
 
         ['tx-power', 'link-dist', 'link-wavelength', 'aperture'].forEach(id => {
