@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Space Photonics Digital Twin</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0e27;
+            color: #e0e6ed;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, #1a1f3d 0%, #0a0e27 100%);
+            border-radius: 16px;
+            margin-bottom: 24px;
+        }
+        h1 { font-size: 1.8em; margin-bottom: 8px; }
+        .subtitle { color: #8892b0; font-size: 0.95em; }
+        .badge {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            margin: 4px;
+            font-weight: 600;
+        }
+        .badge-ok { background: #2d6a4f; color: #95d5b2; }
+        .badge-warn { background: #6c5b1e; color: #ffd166; }
+        .badge-new { background: #1b4d6e; color: #90e0ef; }
+        .card {
+            background: #111936;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            border: 1px solid #1e2a4a;
+        }
+        .card h2 {
+            font-size: 1.2em;
+            margin-bottom: 12px;
+            color: #64ffda;
+        }
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin: 16px 0;
+        }
+        .metric {
+            background: #0a0e27;
+            padding: 16px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .metric-value {
+            font-size: 1.6em;
+            font-weight: bold;
+            color: #64ffda;
+        }
+        .metric-label {
+            font-size: 0.8em;
+            color: #8892b0;
+            margin-top: 4px;
+        }
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 14px 20px;
+            background: #2d6a4f;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 8px 0;
+            text-decoration: none;
+            text-align: center;
+        }
+        .btn:hover { background: #40916c; }
+        .btn-secondary {
+            background: #1b4d6e;
+        }
+        .btn-secondary:hover { background: #2a6f97; }
+        .plot-container {
+            margin: 16px 0;
+            text-align: center;
+        }
+        .plot-container img {
+            max-width: 100%;
+            border-radius: 8px;
+            border: 1px solid #1e2a4a;
+        }
+        .tech-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 12px 0;
+            font-size: 0.9em;
+        }
+        .tech-table th {
+            background: #1e2a4a;
+            padding: 10px;
+            text-align: left;
+        }
+        .tech-table td {
+            padding: 10px;
+            border-bottom: 1px solid #1e2a4a;
+        }
+        .tech-table .status-ok { color: #95d5b2; }
+        .tech-table .status-new { color: #90e0ef; }
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: #8892b0;
+            font-size: 0.85em;
+        }
+        a { color: #64ffda; }
+        .slider-container {
+            margin: 16px 0;
+        }
+        .slider-container label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.9em;
+        }
+        input[type="range"] {
+            width: 100%;
+            -webkit-appearance: none;
+            height: 6px;
+            border-radius: 3px;
+            background: #1e2a4a;
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #64ffda;
+            cursor: pointer;
+        }
+        #opa-canvas {
+            width: 100%;
+            max-width: 600px;
+            height: 300px;
+            background: #0a0e27;
+            border-radius: 8px;
+            margin: 16px auto;
+            display: block;
+        }
+        .code-block {
+            background: #0a0e27;
+            padding: 12px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+            overflow-x: auto;
+            margin: 12px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🛰️ Space Photonics</h1>
+            <p class="subtitle">VLEO Satellite-to-Hypersonic Vehicle Optical Link</p>
+            <div style="margin-top: 12px;">
+                <span class="badge badge-ok">Digital Twin v0.3.0</span>
+                <span class="badge badge-new">BTO Phase Shifters</span>
+                <span class="badge badge-warn">Link Budget Bug</span>
+            </div>
+        </header>
+
+        <!-- Quick Actions -->
+        <div class="card">
+            <h2>⚡ Quick Start</h2>
+            <a href="https://share.streamlit.io/futudmh-svg/space-photonics/main/space-photonics/twin/web_app.py" class="btn">🚀 Launch Streamlit App</a>
+            <a href="https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=futudmh-svg/Space-Photonics" class="btn btn-secondary">💻 Open in GitHub Codespaces</a>
+            <a href="https://github.com/futudmh-svg/Space-Photonics" class="btn btn-secondary">📂 View Source Code</a>
+        </div>
+
+        <!-- Simulation Status -->
+        <div class="card">
+            <h2>📊 Latest Simulation Results</h2>
+            <p style="color: #8892b0; font-size: 0.9em; margin-bottom: 12px;">
+                Run: 2026-08-14 | Scenario: Tracking | Duration: 0.1s
+            </p>
+            <div class="metric-grid">
+                <div class="metric">
+                    <div class="metric-value">-2989</div>
+                    <div class="metric-label">Mean SNR (dB)</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">-3104</div>
+                    <div class="metric-label">RX Power (dBm)</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">0.0002</div>
+                    <div class="metric-label">Pointing Error (°)</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">0.1s</div>
+                    <div class="metric-label">Sim Duration</div>
+                </div>
+            </div>
+            <p style="color: #ffd166; font-size: 0.85em;">
+                ⚠️ SNR values are unrealistically low due to a link budget calculation bug. The physics models (OPA, atmosphere, control loops) are working correctly.
+            </p>
+        </div>
+
+        <!-- OPA Interactive Demo -->
+        <div class="card">
+            <h2>🔭 OPA Far-Field Pattern (Interactive)</h2>
+            <p style="font-size: 0.9em; color: #8892b0; margin-bottom: 12px;">
+                64-element array, 1550 nm. Drag the slider to steer the beam.
+            </p>
+            <div class="slider-container">
+                <label>Steering Angle: <span id="angle-value">15</span>°</label>
+                <input type="range" id="steering-angle" min="-30" max="30" value="15" step="0.5">
+            </div>
+            <canvas id="opa-canvas"></canvas>
+            <p style="font-size: 0.8em; color: #8892b0; text-align: center;">
+                JavaScript simulation — runs entirely in your browser
+            </p>
+        </div>
+
+        <!-- Plots -->
+        <div class="card">
+            <h2>📈 Generated Plots</h2>
+            <div class="plot-container">
+                <p style="font-size: 0.85em; color: #8892b0; margin-bottom: 8px;">OPA Far-Field Pattern (64 elements, steered to 15°)</p>
+                <img src="https://raw.githubusercontent.com/futudmh-svg/Space-Photonics/main/plots/opa_farfield.png" alt="OPA Pattern" onerror="this.style.display='none'">
+            </div>
+            <div class="plot-container">
+                <p style="font-size: 0.85em; color: #8892b0; margin-bottom: 8px;">Atmospheric Seeing vs Elevation</p>
+                <img src="https://raw.githubusercontent.com/futudmh-svg/Space-Photonics/main/plots/atmospheric_seeing.png" alt="Atmospheric Seeing" onerror="this.style.display='none'">
+            </div>
+        </div>
+
+        <!-- Technology Status -->
+        <div class="card">
+            <h2>🔬 Technology Status</h2>
+            <table class="tech-table">
+                <tr>
+                    <th>Component</th>
+                    <th>Status</th>
+                    <th>Notes</th>
+                </tr>
+                <tr>
+                    <td>TFLN OPA Phase Shifters</td>
+                    <td class="status-ok">✅ Mature</td>
+                    <td>Commercial PDKs (CCRAFT, Luxtelligence)</td>
+                </tr>
+                <tr>
+                    <td>BTO Phase Shifters</td>
+                    <td class="status-new">✅ New</td>
+                    <td>30x lower voltage, ps switching, research stage</td>
+                </tr>
+                <tr>
+                    <td>Ag-Chalcogenide Amplifier</td>
+                    <td class="status-ok">✅ Model</td>
+                    <td>Kerr/FWM gain, no commercial foundry</td>
+                </tr>
+                <tr>
+                    <td>Nested Control (PLL + Kalman)</td>
+                    <td class="status-ok">✅ Working</td>
+                    <td>ns optical loop + μs digital loop</td>
+                </tr>
+                <tr>
+                    <td>Atmospheric Channel</td>
+                    <td class="status-ok">✅ Working</td>
+                    <td>Turbulence, scintillation, beam wander</td>
+                </tr>
+                <tr>
+                    <td>VLEO Thermal Model</td>
+                    <td class="status-ok">✅ Working</td>
+                    <td>Atomic oxygen, aerothermal heating</td>
+                </tr>
+                <tr>
+                    <td>Link Budget</td>
+                    <td class="status-warn" style="color: #ffd166;">⚠️ Bug</td>
+                    <td>SNR calculation needs fixing</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Run Locally -->
+        <div class="card">
+            <h2>💻 Run on Your Machine</h2>
+            <div class="code-block">
+git clone https://github.com/futudmh-svg/Space-Photonics.git
+cd Space-Photonics/space-photonics/twin
+pip install -e .
+python3 -m twin --scenario tracking --duration 10.0
+            </div>
+            <p style="font-size: 0.85em; color: #8892b0; margin-top: 8px;">
+                Or open in <a href="https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=futudmh-svg/Space-Photonics">GitHub Codespaces</a> — zero setup required.
+            </p>
+        </div>
+
+        <footer>
+            <p>Space Photonics Digital Twin v0.3.0</p>
+            <p>
+                <a href="https://github.com/futudmh-svg/Space-Photonics">GitHub</a> •
+                <a href="https://github.com/futudmh-svg/Space-Photonics/blob/main/space-photonics/twin/TUTORIAL.md">Tutorial</a> •
+                <a href="https://github.com/futudmh-svg/Space-Photonics/issues">Report Issue</a>
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        // OPA Far-Field Simulation in JavaScript
+        const canvas = document.getElementById('opa-canvas');
+        const ctx = canvas.getContext('2d');
+        const angleSlider = document.getElementById('steering-angle');
+        const angleValue = document.getElementById('angle-value');
+
+        // Set canvas size
+        canvas.width = canvas.offsetWidth * 2;
+        canvas.height = canvas.offsetHeight * 2;
+
+        function computeFarField(steeringAngleDeg, numElements = 64, spacing = 10e-6, wavelength = 1550e-9) {
+            const steeringRad = steeringAngleDeg * Math.PI / 180;
+            const k = 2 * Math.PI / wavelength;
+            const d = spacing;
+            const N = numElements;
+            const angles = [];
+            const intensity = [];
+
+            for (let thetaDeg = -30; thetaDeg <= 30; thetaDeg += 0.1) {
+                const theta = thetaDeg * Math.PI / 180;
+                let real = 0, imag = 0;
+                for (let n = 0; n < N; n++) {
+                    const phase = k * d * n * (Math.sin(theta) - Math.sin(steeringRad));
+                    real += Math.cos(phase);
+                    imag += Math.sin(phase);
+                }
+                const I = (real * real + imag * imag) / (N * N);
+                angles.push(thetaDeg);
+                intensity.push(10 * Math.log10(I + 1e-10));
+            }
+            return { angles, intensity };
+        }
+
+        function drawOPA() {
+            const angle = parseFloat(angleSlider.value);
+            angleValue.textContent = angle.toFixed(1);
+
+            const { angles, intensity } = computeFarField(angle);
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw grid
+            ctx.strokeStyle = '#1e2a4a';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 10; i++) {
+                const y = (canvas.height / 10) * i;
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+
+            // Draw pattern
+            ctx.strokeStyle = '#64ffda';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+
+            const minI = Math.min(...intensity);
+            const maxI = Math.max(...intensity);
+            const range = maxI - minI || 1;
+
+            for (let i = 0; i < angles.length; i++) {
+                const x = (angles[i] + 30) / 60 * canvas.width;
+                const y = canvas.height - ((intensity[i] - minI) / range * canvas.height * 0.8 + canvas.height * 0.1);
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+
+            // Labels
+            ctx.fillStyle = '#8892b0';
+            ctx.font = '24px sans-serif';
+            ctx.fillText('Angle (deg)', canvas.width / 2 - 60, canvas.height - 10);
+            ctx.save();
+            ctx.translate(30, canvas.height / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText('Intensity (dB)', -80, 0);
+            ctx.restore();
+
+            // Angle markers
+            ctx.fillStyle = '#e0e6ed';
+            ctx.font = '20px sans-serif';
+            for (let a = -30; a <= 30; a += 10) {
+                const x = (a + 30) / 60 * canvas.width;
+                ctx.fillText(a.toString(), x - 10, canvas.height - 40);
+            }
+        }
+
+        angleSlider.addEventListener('input', drawOPA);
+        drawOPA();
+    </script>
+</body>
+</html>

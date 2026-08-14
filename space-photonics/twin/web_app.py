@@ -11,7 +11,19 @@ This creates a mobile-friendly web interface where you can:
 """
 
 import sys
-sys.path.insert(0, '/root/.openclaw/workspace/space-photonics/twin')
+import os
+
+# Try multiple paths to find the twin module
+possible_paths = [
+    os.path.join(os.path.dirname(__file__), '.'),  # Same dir as web_app.py
+    '/mount/src/space-photonics/space-photonics/twin',  # Streamlit Cloud
+    '/root/.openclaw/workspace/space-photonics/twin',  # Local dev
+]
+
+for path in possible_paths:
+    if os.path.exists(path):
+        sys.path.insert(0, path)
+        break
 
 import numpy as np
 import matplotlib.pyplot as plt
