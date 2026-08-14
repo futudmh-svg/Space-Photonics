@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Architecture — Space Photonics</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #050811; color: #e0e6ed; line-height: 1.6; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 16px; }
+        nav { background: #1b263b; padding: 12px; border-radius: 10px; margin-bottom: 16px; display: flex; flex-wrap: wrap; gap: 8px; }
+        nav a { color: #e0e6ed; text-decoration: none; padding: 8px 14px; border-radius: 6px; font-size: 0.9em; background: #0d1b2a; }
+        nav a:hover, nav a.active { background: #00d4aa; color: #050811; }
+        h1 { font-size: 1.5em; color: #00d4aa; margin: 16px 0 8px; }
+        .subtitle { color: #778da9; font-size: 0.9em; margin-bottom: 16px; }
+        .card { background: #1b263b; border-radius: 12px; padding: 18px; margin-bottom: 16px; border: 1px solid #415a77; }
+        .card h2 { font-size: 1.15em; color: #00d4aa; margin-bottom: 12px; }
+        
+        /* 3D Pipeline */
+        .pipeline-container { perspective: 1000px; margin: 20px 0; }
+        .pipeline {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            transform-style: preserve-3d;
+        }
+        .stage {
+            background: linear-gradient(135deg, #0d1b2a, #1b263b);
+            border: 2px solid #415a77;
+            border-radius: 12px;
+            padding: 16px;
+            min-width: 140px;
+            text-align: center;
+            position: relative;
+            transition: transform 0.3s;
+        }
+        .stage:hover { transform: translateZ(20px) scale(1.05); border-color: #00d4aa; }
+        .stage-icon { font-size: 2em; margin-bottom: 8px; }
+        .stage-title { font-weight: bold; color: #00d4aa; font-size: 0.9em; }
+        .stage-desc { font-size: 0.75em; color: #778da9; margin-top: 4px; }
+        .arrow { color: #00d4aa; font-size: 1.5em; align-self: center; }
+        
+        /* Signal Flow Animation */
+        .signal-path {
+            stroke-dasharray: 10;
+            animation: dash 1s linear infinite;
+        }
+        @keyframes dash { to { stroke-dashoffset: -20; } }
+        
+        /* Component Grid */
+        .component-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px; margin: 12px 0; }
+        .component-card {
+            background: #0d1b2a;
+            border-radius: 10px;
+            padding: 14px;
+            border: 1px solid #415a77;
+        }
+        .component-card h3 { font-size: 0.95em; color: #e0e1dd; margin-bottom: 8px; }
+        .component-card .param { font-size: 0.8em; color: #778da9; }
+        .component-card .value { font-size: 1.1em; color: #00d4aa; font-weight: bold; }
+        
+        /* Nonlinear Interaction Viz */
+        .nl-viz { width: 100%; height: 200px; background: #0d1b2a; border-radius: 8px; position: relative; overflow: hidden; }
+        .photon { position: absolute; width: 6px; height: 6px; border-radius: 50%; animation: photon-move 2s linear infinite; }
+        @keyframes photon-move {
+            0% { left: 0; opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { left: 100%; opacity: 0; }
+        }
+        
+        /* Matrix Visualization */
+        .matrix-viz { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; max-width: 200px; margin: 12px auto; }
+        .matrix-cell {
+            aspect-ratio: 1;
+            background: #415a77;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7em;
+            color: #e0e6ed;
+            transition: background 0.3s;
+        }
+        .matrix-cell.active { background: #00d4aa; color: #050811; }
+        
+        footer { text-align: center; padding: 30px; color: #778da9; font-size: 0.8em; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav>
+            <a href="../index.html">🏠 Dashboard</a>
+            <a href="opa-analysis.html">🔭 OPA</a>
+            <a href="atmospheric.html">🌫️ Atmosphere</a>
+            <a href="thermal.html">🌡️ Thermal</a>
+            <a href="link-budget.html">📡 Link Budget</a>
+            <a href="hypersonic.html">🚀 Hypersonic</a>
+            <a href="architecture.html" class="active">🏗️ Architecture</a>
+        </nav>
+
+        <h1>🏗️ All-Optical System Architecture</h1>
+        <p class="subtitle">Photonic accelerator with nonlinear pre-processing and electronic co-pilot</p>
+
+        <!-- Signal Flow Pipeline -->
+        <div class="card">
+            <h2>🔄 Signal Processing Pipeline</h2>
+            <div class="pipeline-container">
+                <div class="pipeline">
+                    <div class="stage">
+                        <div class="stage-icon">🔴</div>
+                        <div class="stage-title">Laser Source</div>
+                        <div class="stage-desc">1550 nm CW<br/>10 mW output</div>
+                    </div>
+                    <div class="arrow">→</div>
+                    <div class="stage">
+                        <div class="stage-icon">⚡</div>
+                        <div class="stage-title">EO-Kerr Comb</div>
+                        <div class="stage-desc">Multi-wavelength<br/>100 GHz spacing</div>
+                    </div>
+                    <div class="arrow">→</div>
+                    <div class="stage">
+                        <div class="stage-icon">🌀</div>
+                        <div class="stage-title">Nonlinear XPM</div>
+                        <div class="stage-desc">Kerr interaction<br/>Phase modulation</div>
+                    </div>
+                    <div class="arrow">→</div>
+                    <div class="stage">
+                        <div class="stage-icon">🔲</div>
+                        <div class="stage-title">MZI Mesh</div>
+                        <div class="stage-desc">Matrix multiply<br/>4×4 photonic MAC</div>
+                    </div>
+                    <div class="arrow">→</div>
+                    <div class="stage">
+                        <div class="stage-icon">💍</div>
+                        <div class="stage-title">MRR Weight Bank</div>
+                        <div class="stage-desc">High-Q filtering<br/>Coupling modulation</div>
+                    </div>
+                    <div class="arrow">→</div>
+                    <div class="stage">
+                        <div class="stage-icon">🎯</div>
+                        <div class="stage-title">OPA Output</div>
+                        <div class="stage-desc">Beam steering<br/>Multi-target</div>
+                    </div>
+                    <div class="arrow">→</div>
+                    <div class="stage">
+                        <div class="stage-icon">🧠</div>
+                        <div class="stage-title">E-CoPilot</div>
+                        <div class="stage-desc">Kalman filter<br/>Tracking control</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Component Details -->
+        <div class="card">
+            <h2>⚡ Key Components</h2>
+            <div class="component-grid">
+                <div class="component-card">
+                    <h3>🔴 Laser Source</h3>
+                    <div class="param">Wavelength</div>
+                    <div class="value">1550 nm</div>
+                    <div class="param">Power</div>
+                    <div class="value">10 mW</div>
+                    <div class="param">Linewidth</div>
+                    <div class="value">&lt; 100 kHz</div>
+                </div>
+                <div class="component-card">
+                    <h3>⚡ EO-Kerr Comb</h3>
+                    <div class="param">Comb Spacing</div>
+                    <div class="value">100 GHz</div>
+                    <div class="param">Lines</div>
+                    <div class="value">64</div>
+                    <div class="param">Platform</div>
+                    <div class="value">Si₃N₄</div>
+                </div>
+                <div class="component-card">
+                    <h3>🌀 Nonlinear XPM</h3>
+                    <div class="param">γ (nonlinear coeff)</div>
+                    <div class="value">70 W⁻¹km⁻¹</div>
+                    <div class="param">Phase shift</div>
+                    <div class="value">10⁻⁷ rad/photon</div>
+                    <div class="param">Response</div>
+                    <div class="value">&lt; 1 ps</div>
+                </div>
+                <div class="component-card">
+                    <h3>🔲 MZI Mesh</h3>
+                    <div class="param">Matrix size</div>
+                    <div class="value">4×4</div>
+                    <div class="param">Vπ</div>
+                    <div class="value">4.7 V</div>
+                    <div class="param">Switching</div>
+                    <div class="value">158 ps</div>
+                </div>
+                <div class="component-card">
+                    <h3>💍 MRR Weight Bank</h3>
+                    <div class="param">Q-factor</div>
+                    <div class="value">&gt; 10⁵</div>
+                    <div class="param">Tuning</div>
+                    <div class="value">Thermal/EO</div>
+                    <div class="param">Weights</div>
+                    <div class="value">16-bit</div>
+                </div>
+                <div class="component-card">
+                    <h3>🎯 OPA Array</h3>
+                    <div class="param">Elements</div>
+                    <div class="value">64 × 4 faces</div>
+                    <div class="param">FOV</div>
+                    <div class="value">62° × 11°</div>
+                    <div class="param">Steering</div>
+                    <div class="value">&lt; 1 μs</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Nonlinear Interaction Visualization -->
+        <div class="card">
+            <h2>🌀 Nonlinear Interaction (XPM)</h2>
+            <p style="font-size: 0.85em; color: #778da9; margin-bottom: 12px;">
+                Cross-phase modulation replaces single-photon detection. Signal photons interact via Kerr nonlinearity.
+            </p>
+            <svg viewBox="0 0 600 200" style="width:100%; background:#0d1b2a; border-radius:8px;">
+                <!-- Fiber -->
+                <rect x="50" y="85" width="500" height="30" rx="15" fill="#1b263b" stroke="#415a77" stroke-width="2"/>
+                
+                <!-- Pump photons (red) -->
+                <circle cx="80" cy="100" r="5" fill="#e63946">
+                    <animate attributeName="cx" values="80;520" dur="2s" repeatCount="indefinite"/>
+                </circle>
+                <circle cx="120" cy="100" r="5" fill="#e63946">
+                    <animate attributeName="cx" values="120;560" dur="2s" repeatCount="indefinite"/>
+                </circle>
+                
+                <!-- Probe photons (blue) -->
+                <circle cx="80" cy="100" r="4" fill="#00d4aa" opacity="0.7">
+                    <animate attributeName="cx" values="80;520" dur="2.1s" repeatCount="indefinite"/>
+                    <animate attributeName="cy" values="100;95;100;105;100" dur="0.5s" repeatCount="indefinite"/>
+                </circle>
+                
+                <!-- Phase shift indicator -->
+                <path d="M 250 60 Q 300 30 350 60" fill="none" stroke="#ffd166" stroke-width="2" stroke-dasharray="5,5">
+                    <animate attributeName="stroke-dashoffset" values="0;-20" dur="1s" repeatCount="indefinite"/>
+                </path>
+                <text x="300" y="50" text-anchor="middle" fill="#ffd166" font-size="12">Δφ = 2γP_pL</text>
+                
+                <!-- Labels -->
+                <text x="50" y="170" fill="#778da9" font-size="11">Input</text>
+                <text x="520" y="170" fill="#778da9" font-size="11">Phase-modulated Output</text>
+                <text x="300" y="195" text-anchor="middle" fill="#00d4aa" font-size="12">Photonic Crystal Fiber (PCF) — γ = 70 W⁻¹km⁻¹</text>
+            </svg>
+        </div>
+
+        <!-- Matrix Multiplication -->
+        <div class="card">
+            <h2>🔢 Photonic Matrix Multiplication</h2>
+            <p style="font-size: 0.85em; color: #778da9; margin-bottom: 12px;">
+                MZI mesh performs 4×4 matrix-vector multiplication in the optical domain. Each MZI applies a tunable 2×2 unitary transformation.
+            </p>
+            <div style="display:flex; justify-content:center; gap:20px; align-items:center; flex-wrap:wrap;">
+                <div>
+                    <div style="font-size:0.8em; color:#778da9; text-align:center; margin-bottom:4px;">Input Vector</div>
+                    <div class="matrix-viz" style="grid-template-columns:1fr;">
+                        <div class="matrix-cell active">x₁</div>
+                        <div class="matrix-cell active">x₂</div>
+                        <div class="matrix-cell active">x₃</div>
+                        <div class="matrix-cell active">x₄</div>
+                    </div>
+                </div>
+                <div style="font-size:1.5em; color:#00d4aa;">×</div>
+                <div>
+                    <div style="font-size:0.8em; color:#778da9; text-align:center; margin-bottom:4px;">MZI Mesh</div>
+                    <div class="matrix-viz">
+                        <div class="matrix-cell active">U₁₁</div>
+                        <div class="matrix-cell">U₁₂</div>
+                        <div class="matrix-cell">U₁₃</div>
+                        <div class="matrix-cell">U₁₄</div>
+                        <div class="matrix-cell">U₂₁</div>
+                        <div class="matrix-cell active">U₂₂</div>
+                        <div class="matrix-cell">U₂₃</div>
+                        <div class="matrix-cell">U₂₄</div>
+                        <div class="matrix-cell">U₃₁</div>
+                        <div class="matrix-cell">U₃₂</div>
+                        <div class="matrix-cell active">U₃₃</div>
+                        <div class="matrix-cell">U₃₄</div>
+                        <div class="matrix-cell">U₄₁</div>
+                        <div class="matrix-cell">U₄₂</div>
+                        <div class="matrix-cell">U₄₃</div>
+                        <div class="matrix-cell active">U₄₄</div>
+                    </div>
+                </div>
+                <div style="font-size:1.5em; color:#00d4aa;">=</div>
+                <div>
+                    <div style="font-size:0.8em; color:#778da9; text-align:center; margin-bottom:4px;">Output</div>
+                    <div class="matrix-viz" style="grid-template-columns:1fr;">
+                        <div class="matrix-cell" style="background:#ffd166; color:#050811;">y₁</div>
+                        <div class="matrix-cell" style="background:#ffd166; color:#050811;">y₂</div>
+                        <div class="matrix-cell" style="background:#ffd166; color:#050811;">y₃</div>
+                        <div class="matrix-cell" style="background:#ffd166; color:#050811;">y₄</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- OPA Multi-Beam -->
+        <div class="card">
+            <h2>🎯 Multi-Target OPA</h2>
+            <p style="font-size: 0.85em; color: #778da9; margin-bottom: 12px;">
+                Simultaneous multi-beam generation for tracking multiple hypersonic vehicles. Wavelength-division beam steering.
+            </p>
+            <svg viewBox="0 0 600 250" style="width:100%; background:#0d1b2a; border-radius:8px;">
+                <!-- OPA Array -->
+                <rect x="20" y="100" width="80" height="50" rx="5" fill="#1b263b" stroke="#00d4aa" stroke-width="2"/>
+                <text x="60" y="130" text-anchor="middle" fill="#00d4aa" font-size="12">OPA</text>
+                
+                <!-- Beams -->
+                <line x1="100" y1="110" x2="280" y2="60" stroke="#e63946" stroke-width="3" opacity="0.8">
+                    <animate attributeName="x2" values="280;300;280" dur="2s" repeatCount="indefinite"/>
+                </line>
+                <line x1="100" y1="125" x2="300" y2="125" stroke="#00d4aa" stroke-width="3" opacity="0.8"/>
+                <line x1="100" y1="140" x2="280" y2="190" stroke="#90e0ef" stroke-width="3" opacity="0.8">
+                    <animate attributeName="x2" values="280;260;280" dur="2s" repeatCount="indefinite"/>
+                </line>
+                
+                <!-- Targets -->
+                <circle cx="300" cy="60" r="12" fill="#e63946" opacity="0.8">
+                    <animate attributeName="cy" values="60;50;60" dur="3s" repeatCount="indefinite"/>
+                </circle>
+                <text x="300" y="55" text-anchor="middle" fill="#050811" font-size="10">🚀</text>
+                
+                <circle cx="320" cy="125" r="12" fill="#00d4aa" opacity="0.8"/>
+                <text x="320" y="129" text-anchor="middle" fill="#050811" font-size="10">🚀</text>
+                
+                <circle cx="300" cy="190" r="12" fill="#90e0ef" opacity="0.8">
+                    <animate attributeName="cy" values="190;200;190" dur="2.5s" repeatCount="indefinite"/>
+                </circle>
+                <text x="300" y="194" text-anchor="middle" fill="#050811" font-size="10">🚀</text>
+                
+                <!-- Wavelength labels -->
+                <text x="180" y="80" fill="#e63946" font-size="10">λ₁ = 1530 nm</text>
+                <text x="180" y="120" fill="#00d4aa" font-size="10">λ₂ = 1580 nm</text>
+                <text x="180" y="170" fill="#90e0ef" font-size="10">λ₃ = 1630 nm</text>
+                
+                <!-- Stats -->
+                <text x="450" y="80" fill="#778da9" font-size="11">Speed: Mach 10</text>
+                <text x="450" y="100" fill="#778da9" font-size="11">Altitude: 30 km</text>
+                <text x="450" y="120" fill="#778da9" font-size="11">Data Rate: 320 Gbps</text>
+                <text x="450" y="140" fill="#778da9" font-size="11">BER: &lt; 1.1×10⁻³</text>
+                
+                <!-- Title -->
+                <text x="300" y="240" text-anchor="middle" fill="#00d4aa" font-size="14">Simultaneous Multi-Target Tracking</text>
+            </svg>
+        </div>
+
+        <!-- Electronic Co-Pilot -->
+        <div class="card">
+            <h2>🧠 Electronic Co-Pilot</h2>
+            <p style="font-size: 0.85em; color: #778da9; margin-bottom: 12px;">
+                Digital signal processing layer for tracking control, error correction, and system optimization.
+            </p>
+            <div class="component-grid">
+                <div class="component-card">
+                    <h3>🔍 Optical PLL</h3>
+                    <div class="param">Lock time</div>
+                    <div class="value">&lt; 10 ns</div>
+                    <div class="param">Bandwidth</div>
+                    <div class="value">100 MHz</div>
+                </div>
+                <div class="component-card">
+                    <h3>📡 Kalman Filter</h3>
+                    <div class="param">Update rate</div>
+                    <div class="value">1 MHz</div>
+                    <div class="param">Accuracy</div>
+                    <div class="value">&lt; 1 μrad</div>
+                </div>
+                <div class="component-card">
+                    <h3>🎯 Tracking Loop</h3>
+                    <div class="param">Latency</div>
+                    <div class="value">&lt; 1 μs</div>
+                    <div class="param">Handoff time</div>
+                    <div class="value">&lt; 10 μs</div>
+                </div>
+                <div class="component-card">
+                    <h3>🔧 DSP</h3>
+                    <div class="param">MIMO-FFE</div>
+                    <div class="value">16-tap</div>
+                    <div class="param">MLSD</div>
+                    <div class="value">Viterbi</div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>Space Photonics — All-Optical System Architecture</p>
+            <p>Nonlinear XPM → MZI Mesh → MRR Bank → OPA → E-CoPilot</p>
+        </footer>
+    </div>
+</body>
+</html>
