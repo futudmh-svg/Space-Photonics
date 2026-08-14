@@ -30,6 +30,10 @@ from .bto_phase_shifter import (
     BTOPhaseShifter, BTOPhaseShifterConfig,
     BTOOPA, BTOOPAConfig
 )
+from .multiface_opa import (
+    MultiFaceOPA, MultiFaceOPAConfig,
+    FaceConfig
+)
 from .config_manager import (
     load_config, save_config, get_default_config,
     get_high_performance_config, get_fast_config,
