@@ -208,25 +208,93 @@
         const panelTop = addComponent(panelGeo, panelMat, [0, 0.82, 0], 'Solar Panel (+Y)', 'Triple-junction GaAs, 45 W peak', 'electrical');
         const panelBot = addComponent(panelGeo, panelMat, [0, -0.82, 0], 'Solar Panel (-Y)', 'Triple-junction GaAs, 45 W peak', 'electrical');
 
-        // PPLN Receiver Module (nadir face, -Z)
-        const pplnGeo = new THREE.BoxGeometry(0.6, 0.4, 0.15);
-        const pplnMat = new THREE.MeshPhongMaterial({ color: 0xcc9966, emissive: 0x332200 });
-        const ppln = addComponent(pplnGeo, pplnMat, [0, 0, 1.4], 'PPLN Receiver', 'Periodically-Poled LiNbO₃, 1550→777 nm conversion, sensitivity -60 dBm', 'optical');
+        // PPLN Receiver Module (nadir face, -Z) — with waveguide detail
+        const pplnGroup = new THREE.Group();
+        pplnGroup.position.set(0, 0, 1.4);
+        busGroup.add(pplnGroup);
+
+        // Main PPLN body
+        const pplnBodyGeo = new THREE.BoxGeometry(0.6, 0.4, 0.15);
+        const pplnBodyMat = new THREE.MeshPhongMaterial({ color: 0xcc9966, emissive: 0x332200 });
+        const pplnBody = new THREE.Mesh(pplnBodyGeo, pplnBodyMat);
+        pplnBody.userData = { name: 'PPLN Receiver', description: 'Periodically-Poled LiNbO₃, 1550→777 nm conversion, sensitivity -60 dBm', layer: 'optical' };
+        pplnGroup.add(pplnBody);
+        components.push(pplnBody);
+
+        // Periodic poling stripes
+        const stripeGeo = new THREE.BoxGeometry(0.02, 0.35, 0.005);
+        const stripeMat = new THREE.MeshBasicMaterial({ color: 0x00d4aa });
+        for (let i = -12; i <= 12; i++) {
+            const stripe = new THREE.Mesh(stripeGeo, stripeMat);
+            stripe.position.set(i * 0.045, 0, 0.08);
+            stripe.userData = { layer: 'optical' };
+            pplnGroup.add(stripe);
+        }
+
+        // QPM label
+        const qpmLabel = document.createElement('div');
+        qpmLabel.style.cssText = 'position:absolute;color:#00d4aa;font-size:10px;font-family:monospace;';
+        // (labels added via tooltip instead)
 
         // Receive aperture (on PPLN face)
         const apertureGeo = new THREE.CylinderGeometry(0.25, 0.25, 0.05, 16);
         apertureGeo.rotateX(Math.PI / 2);
         const apertureMat = new THREE.MeshPhysicalMaterial({ color: 0x88ccff, metalness: 0.9, roughness: 0.1, transparent: true, opacity: 0.6 });
-        addComponent(apertureGeo, apertureMat, [0, 0, 1.55], 'Receive Aperture', '5 cm OPA, 1550 nm, ±15° steering', 'optical');
+        const aperture = new THREE.Mesh(apertureGeo, apertureMat);
+        aperture.position.set(0, 0, 1.55);
+        aperture.userData = { name: 'Receive Aperture', description: '5 cm OPA, 1550 nm, ±15° steering', layer: 'optical' };
+        busGroup.add(aperture);
+        components.push(aperture);
 
         // TFLN OPA Faces (4 lateral faces: +X, -X, +Z, -Z for transmit)
-        const opaGeo = new THREE.BoxGeometry(0.5, 0.35, 0.1);
-        const opaMat = new THREE.MeshPhongMaterial({ color: 0x00d4aa, emissive: 0x004433, emissiveIntensity: 0.3 });
+        // Create detailed OPA arrays with individual phase shifters
+        function createOPAFace(position, rotation, name, label) {
+            const group = new THREE.Group();
+            group.position.set(...position);
+            if (rotation) group.rotation.set(...rotation);
 
-        // Transmit OPAs on +X, -X, +Z
-        addComponent(opaGeo.clone(), opaMat.clone(), [1.0, 0.2, 0], 'OPA Starboard', 'TFLN 64-element, 1550 nm TX, ±15°', 'optical');
-        addComponent(opaGeo.clone(), opaMat.clone(), [-1.0, 0.2, 0], 'OPA Port', 'TFLN 64-element, 1550 nm TX, ±15°', 'optical');
-        addComponent(opaGeo.clone(), opaMat.clone(), [0, 0.2, -1.0], 'OPA Zenith', 'TFLN 64-element, 1550 nm TX, ±15°', 'optical');
+            // OPA substrate
+            const substrateGeo = new THREE.BoxGeometry(0.5, 0.35, 0.08);
+            const substrateMat = new THREE.MeshPhongMaterial({ color: 0x00d4aa, emissive: 0x004433, emissiveIntensity: 0.3 });
+            const substrate = new THREE.Mesh(substrateGeo, substrateMat);
+            substrate.userData = { name, description: `TFLN 64-element, 1550 nm TX, ±15° steering`, layer: 'optical' };
+            group.add(substrate);
+            components.push(substrate);
+
+            // Individual phase shifter elements (8x8 grid)
+            const elemGeo = new THREE.BoxGeometry(0.045, 0.03, 0.02);
+            const elemMat = new THREE.MeshBasicMaterial({ color: 0x00ffaa });
+            const elemActiveMat = new THREE.MeshBasicMaterial({ color: 0xffd166 });
+
+            for (let row = 0; row < 8; row++) {
+                for (let col = 0; col < 8; col++) {
+                    const elem = new THREE.Mesh(elemGeo, elemMat.clone());
+                    elem.position.set(
+                        (col - 3.5) * 0.055,
+                        (row - 3.5) * 0.04,
+                        0.05
+                    );
+                    elem.userData = { name: `${name} Element [${row},${col}]`, description: `Phase shifter, thermo-optic tuning`, layer: 'optical' };
+                    group.add(elem);
+                    components.push(elem);
+                }
+            }
+
+            // Fiber output
+            const fiberGeo = new THREE.CylinderGeometry(0.02, 0.02, 0.3, 8);
+            const fiberMat = new THREE.MeshPhongMaterial({ color: 0x4488ff, emissive: 0x112244 });
+            const fiber = new THREE.Mesh(fiberGeo, fiberMat);
+            fiber.position.set(0, 0, -0.2);
+            fiber.rotation.x = Math.PI / 2;
+            group.add(fiber);
+
+            busGroup.add(group);
+            return group;
+        }
+
+        const opaStarboard = createOPAFace([1.0, 0.2, 0], [0, Math.PI/2, 0], 'OPA Starboard', '+X');
+        const opaPort = createOPAFace([-1.0, 0.2, 0], [0, -Math.PI/2, 0], 'OPA Port', '-X');
+        const opaZenith = createOPAFace([0, 0.2, -1.0], [0, 0, 0], 'OPA Zenith', '-Z');
 
         // EDFA Laser (center)
         const laserGeo = new THREE.CylinderGeometry(0.1, 0.1, 0.4, 12);

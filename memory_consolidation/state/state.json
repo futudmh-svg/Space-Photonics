@@ -13,10 +13,10 @@
     "last_invoke": 1
   },
   "stm": {
-    "count": 5,
-    "last_ts": "2026-08-15T16:57:43.079311",
-    "last_sessions": 14,
-    "last_messages": 293,
-    "last_chars": 9482
+    "count": 6,
+    "last_ts": "2026-08-15T18:39:21.257472",
+    "last_sessions": 16,
+    "last_messages": 320,
+    "last_chars": 10774
   }
 }
