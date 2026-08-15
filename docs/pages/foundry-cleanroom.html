@@ -3,142 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🏭 Foundry Clean Room 3D — Space Photonics</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Roboto, -apple-system, BlinkMacSystemFont, sans-serif; background: #050811; color: #e0e6ed; overflow: hidden; width: 100vw; height: 100vh; }
-        #canvas-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
-
-        nav { position: fixed; top: 8px; left: 8px; right: 8px; z-index: 200; background: rgba(5,8,17,0.92); backdrop-filter: blur(12px); border: 1px solid rgba(65,90,119,0.5); border-radius: 10px; padding: 6px; display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; }
-        nav a { color: #90e0ef; text-decoration: none; padding: 5px 10px; border-radius: 6px; font-size: 0.78em; background: rgba(13,27,42,0.7); transition: all 0.2s; border: 1px solid transparent; }
-        nav a:hover, nav a.active { background: #00d4aa; color: #050811; border-color: #00d4aa; }
-
-        .hud { position: fixed; z-index: 100; background: rgba(5,8,17,0.88); backdrop-filter: blur(10px); border: 1px solid rgba(65,90,119,0.5); border-radius: 10px; padding: 10px; font-size: 0.72em; }
-        .hud h3 { color: #00d4aa; font-size: 0.95em; margin-bottom: 6px; border-bottom: 1px solid rgba(65,90,119,0.5); padding-bottom: 4px; }
-        .hud h4 { color: #90e0ef; font-size: 0.85em; margin: 8px 0 4px; }
-        .hud-row { display: flex; justify-content: space-between; padding: 2.5px 0; border-bottom: 1px solid rgba(65,90,119,0.15); }
-        .hud-label { color: #90e0ef; font-weight: 500; }
-        .hud-value { color: #ffd166; font-family: monospace; font-size: 0.95em; }
-        .hud-value.ok { color: #2a9d8f; }
-        .hud-value.warn { color: #ffd166; }
-        .hud-value.danger { color: #e63946; }
-
-        .hud-left { top: 65px; left: 8px; width: 240px; max-height: calc(100vh - 180px); overflow-y: auto; }
-        .hud-right { top: 65px; right: 8px; width: 240px; max-height: calc(100vh - 180px); overflow-y: auto; }
-        .hud-bottom { bottom: 60px; left: 8px; right: 8px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
-
-        .zone-card { background: rgba(13,27,42,0.7); border-radius: 8px; padding: 8px 12px; border: 1px solid rgba(65,90,119,0.3); min-width: 120px; }
-        .zone-card h5 { color: #00d4aa; font-size: 0.8em; margin-bottom: 4px; }
-        .zone-status { font-size: 0.75em; }
-        .zone-status.ok { color: #2a9d8f; }
-        .zone-status.warn { color: #ffd166; }
-        .zone-status.run { color: #00d4aa; }
-
-        .legend { position: fixed; bottom: 10px; right: 8px; z-index: 100; background: rgba(5,8,17,0.88); border: 1px solid rgba(65,90,119,0.5); border-radius: 8px; padding: 8px; font-size: 0.7em; }
-        .legend-item { display: flex; align-items: center; gap: 6px; margin: 2px 0; }
-        .legend-color { width: 12px; height: 12px; border-radius: 3px; }
-
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-thumb { background: #415a77; border-radius: 2px; }
-    
-        /* ─── Responsive & Mobile ─── */
-        @media (max-width: 900px) {
-            nav { flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start; padding: 4px; gap: 2px; }
-            nav a { font-size: 0.65em; padding: 4px 6px; flex-shrink: 0; }
-            .hud-left, .hud-right { width: 180px; font-size: 0.65em; max-height: calc(100vh - 220px); }
-            .hud-left { left: 4px; top: 55px; }
-            .hud-right { right: 4px; top: 55px; }
-            .scenario-controls { top: 55px; }
-            .scenario-btn { padding: 5px 8px; font-size: 0.7em; }
-            .time-controls { padding: 6px 8px; gap: 4px; }
-            .minimap-container { display: none; }
-            .cam-indicator { display: none; }
-            .camera-feed { width: 240px; height: 150px; }
-            #cam-canvas { height: 80px !important; }
-        }
-        @media (max-width: 600px) {
-            .hud-left, .hud-right { width: 150px; font-size: 0.6em; padding: 6px; }
-            .hud-bottom-left, .hud-bottom-right { display: none; }
-            .camera-feed { width: 200px; height: 120px; right: 4px; left: auto; transform: none; bottom: 50px; }
-            .time-controls { left: 4px; transform: none; }
-        }
-        
-        /* Collapsible HUD */
-        .hud-toggle {
-            position: fixed; top: 55px; z-index: 150;
-            background: rgba(5,8,17,0.9); border: 1px solid #00d4aa;
-            color: #00d4aa; padding: 4px 8px; border-radius: 4px;
-            cursor: pointer; font-size: 0.7em; display: none;
-        }
-        @media (max-width: 900px) {
-            .hud-toggle { display: block; }
-            .hud-left.collapsed, .hud-right.collapsed { display: none; }
-        }
-        #toggle-left { left: 4px; }
-        #toggle-right { right: 4px; }
-        
-        /* Fullscreen mode */
-        body.fullscreen nav,
-        body.fullscreen .hud-left,
-        body.fullscreen .hud-right,
-        body.fullscreen .scenario-controls,
-        body.fullscreen .time-controls,
-        body.fullscreen .hud-bottom-left,
-        body.fullscreen .hud-bottom-right,
-        body.fullscreen .camera-feed,
-        body.fullscreen .minimap-container,
-        body.fullscreen .cam-indicator,
-        body.fullscreen .hud-toggle {
-            display: none !important;
-        }
-        #fs-toggle {
-            position: fixed; top: 55px; right: 50%; transform: translateX(50%);
-            z-index: 150; background: rgba(5,8,17,0.9); border: 1px solid #00d4aa;
-            color: #00d4aa; padding: 4px 10px; border-radius: 4px;
-            cursor: pointer; font-size: 0.7em;
-        }
-        body.fullscreen #fs-toggle { display: block !important; top: 8px; right: 8px; transform: none; }
-
-    
-        /* ─── Hamburger Navigation ─── */
-        .nav-hamburger {
-            display: none;
-            position: fixed; top: 8px; left: 8px; z-index: 300;
-            background: rgba(5,8,17,0.92); border: 1px solid #00d4aa;
-            color: #00d4aa; padding: 8px 12px; border-radius: 8px;
-            cursor: pointer; font-size: 1.2em;
-        }
-        .nav-overlay {
-            display: none; position: fixed; inset: 0; z-index: 250;
-            background: rgba(5,8,17,0.95); backdrop-filter: blur(12px);
-            flex-direction: column; align-items: center; justify-content: center;
-            gap: 8px; padding: 20px;
-        }
-        .nav-overlay.active { display: flex; }
-        .nav-overlay a {
-            color: #90e0ef; text-decoration: none; padding: 10px 20px;
-            font-size: 1.1em; border-radius: 8px;
-            background: rgba(13,27,42,0.7); border: 1px solid rgba(65,90,119,0.3);
-            width: 200px; text-align: center;
-        }
-        .nav-overlay a:hover { background: #00d4aa; color: #050811; }
-        .nav-close {
-            position: absolute; top: 8px; right: 8px;
-            color: #e63946; font-size: 1.5em; cursor: pointer;
-            background: none; border: none; padding: 8px;
-        }
-        @media (max-width: 768px) {
-            nav { display: none; }
-            .nav-hamburger { display: block; }
-        }
-
-        .hud-left, .hud-right {
-            transition: transform 0.3s ease, opacity 0.3s ease;
-        }
-        .hud-left.collapsed { transform: translateX(-120%); opacity: 0; }
-        .hud-right.collapsed { transform: translateX(120%); opacity: 0; }
-
-    </style>
+    <title>Foundry Clean Room 3D — Space Photonics</title>
     <script type="importmap">
     {
         "imports": {
@@ -147,350 +12,460 @@
         }
     }
     </script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #050811; color: #e0e6ed; line-height: 1.6; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 16px; }
+        nav { background: #1b263b; padding: 12px; border-radius: 10px; margin-bottom: 16px; display: flex; flex-wrap: wrap; gap: 8px; }
+        nav a { color: #e0e6ed; text-decoration: none; padding: 8px 14px; border-radius: 6px; font-size: 0.9em; background: #0d1b2a; }
+        nav a:hover, nav a.active { background: #00d4aa; color: #050811; }
+        h1 { font-size: 1.5em; color: #00d4aa; margin: 16px 0 8px; }
+        .subtitle { color: #778da9; font-size: 0.9em; margin-bottom: 16px; }
+        .card { background: #1b263b; border-radius: 12px; padding: 18px; margin-bottom: 16px; border: 1px solid #415a77; }
+        .card h2 { font-size: 1.15em; color: #00d4aa; margin-bottom: 12px; }
+        canvas { width: 100%; background: #0d1b2a; border-radius: 8px; margin: 12px 0; }
+        .controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin: 12px 0; }
+        .control-group label { display: block; font-size: 0.85em; color: #778da9; margin-bottom: 4px; }
+        input[type="range"], select { width: 100%; padding: 8px; background: #0d1b2a; border: 1px solid #415a77; border-radius: 6px; color: #e0e6ed; }
+        input[type="range"] { -webkit-appearance: none; height: 6px; padding: 0; }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: #00d4aa; cursor: pointer; }
+        .btn { padding: 10px 20px; background: #2d6a4f; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9em; margin: 4px; }
+        .btn:hover { background: #40916c; }
+        .btn-danger { background: #6c2e2e; }
+        .btn-danger:hover { background: #9e3a3a; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 12px 0; }
+        .stat-box { background: #0d1b2a; padding: 14px; border-radius: 8px; text-align: center; }
+        .stat-value { font-size: 1.5em; font-weight: bold; color: #00d4aa; }
+        .stat-label { font-size: 0.8em; color: #778da9; }
+        footer { text-align: center; padding: 30px; color: #778da9; font-size: 0.8em; }
+        .zone-legend { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+        .zone-item { display: flex; align-items: center; gap: 6px; font-size: 0.85em; }
+        .zone-color { width: 16px; height: 16px; border-radius: 4px; }
+    </style>
 </head>
 <body>
-    <div id="canvas-container"></div>
+    <div class="container">
+        <nav>
+            <a href="../index.html">🏠 Dashboard</a>
+            <a href="../pages/architecture.html">🏛️ Architecture</a>
+            <a href="../pages/digital-twin.html">🎮 3D Twin</a>
+            <a href="../pages/opa-analysis.html">📡 OPA</a>
+            <a href="../pages/link-budget.html">📊 Link Budget</a>
+            <a href="../pages/hypersonic.html">🚀 Hypersonic</a>
+            <a href="../pages/vleo-constellation.html">🌐 VLEO</a>
+            <a href="../pages/mapper-3d.html">🗺️ Mapper</a>
+            <a href="../pages/satellite-digital-twin.html">🛰️ Sat Twin</a>
+            <a href="../pages/interception-mission.html">🎯 Intercept</a>
+            <a href="../pages/vehicle-terminal.html">🛰️ Terminal</a>
+            <a href="../pages/ehf-optical-trade.html">📡 EHF vs Opt</a>
+            <a href="../pages/ppln-calculator.html">🔢 PPLN</a>
+            <a href="../pages/research-gaps.html">🔬 Gaps</a>
+            <a href="../pages/foundry.html">🏭 Foundry</a>
+            <a href="../pages/foundry-cleanroom.html">🏭 Clean Room</a>
+        </nav>
 
-    <nav>
-        <a href="../index.html">🏠 Dashboard</a>
-        <a href="architecture.html">🏛️ Architecture</a>
-        <a href="digital-twin.html">🎮 3D Twin</a>
-        <a href="opa-analysis.html">📡 OPA</a>
-        <a href="link-budget.html">📊 Link Budget</a>
-        <a href="hypersonic.html">🚀 Hypersonic</a>
-        <a href="vleo-constellation.html">🌐 VLEO</a>
-        <a href="mapper-3d.html">🗺️ Mapper</a>
-        <a href="satellite-digital-twin.html">🛰️ Sat Twin</a>
-        <a href="interception-mission.html">🎯 Intercept</a>
-        <a href="vehicle-terminal.html">🛰️ Terminal</a>
-        <a href="ehf-optical-trade.html">📡 EHF vs Opt</a>
-        <a href="ppln-calculator.html">🔢 PPLN</a>
-        <a href="research-gaps.html">🔬 Gaps</a>
-        <a href="foundry.html">🏭 Foundry</a>
-        <a href="foundry-cleanroom.html" class="active">🏭 Clean Room</a>
-    </nav>
+        <h1>🏭 Foundry Clean Room 3D</h1>
+        <p class="subtitle">Real-time digital twin of the photonic foundry clean room</p>
 
-    <!-- Environment HUD -->
-    <div class="hud hud-left">
-        <h3>🏭 Clean Room Environment</h3>
-        <div class="hud-row"><span class="hud-label">Class</span><span class="hud-value ok">ISO 3 / Class 1</span></div>
-        <div class="hud-row"><span class="hud-label">Temperature</span><span class="hud-value ok">20.0 ± 0.1°C</span></div>
-        <div class="hud-row"><span class="hud-label">Humidity</span><span class="hud-value ok">45.0 ± 2% RH</span></div>
-        <div class="hud-row"><span class="hud-label">Pressure</span><span class="hud-value">+25 Pa</span></div>
-        <div class="hud-row"><span class="hud-label">Air Changes</span><span class="hud-value">600 / hr</span></div>
-        <div class="hud-row"><span class="hud-label">Particles/m³</span><span class="hud-value ok">&lt; 35 (≥0.5μm)</span></div>
-        <div class="hud-row"><span class="hud-label">Vibration</span><span class="hud-value ok">&lt; 0.25 μm/s</span></div>
-        <div class="hud-row"><span class="hud-label">Lighting</span><span class="hud-value">500 lux</span></div>
-
-        <h4>🔄 Active Process</h4>
-        <div class="hud-row"><span class="hud-label">Wafer ID</span><span class="hud-value">W-TFLN-2847</span></div>
-        <div class="hud-row"><span class="hud-label">Process</span><span class="hud-value">E-Beam Litho</span></div>
-        <div class="hud-row"><span class="hud-label">Step</span><span class="hud-value">12 / 47</span></div>
-        <div class="hud-row"><span class="hud-label">Recipe</span><span class="hud-value">OPA_V3.2</span></div>
-        <div class="hud-row"><span class="hud-label">Progress</span><span class="hud-value">25.5%</span></div>
-        <div class="hud-row"><span class="hud-label">ETA</span><span class="hud-value">4h 23m</span></div>
-
-        <h4>📊 Yield Tracking</h4>
-        <div class="hud-row"><span class="hud-label">TFLN OPA</span><span class="hud-value ok">94.2%</span></div>
-        <div class="hud-row"><span class="hud-label">Si₃N₄ Mesh</span><span class="hud-value ok">96.8%</span></div>
-        <div class="hud-row"><span class="hud-label">PPLN Receiver</span><span class="hud-value warn">87.3%</span></div>
-        <div class="hud-row"><span class="hud-label">Hybrid Stack</span><span class="hud-value warn">72.1%</span></div>
-    </div>
-
-    <!-- Equipment HUD -->
-    <div class="hud hud-right">
-        <h3>🔧 Equipment Status</h3>
-        <div class="hud-row"><span class="hud-label">E-Beam Writer</span><span class="hud-value ok">RUNNING</span></div>
-        <div class="hud-row"><span class="hud-label">DUV Stepper</span><span class="hud-value ok">IDLE</span></div>
-        <div class="hud-row"><span class="hud-label">ICP Etcher</span><span class="hud-value warn">MAINT</span></div>
-        <div class="hud-row"><span class="hud-label">PE-CVD</span><span class="hud-value ok">RUNNING</span></div>
-        <div class="hud-row"><span class="hud-label">ALD Chamber</span><span class="hud-value ok">RUNNING</span></div>
-        <div class="hud-row"><span class="hud-label">Wafer Bonder</span><span class="hud-value ok">IDLE</span></div>
-        <div class="hud-row"><span class="hud-label">Dicing Saw</span><span class="hud-value ok">IDLE</span></div>
-        <div class="hud-row"><span class="hud-label">Prober</span><span class="hud-value ok">RUNNING</span></div>
-        <div class="hud-row"><span class="hud-label">Wire Bonder</span><span class="hud-value ok">IDLE</span></div>
-
-        <h4>⚡ Utilities</h4>
-        <div class="hud-row"><span class="hud-label">Power</span><span class="hud-value">2.4 MW</span></div>
-        <div class="hud-row"><span class="hud-label">UPW</span><span class="hud-value ok">18.2 MΩ·cm</span></div>
-        <div class="hud-row"><span class="hud-label">N₂</span><span class="hud-value ok">99.9999%</span></div>
-        <div class="hud-row"><span class="hud-label">Ar</span><span class="hud-value ok">99.999%</span></div>
-        <div class="hud-row"><span class="hud-label">Vacuum</span><span class="hud-value ok">&lt; 1×10⁻⁶ Torr</span></div>
-    </div>
-
-    <!-- Zone Status Bar -->
-    <div class="hud hud-bottom">
-        <div class="zone-card">
-            <h5>🟦 Lithography</h5>
-            <div class="zone-status run">● Running — E-Beam</div>
+        <div class="card">
+            <h2>3D Clean Room Visualization</h2>
+            <div id="cleanroom3d-container" style="width:100%;height:500px;position:relative;background:#0d1b2a;border-radius:8px;overflow:hidden;">
+                <canvas id="cleanroom3d" style="width:100%;height:100%;display:block;"></canvas>
+                <div style="position:absolute;top:10px;left:10px;background:rgba(5,8,17,0.85);border:1px solid #415a77;border-radius:8px;padding:10px;font-size:0.7em;max-width:220px;">
+                    <div style="color:#00d4aa;font-weight:600;margin-bottom:4px">🏭 Clean Room Status</div>
+                    <div style="display:flex;justify-content:space-between;margin:2px 0"><span style="color:#90e0ef">Class:</span><span id="cr-class" style="color:#ffd166;font-family:monospace">ISO 5</span></div>
+                    <div style="display:flex;justify-content:space-between;margin:2px 0"><span style="color:#90e0ef">Temp:</span><span id="cr-temp" style="color:#ffd166;font-family:monospace">20.0°C</span></div>
+                    <div style="display:flex;justify-content:space-between;margin:2px 0"><span style="color:#90e0ef">Humidity:</span><span id="cr-hum" style="color:#ffd166;font-family:monospace">45%</span></div>
+                    <div style="display:flex;justify-content:space-between;margin:2px 0"><span style="color:#90e0ef">Wafers:</span><span id="cr-wafers" style="color:#ffd166;font-family:monospace">24</span></div>
+                    <div style="display:flex;justify-content:space-between;margin:2px 0"><span style="color:#90e0ef">Yield:</span><span id="cr-yield" style="color:#ffd166;font-family:monospace">94%</span></div>
+                </div>
+            </div>
+            <div class="zone-legend">
+                <div class="zone-item"><div class="zone-color" style="background:#00d4aa"></div><span>Lithography</span></div>
+                <div class="zone-item"><div class="zone-color" style="background:#90e0ef"></div><span>Etch</span></div>
+                <div class="zone-item"><div class="zone-color" style="background:#ffd166"></div><span>Deposition</span></div>
+                <div class="zone-item"><div class="zone-color" style="background:#e63946"></div><span>Bonding</span></div>
+                <div class="zone-item"><div class="zone-color" style="background:#2a9d8f"></div><span>Test</span></div>
+                <div class="zone-item"><div class="zone-color" style="background:#778da9"></div><span>Storage</span></div>
+            </div>
         </div>
-        <div class="zone-card">
-            <h5>🟩 Etch</h5>
-            <div class="zone-status warn">● Maintenance</div>
-        </div>
-        <div class="zone-card">
-            <h5>🟨 Deposition</h5>
-            <div class="zone-status run">● Running — PE-CVD</div>
-        </div>
-        <div class="zone-card">
-            <h5>🟪 Bonding</h5>
-            <div class="zone-status ok">● Idle</div>
-        </div>
-        <div class="zone-card">
-            <h5>🟥 Test</h5>
-            <div class="zone-status run">● Running — Prober</div>
-        </div>
-    </div>
 
-    <!-- Legend -->
-    <div class="legend">
-        <div class="legend-item"><div class="legend-color" style="background:#3b82f6"></div> Litho Zone</div>
-        <div class="legend-item"><div class="legend-color" style="background:#22c55e"></div> Etch Zone</div>
-        <div class="legend-item"><div class="legend-color" style="background:#eab308"></div> Dep Zone</div>
-        <div class="legend-item"><div class="legend-color" style="background:#a855f7"></div> Bond Zone</div>
-        <div class="legend-item"><div class="legend-color" style="background:#ef4444"></div> Test Zone</div>
-        <div class="legend-item"><div class="legend-color" style="background:#00d4aa"></div> Wafer Path</div>
+        <div class="card">
+            <h2>Clean Room Controls</h2>
+            <div class="controls">
+                <div class="control-group">
+                    <label>View Mode</label>
+                    <select id="view-mode">
+                        <option value="overview">Overview</option>
+                        <option value="litho">Lithography Zone</option>
+                        <option value="etch">Etch Zone</option>
+                        <option value="dep">Deposition Zone</option>
+                        <option value="bond">Bonding Zone</option>
+                        <option value="test">Test Zone</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>Wafer Count: <span id="wafer-val">24</span></label>
+                    <input type="range" id="wafer-count" min="1" max="50" value="24">
+                </div>
+                <div class="control-group">
+                    <label>Airflow (m/s): <span id="airflow-val">0.45</span></label>
+                    <input type="range" id="airflow" min="0.1" max="1.0" value="0.45" step="0.01">
+                </div>
+                <div class="control-group">
+                    <label>Filter Status</label>
+                    <select id="filter-status">
+                        <option value="normal">Normal</option>
+                        <option value="warning">Warning</option>
+                        <option value="critical">Critical</option>
+                    </select>
+                </div>
+            </div>
+            <button class="btn" onclick="startCRSim()">▶️ Start Simulation</button>
+            <button class="btn btn-danger" onclick="stopCRSim()">⏹️ Stop</button>
+        </div>
+
+        <div class="card">
+            <h2>Process Flow</h2>
+            <canvas id="process-flow" height="200"></canvas>
+        </div>
+
+        <div class="card">
+            <h2>Equipment Status</h2>
+            <canvas id="equipment-status" height="250"></canvas>
+        </div>
+
+        <footer><p>Space Photonics Digital Twin — Foundry Clean Room Module</p></footer>
     </div>
 
     <script type="module">
         import * as THREE from 'three';
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-        const container = document.getElementById('canvas-container');
-        const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x050811);
+        const cr3dCanvas = document.getElementById('cleanroom3d');
+        const cr3dScene = new THREE.Scene();
+        cr3dScene.background = new THREE.Color(0x0d1b2a);
+        const cr3dCamera = new THREE.PerspectiveCamera(50, cr3dCanvas.clientWidth / cr3dCanvas.clientHeight, 0.1, 100);
+        cr3dCamera.position.set(0, 8, 12);
+        const cr3dRenderer = new THREE.WebGLRenderer({ canvas: cr3dCanvas, antialias: true });
+        cr3dRenderer.setSize(cr3dCanvas.clientWidth, cr3dCanvas.clientHeight);
 
-        const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 200);
-        camera.position.set(25, 20, 25);
+        const cr3dControls = new OrbitControls(cr3dCamera, cr3dCanvas);
+        cr3dControls.enableDamping = true;
+        cr3dControls.autoRotate = true;
+        cr3dControls.autoRotateSpeed = 0.2;
 
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        renderer.shadowMap.enabled = true;
-        container.appendChild(renderer.domElement);
+        cr3dScene.add(new THREE.AmbientLight(0x404040, 0.6));
+        const cr3dSun = new THREE.DirectionalLight(0xffffff, 0.8);
+        cr3dSun.position.set(5, 10, 5);
+        cr3dScene.add(cr3dSun);
 
-        const controls = new OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true;
-        controls.target.set(0, 0, 0);
-
-        // ─── Lights ───
-        scene.add(new THREE.AmbientLight(0x404040, 0.5));
-        const sun = new THREE.DirectionalLight(0xffffff, 0.8);
-        sun.position.set(20, 40, 20);
-        sun.castShadow = true;
-        scene.add(sun);
-
-        // ─── Floor ───
-        const floorGeo = new THREE.PlaneGeometry(40, 40);
-        const floorMat = new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.8 });
+        // Clean room floor
+        const floorGeo = new THREE.PlaneGeometry(20, 15);
+        const floorMat = new THREE.MeshPhongMaterial({ color: 0x1a3a5c, shininess: 100 });
         const floor = new THREE.Mesh(floorGeo, floorMat);
-        floor.rotation.x = -Math.PI / 2;
-        floor.receiveShadow = true;
-        scene.add(floor);
+        floor.rotation.x = -Math.PI/2;
+        cr3dScene.add(floor);
 
-        // Grid
-        const grid = new THREE.GridHelper(40, 40, 0x1e3a5f, 0x0d1b2a);
-        scene.add(grid);
+        // Clean room walls
+        const wallMat = new THREE.MeshPhongMaterial({ color: 0x2a4a6c, transparent: true, opacity: 0.3 });
+        const wall1 = new THREE.Mesh(new THREE.PlaneGeometry(20, 3), wallMat);
+        wall1.position.set(0, 1.5, -7.5);
+        cr3dScene.add(wall1);
+        const wall2 = new THREE.Mesh(new THREE.PlaneGeometry(20, 3), wallMat);
+        wall2.position.set(0, 1.5, 7.5);
+        wall2.rotation.y = Math.PI;
+        cr3dScene.add(wall2);
+        const wall3 = new THREE.Mesh(new THREE.PlaneGeometry(15, 3), wallMat);
+        wall3.position.set(-10, 1.5, 0);
+        wall3.rotation.y = Math.PI/2;
+        cr3dScene.add(wall3);
+        const wall4 = new THREE.Mesh(new THREE.PlaneGeometry(15, 3), wallMat);
+        wall4.position.set(10, 1.5, 0);
+        wall4.rotation.y = -Math.PI/2;
+        cr3dScene.add(wall4);
 
-        // ─── Zones (colored floor patches) ───
-        const zones = [];
-        function createZone(x, z, w, d, color, name) {
-            const geo = new THREE.PlaneGeometry(w, d);
-            const mat = new THREE.MeshStandardMaterial({ color, transparent: true, opacity: 0.15, side: THREE.DoubleSide });
-            const mesh = new THREE.Mesh(geo, mat);
-            mesh.rotation.x = -Math.PI / 2;
-            mesh.position.set(x, 0.01, z);
-            scene.add(mesh);
-
-            // Border
-            const border = new THREE.LineSegments(
-                new THREE.EdgesGeometry(new THREE.BoxGeometry(w, 0.02, d)),
-                new THREE.LineBasicMaterial({ color, transparent: true, opacity: 0.4 })
-            );
-            border.position.set(x, 0.01, z);
-            scene.add(border);
-
-            // Label
-            const labelDiv = document.createElement('div');
-            labelDiv.style.cssText = 'position:absolute;background:rgba(5,8,17,0.85);color:#e0e6ed;padding:2px 6px;border-radius:4px;font-size:0.65em;pointer-events:none;';
-            labelDiv.textContent = name;
-            // We'll position in 2D projection during render
-            zones.push({ mesh, border, name, x, z, label: labelDiv });
-            document.body.appendChild(labelDiv);
-
-            return mesh;
-        }
-
-        createZone(-12, -8, 10, 10, 0x3b82f6, 'Lithography');
-        createZone(-12, 6, 10, 10, 0x22c55e, 'Etch');
-        createZone(0, -8, 10, 10, 0xeab308, 'Deposition');
-        createZone(0, 6, 10, 10, 0xa855f7, 'Bonding');
-        createZone(12, -1, 10, 14, 0xef4444, 'Test & Pack');
-
-        // ─── Equipment ───
-        function createEquipment(x, z, w, h, d, color, name) {
-            const geo = new THREE.BoxGeometry(w, h, d);
-            const mat = new THREE.MeshStandardMaterial({ color, roughness: 0.3, metalness: 0.4 });
-            const mesh = new THREE.Mesh(geo, mat);
-            mesh.position.set(x, h / 2, z);
-            mesh.castShadow = true;
-            scene.add(mesh);
-
-            // Status light
-            const lightGeo = new THREE.SphereGeometry(0.1, 8, 8);
-            const lightMat = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-            const light = new THREE.Mesh(lightGeo, lightMat);
-            light.position.set(x, h + 0.15, z);
-            scene.add(light);
-
-            return { mesh, light, name };
-        }
-
-        // Litho equipment
-        createEquipment(-14, -10, 2, 2.5, 1.5, 0x334155, 'E-Beam Writer');
-        createEquipment(-10, -10, 2, 2, 1.5, 0x334155, 'DUV Stepper');
-        createEquipment(-14, -6, 1.5, 1.8, 1, 0x334155, 'Spinner');
-
-        // Etch equipment
-        createEquipment(-14, 4, 2, 2.5, 1.5, 0x334155, 'ICP Etcher');
-        createEquipment(-10, 4, 2, 2, 1.5, 0x334155, 'RIE Chamber');
-        createEquipment(-14, 8, 1.5, 1.5, 1, 0x334155, 'Wet Bench');
-
-        // Deposition
-        createEquipment(-2, -10, 2, 2.5, 1.5, 0x334155, 'PE-CVD');
-        createEquipment(2, -10, 2, 2, 1.5, 0x334155, 'ALD');
-        createEquipment(-2, -6, 1.5, 1.5, 1, 0x334155, 'Sputter');
-
-        // Bonding
-        createEquipment(-2, 4, 2, 2, 1.5, 0x334155, 'Wafer Bonder');
-        createEquipment(2, 4, 2, 1.8, 1.5, 0x334155, 'Flip-Chip');
-        createEquipment(-2, 8, 1.5, 1.5, 1, 0x334155, 'Oven');
-
-        // Test
-        createEquipment(10, -6, 2, 2, 1.5, 0x334155, 'Prober');
-        createEquipment(14, -6, 2, 2, 1.5, 0x334155, 'Wire Bonder');
-        createEquipment(10, -2, 2, 1.8, 1.5, 0x334155, 'Dicing Saw');
-        createEquipment(14, -2, 1.5, 1.5, 1, 0x334155, 'Inspector');
-        createEquipment(12, 4, 2, 2, 1.5, 0x334155, 'Packaging');
-
-        // ─── Wafer Transport Robot ───
-        const robot = new THREE.Group();
-        const armGeo = new THREE.CylinderGeometry(0.05, 0.05, 0.8, 8);
-        const armMat = new THREE.MeshStandardMaterial({ color: 0x888888 });
-        const arm1 = new THREE.Mesh(armGeo, armMat);
-        arm1.position.y = 0.4;
-        robot.add(arm1);
-        const arm2 = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.05, 0.05), armMat);
-        arm2.position.set(0.15, 0.8, 0);
-        robot.add(arm2);
-        // Wafer
-        const wafer = new THREE.Mesh(
-            new THREE.CylinderGeometry(0.15, 0.15, 0.01, 32),
-            new THREE.MeshStandardMaterial({ color: 0x00d4aa, emissive: 0x00d4aa, emissiveIntensity: 0.3, metalness: 0.8, roughness: 0.2 })
-        );
-        wafer.position.set(0.3, 0.83, 0);
-        robot.add(wafer);
-        robot.position.set(0, 0, 0);
-        scene.add(robot);
-
-        // ─── Wafer Path ───
-        const pathPoints = [
-            new THREE.Vector3(-14, 0.5, -10),
-            new THREE.Vector3(-10, 0.5, -10),
-            new THREE.Vector3(-14, 0.5, 4),
-            new THREE.Vector3(-10, 0.5, 4),
-            new THREE.Vector3(-2, 0.5, -10),
-            new THREE.Vector3(2, 0.5, -10),
-            new THREE.Vector3(-2, 0.5, 4),
-            new THREE.Vector3(2, 0.5, 4),
-            new THREE.Vector3(10, 0.5, -6),
-            new THREE.Vector3(14, 0.5, -6),
+        // Equipment zones
+        const zones = [
+            { name: 'Lithography', x: -6, z: -4, color: 0x00d4aa, equip: 4 },
+            { name: 'Etch', x: 0, z: -4, color: 0x90e0ef, equip: 3 },
+            { name: 'Deposition', x: 6, z: -4, color: 0xffd166, equip: 5 },
+            { name: 'Bonding', x: -6, z: 4, color: 0xe63946, equip: 3 },
+            { name: 'Test', x: 0, z: 4, color: 0x2a9d8f, equip: 4 },
+            { name: 'Storage', x: 6, z: 4, color: 0x778da9, equip: 2 }
         ];
-        const pathCurve = new THREE.CatmullRomCurve3(pathPoints);
-        const tubeGeo = new THREE.TubeGeometry(pathCurve, 100, 0.02, 8, false);
-        const tubeMat = new THREE.MeshBasicMaterial({ color: 0x00d4aa, transparent: true, opacity: 0.3 });
-        scene.add(new THREE.Mesh(tubeGeo, tubeMat));
 
-        // ─── Particles (clean room air flow) ───
-        const particleCount = 200;
-        const pGeo = new THREE.BufferGeometry();
-        const pPos = new Float32Array(particleCount * 3);
-        const pVel = [];
-        for (let i = 0; i < particleCount; i++) {
-            pPos[i * 3] = (Math.random() - 0.5) * 36;
-            pPos[i * 3 + 1] = Math.random() * 8;
-            pPos[i * 3 + 2] = (Math.random() - 0.5) * 36;
-            pVel.push({ x: (Math.random() - 0.5) * 0.01, y: -Math.random() * 0.01 - 0.005, z: (Math.random() - 0.5) * 0.01 });
+        const equipment = [];
+        zones.forEach(zone => {
+            // Zone platform
+            const platformGeo = new THREE.BoxGeometry(4, 0.1, 4);
+            const platformMat = new THREE.MeshPhongMaterial({ color: zone.color, transparent: true, opacity: 0.2 });
+            const platform = new THREE.Mesh(platformGeo, platformMat);
+            platform.position.set(zone.x, 0.05, zone.z);
+            cr3dScene.add(platform);
+
+            // Equipment boxes
+            for (let i = 0; i < zone.equip; i++) {
+                const equipGeo = new THREE.BoxGeometry(0.8, 1.2, 0.6);
+                const equipMat = new THREE.MeshPhongMaterial({ color: zone.color, shininess: 50 });
+                const equip = new THREE.Mesh(equipGeo, equipMat);
+                equip.position.set(
+                    zone.x + (Math.random() - 0.5) * 2.5,
+                    0.6,
+                    zone.z + (Math.random() - 0.5) * 2.5
+                );
+                equip.userData = { zone: zone.name, status: 'running' };
+                cr3dScene.add(equip);
+                equipment.push(equip);
+
+                // Status light
+                const lightGeo = new THREE.SphereGeometry(0.05, 8, 8);
+                const lightMat = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+                const light = new THREE.Mesh(lightGeo, lightMat);
+                light.position.set(equip.position.x, 1.3, equip.position.z);
+                light.userData.parent = equip;
+                cr3dScene.add(light);
+                equip.userData.light = light;
+            }
+        });
+
+        // Wafer carriers
+        const wafers = [];
+        const waferGeo = new THREE.CylinderGeometry(0.15, 0.15, 0.02, 16);
+        const waferMat = new THREE.MeshPhongMaterial({ color: 0xdddddd, shininess: 100 });
+        for (let i = 0; i < 24; i++) {
+            const wafer = new THREE.Mesh(waferGeo, waferMat);
+            wafer.position.set(
+                (Math.random() - 0.5) * 16,
+                0.02 + i * 0.001,
+                (Math.random() - 0.5) * 12
+            );
+            wafer.userData = { id: i, stage: Math.floor(Math.random() * 6) };
+            cr3dScene.add(wafer);
+            wafers.push(wafer);
         }
-        pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
-        const pMat = new THREE.PointsMaterial({ color: 0x00d4aa, size: 0.05, transparent: true, opacity: 0.4 });
-        const particles = new THREE.Points(pGeo, pMat);
-        scene.add(particles);
 
-        // ─── Animation ───
-        const clock = new THREE.Clock();
+        // Airflow visualization
+        const airflowParticles = [];
+        const particleGeo = new THREE.SphereGeometry(0.02, 4, 4);
+        const particleMat = new THREE.MeshBasicMaterial({ color: 0x90e0ef, transparent: true, opacity: 0.3 });
+        for (let i = 0; i < 200; i++) {
+            const particle = new THREE.Mesh(particleGeo, particleMat);
+            particle.position.set(
+                (Math.random() - 0.5) * 18,
+                Math.random() * 2.5,
+                (Math.random() - 0.5) * 13
+            );
+            particle.userData = { vx: 0, vy: -0.01, vz: 0 };
+            cr3dScene.add(particle);
+            airflowParticles.push(particle);
+        }
 
-        function animate() {
-            requestAnimationFrame(animate);
-            const dt = clock.getDelta();
-            const t = clock.getElapsedTime();
+        let crAnimId = null;
+        let crTime = 0;
 
-            // Robot moves along path
-            const robotT = (t * 0.05) % 1;
-            const robotPos = pathCurve.getPoint(robotT);
-            robot.position.set(robotPos.x, 0, robotPos.z);
-            const nextPos = pathCurve.getPointAt((robotT + 0.01) % 1);
-            robot.lookAt(nextPos.x, 0, nextPos.z);
+        function updateCRSim() {
+            crTime += 0.016;
 
-            // Particles
-            const pos = particles.geometry.attributes.position.array;
-            for (let i = 0; i < particleCount; i++) {
-                pos[i * 3] += pVel[i].x;
-                pos[i * 3 + 1] += pVel[i].y;
-                pos[i * 3 + 2] += pVel[i].z;
-                if (pos[i * 3 + 1] < 0) {
-                    pos[i * 3 + 1] = 8;
-                    pos[i * 3] = (Math.random() - 0.5) * 36;
-                    pos[i * 3 + 2] = (Math.random() - 0.5) * 36;
+            const viewMode = document.getElementById('view-mode').value;
+            const waferCount = parseInt(document.getElementById('wafer-count').value);
+            const airflow = parseFloat(document.getElementById('airflow').value);
+            const filterStatus = document.getElementById('filter-status').value;
+
+            document.getElementById('wafer-val').textContent = waferCount;
+            document.getElementById('airflow-val').textContent = airflow.toFixed(2);
+
+            // Camera view
+            if (viewMode === 'overview') {
+                cr3dCamera.position.lerp(new THREE.Vector3(0, 8, 12), 0.02);
+                cr3dControls.autoRotate = true;
+            } else {
+                const zone = zones.find(z => z.name.toLowerCase().startsWith(viewMode));
+                if (zone) {
+                    cr3dCamera.position.lerp(new THREE.Vector3(zone.x, 4, zone.z + 6), 0.02);
+                    cr3dControls.target.lerp(new THREE.Vector3(zone.x, 0.5, zone.z), 0.02);
+                    cr3dControls.autoRotate = false;
                 }
             }
-            particles.geometry.attributes.position.needsUpdate = true;
 
-            // Zone label projection
-            zones.forEach(z => {
-                const vec = new THREE.Vector3(z.x, 0.5, z.z);
-                vec.project(camera);
-                const x = (vec.x * 0.5 + 0.5) * window.innerWidth;
-                const y = (-vec.y * 0.5 + 0.5) * window.innerHeight;
-                z.label.style.left = x + 'px';
-                z.label.style.top = y + 'px';
-                z.label.style.display = (vec.z < 1) ? 'block' : 'none';
+            // Update wafers
+            wafers.forEach((wafer, i) => {
+                wafer.visible = i < waferCount;
+                wafer.rotation.y += 0.01;
             });
 
-            controls.update();
-            renderer.render(scene, camera);
+            // Update equipment status lights
+            equipment.forEach(equip => {
+                const light = equip.userData.light;
+                if (filterStatus === 'critical' && Math.random() > 0.8) {
+                    light.material.color.setHex(0xff0000);
+                } else if (filterStatus === 'warning' && Math.random() > 0.6) {
+                    light.material.color.setHex(0xffaa00);
+                } else {
+                    light.material.color.setHex(0x00ff00);
+                }
+            });
+
+            // Update airflow particles
+            airflowParticles.forEach(p => {
+                p.position.y += p.userData.vy * airflow;
+                p.position.x += (Math.random() - 0.5) * 0.01;
+                p.position.z += (Math.random() - 0.5) * 0.01;
+                if (p.position.y < 0) {
+                    p.position.y = 2.5;
+                    p.position.x = (Math.random() - 0.5) * 18;
+                    p.position.z = (Math.random() - 0.5) * 13;
+                }
+                p.material.opacity = 0.1 + airflow * 0.4;
+            });
+
+            // Update HUD
+            document.getElementById('cr-class').textContent = filterStatus === 'critical' ? 'ISO 7' : filterStatus === 'warning' ? 'ISO 6' : 'ISO 5';
+            document.getElementById('cr-temp').textContent = (20 + Math.sin(crTime * 0.5) * 0.5).toFixed(1) + '°C';
+            document.getElementById('cr-hum').textContent = (45 + Math.cos(crTime * 0.3) * 3).toFixed(0) + '%';
+            document.getElementById('cr-wafers').textContent = waferCount;
+            const yieldVal = filterStatus === 'critical' ? 78 : filterStatus === 'warning' ? 88 : 94;
+            document.getElementById('cr-yield').textContent = yieldVal + '%';
+
+            cr3dControls.update();
+            cr3dRenderer.render(cr3dScene, cr3dCamera);
+            crAnimId = requestAnimationFrame(updateCRSim);
         }
 
-        animate();
+        window.startCRSim = () => {
+            if (crAnimId) cancelAnimationFrame(crAnimId);
+            crTime = 0;
+            updateCRSim();
+        };
+
+        window.stopCRSim = () => {
+            if (crAnimId) {
+                cancelAnimationFrame(crAnimId);
+                crAnimId = null;
+            }
+        };
+
+        // Initial render
+        cr3dRenderer.render(cr3dScene, cr3dCamera);
 
         window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
+            const rect = cr3dCanvas.parentElement.getBoundingClientRect();
+            cr3dCamera.aspect = rect.width / rect.height;
+            cr3dCamera.updateProjectionMatrix();
+            cr3dRenderer.setSize(rect.width, rect.height);
         });
-    
-        // Hamburger nav
-        const hamBtn = document.getElementById('nav-hamburger');
-        const navOverlay = document.getElementById('nav-overlay');
-        const navClose = document.getElementById('nav-close');
-        if (hamBtn && navOverlay) {
-            hamBtn.addEventListener('click', () => navOverlay.classList.add('active'));
-            navClose.addEventListener('click', () => navOverlay.classList.remove('active'));
-            navOverlay.querySelectorAll('a').forEach(a => {
-                a.addEventListener('click', () => navOverlay.classList.remove('active'));
+
+        // Process flow canvas
+        const flowCanvas = document.getElementById('process-flow');
+        flowCanvas.width = flowCanvas.clientWidth * 2;
+        flowCanvas.height = flowCanvas.clientHeight * 2;
+        const flowCtx = flowCanvas.getContext('2d');
+
+        function drawProcessFlow() {
+            flowCtx.clearRect(0, 0, flowCanvas.width, flowCanvas.height);
+            const w = flowCanvas.width;
+            const h = flowCanvas.height;
+
+            const steps = [
+                { name: 'Wafer In', color: '#778da9' },
+                { name: 'Lithography', color: '#00d4aa' },
+                { name: 'Etch', color: '#90e0ef' },
+                { name: 'Deposition', color: '#ffd166' },
+                { name: 'Bonding', color: '#e63946' },
+                { name: 'Test', color: '#2a9d8f' },
+                { name: 'Wafer Out', color: '#95d5b2' }
+            ];
+
+            const stepW = w / steps.length;
+            const cy = h / 2;
+
+            steps.forEach((step, i) => {
+                const x = i * stepW + stepW / 2;
+
+                // Arrow
+                if (i < steps.length - 1) {
+                    flowCtx.strokeStyle = '#415a77';
+                    flowCtx.lineWidth = 3;
+                    flowCtx.beginPath();
+                    flowCtx.moveTo(x + 30, cy);
+                    flowCtx.lineTo(x + stepW - 30, cy);
+                    flowCtx.stroke();
+                    // Arrowhead
+                    flowCtx.beginPath();
+                    flowCtx.moveTo(x + stepW - 35, cy - 8);
+                    flowCtx.lineTo(x + stepW - 30, cy);
+                    flowCtx.lineTo(x + stepW - 35, cy + 8);
+                    flowCtx.stroke();
+                }
+
+                // Step circle
+                flowCtx.fillStyle = step.color;
+                flowCtx.beginPath();
+                flowCtx.arc(x, cy, 25, 0, 2 * Math.PI);
+                flowCtx.fill();
+
+                // Step name
+                flowCtx.fillStyle = '#e0e6ed';
+                flowCtx.font = '14px sans-serif';
+                flowCtx.textAlign = 'center';
+                flowCtx.fillText(step.name, x, cy + 50);
+
+                // Step number
+                flowCtx.fillStyle = '#050811';
+                flowCtx.font = 'bold 16px sans-serif';
+                flowCtx.fillText(i + 1, x, cy + 5);
             });
         }
 
+        // Equipment status canvas
+        const eqCanvas = document.getElementById('equipment-status');
+        eqCanvas.width = eqCanvas.clientWidth * 2;
+        eqCanvas.height = eqCanvas.clientHeight * 2;
+        const eqCtx = eqCanvas.getContext('2d');
+
+        function drawEquipmentStatus() {
+            eqCtx.clearRect(0, 0, eqCanvas.width, eqCanvas.height);
+            const w = eqCanvas.width;
+            const h = eqCanvas.height;
+
+            const zones = ['Lithography', 'Etch', 'Deposition', 'Bonding', 'Test', 'Storage'];
+            const colors = ['#00d4aa', '#90e0ef', '#ffd166', '#e63946', '#2a9d8f', '#778da9'];
+            const status = [4, 3, 5, 3, 4, 2];
+            const running = [3, 2, 4, 2, 3, 1];
+
+            const zoneH = h / zones.length;
+
+            zones.forEach((zone, i) => {
+                const y = i * zoneH;
+
+                // Zone label
+                eqCtx.fillStyle = colors[i];
+                eqCtx.font = 'bold 18px sans-serif';
+                eqCtx.fillText(zone, 20, y + zoneH / 2 + 6);
+
+                // Status bars
+                const barX = 200;
+                const barW = (w - 250) / status[i];
+                for (let j = 0; j < status[i]; j++) {
+                    const isRunning = j < running[i];
+                    eqCtx.fillStyle = isRunning ? '#2a9d8f' : '#6c2e2e';
+                    eqCtx.fillRect(barX + j * barW, y + 10, barW - 5, zoneH - 20);
+                    eqCtx.fillStyle = '#e0e6ed';
+                    eqCtx.font = '12px sans-serif';
+                    eqCtx.textAlign = 'center';
+                    eqCtx.fillText(isRunning ? 'RUN' : 'IDLE', barX + j * barW + barW / 2, y + zoneH / 2 + 4);
+                }
+                eqCtx.textAlign = 'left';
+            });
+        }
+
+        setInterval(() => {
+            drawProcessFlow();
+            drawEquipmentStatus();
+        }, 3000);
+
+        drawProcessFlow();
+        drawEquipmentStatus();
     </script>
 </body>
 </html>
