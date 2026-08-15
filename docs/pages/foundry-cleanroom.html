@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏭 Foundry Clean Room 3D — Space Photonics</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Roboto, -apple-system, BlinkMacSystemFont, sans-serif; background: #050811; color: #e0e6ed; overflow: hidden; width: 100vw; height: 100vh; }
+        #canvas-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+
+        nav { position: fixed; top: 8px; left: 8px; right: 8px; z-index: 200; background: rgba(5,8,17,0.92); backdrop-filter: blur(12px); border: 1px solid rgba(65,90,119,0.5); border-radius: 10px; padding: 6px; display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; }
+        nav a { color: #90e0ef; text-decoration: none; padding: 5px 10px; border-radius: 6px; font-size: 0.78em; background: rgba(13,27,42,0.7); transition: all 0.2s; border: 1px solid transparent; }
+        nav a:hover, nav a.active { background: #00d4aa; color: #050811; border-color: #00d4aa; }
+
+        .hud { position: fixed; z-index: 100; background: rgba(5,8,17,0.88); backdrop-filter: blur(10px); border: 1px solid rgba(65,90,119,0.5); border-radius: 10px; padding: 10px; font-size: 0.72em; }
+        .hud h3 { color: #00d4aa; font-size: 0.95em; margin-bottom: 6px; border-bottom: 1px solid rgba(65,90,119,0.5); padding-bottom: 4px; }
+        .hud h4 { color: #90e0ef; font-size: 0.85em; margin: 8px 0 4px; }
+        .hud-row { display: flex; justify-content: space-between; padding: 2.5px 0; border-bottom: 1px solid rgba(65,90,119,0.15); }
+        .hud-label { color: #90e0ef; font-weight: 500; }
+        .hud-value { color: #ffd166; font-family: monospace; font-size: 0.95em; }
+        .hud-value.ok { color: #2a9d8f; }
+        .hud-value.warn { color: #ffd166; }
+        .hud-value.danger { color: #e63946; }
+
+        .hud-left { top: 65px; left: 8px; width: 240px; max-height: calc(100vh - 180px); overflow-y: auto; }
+        .hud-right { top: 65px; right: 8px; width: 240px; max-height: calc(100vh - 180px); overflow-y: auto; }
+        .hud-bottom { bottom: 60px; left: 8px; right: 8px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+
+        .zone-card { background: rgba(13,27,42,0.7); border-radius: 8px; padding: 8px 12px; border: 1px solid rgba(65,90,119,0.3); min-width: 120px; }
+        .zone-card h5 { color: #00d4aa; font-size: 0.8em; margin-bottom: 4px; }
+        .zone-status { font-size: 0.75em; }
+        .zone-status.ok { color: #2a9d8f; }
+        .zone-status.warn { color: #ffd166; }
+        .zone-status.run { color: #00d4aa; }
+
+        .legend { position: fixed; bottom: 10px; right: 8px; z-index: 100; background: rgba(5,8,17,0.88); border: 1px solid rgba(65,90,119,0.5); border-radius: 8px; padding: 8px; font-size: 0.7em; }
+        .legend-item { display: flex; align-items: center; gap: 6px; margin: 2px 0; }
+        .legend-color { width: 12px; height: 12px; border-radius: 3px; }
+
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: #415a77; border-radius: 2px; }
+    </style>
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        }
+    }
+    </script>
+</head>
+<body>
+    <div id="canvas-container"></div>
+
+    <nav>
+        <a href="../index.html">🏠 Dashboard</a>
+        <a href="architecture.html">🏛️ Architecture</a>
+        <a href="digital-twin.html">🎮 3D Twin</a>
+        <a href="opa-analysis.html">📡 OPA</a>
+        <a href="link-budget.html">📊 Link Budget</a>
+        <a href="hypersonic.html">🚀 Hypersonic</a>
+        <a href="vleo-constellation.html">🌐 VLEO</a>
+        <a href="mapper-3d.html">🗺️ Mapper</a>
+        <a href="satellite-digital-twin.html">🛰️ Sat Twin</a>
+        <a href="interception-mission.html">🎯 Intercept</a>
+        <a href="vehicle-terminal.html">🛰️ Terminal</a>
+        <a href="ehf-optical-trade.html">📡 EHF vs Opt</a>
+        <a href="ppln-calculator.html">🔢 PPLN</a>
+        <a href="research-gaps.html">🔬 Gaps</a>
+        <a href="foundry.html">🏭 Foundry</a>
+        <a href="foundry-cleanroom.html" class="active">🏭 Clean Room</a>
+    </nav>
+
+    <!-- Environment HUD -->
+    <div class="hud hud-left">
+        <h3>🏭 Clean Room Environment</h3>
+        <div class="hud-row"><span class="hud-label">Class</span><span class="hud-value ok">ISO 3 / Class 1</span></div>
+        <div class="hud-row"><span class="hud-label">Temperature</span><span class="hud-value ok">20.0 ± 0.1°C</span></div>
+        <div class="hud-row"><span class="hud-label">Humidity</span><span class="hud-value ok">45.0 ± 2% RH</span></div>
+        <div class="hud-row"><span class="hud-label">Pressure</span><span class="hud-value">+25 Pa</span></div>
+        <div class="hud-row"><span class="hud-label">Air Changes</span><span class="hud-value">600 / hr</span></div>
+        <div class="hud-row"><span class="hud-label">Particles/m³</span><span class="hud-value ok">&lt; 35 (≥0.5μm)</span></div>
+        <div class="hud-row"><span class="hud-label">Vibration</span><span class="hud-value ok">&lt; 0.25 μm/s</span></div>
+        <div class="hud-row"><span class="hud-label">Lighting</span><span class="hud-value">500 lux</span></div>
+
+        <h4>🔄 Active Process</h4>
+        <div class="hud-row"><span class="hud-label">Wafer ID</span><span class="hud-value">W-TFLN-2847</span></div>
+        <div class="hud-row"><span class="hud-label">Process</span><span class="hud-value">E-Beam Litho</span></div>
+        <div class="hud-row"><span class="hud-label">Step</span><span class="hud-value">12 / 47</span></div>
+        <div class="hud-row"><span class="hud-label">Recipe</span><span class="hud-value">OPA_V3.2</span></div>
+        <div class="hud-row"><span class="hud-label">Progress</span><span class="hud-value">25.5%</span></div>
+        <div class="hud-row"><span class="hud-label">ETA</span><span class="hud-value">4h 23m</span></div>
+
+        <h4>📊 Yield Tracking</h4>
+        <div class="hud-row"><span class="hud-label">TFLN OPA</span><span class="hud-value ok">94.2%</span></div>
+        <div class="hud-row"><span class="hud-label">Si₃N₄ Mesh</span><span class="hud-value ok">96.8%</span></div>
+        <div class="hud-row"><span class="hud-label">PPLN Receiver</span><span class="hud-value warn">87.3%</span></div>
+        <div class="hud-row"><span class="hud-label">Hybrid Stack</span><span class="hud-value warn">72.1%</span></div>
+    </div>
+
+    <!-- Equipment HUD -->
+    <div class="hud hud-right">
+        <h3>🔧 Equipment Status</h3>
+        <div class="hud-row"><span class="hud-label">E-Beam Writer</span><span class="hud-value ok">RUNNING</span></div>
+        <div class="hud-row"><span class="hud-label">DUV Stepper</span><span class="hud-value ok">IDLE</span></div>
+        <div class="hud-row"><span class="hud-label">ICP Etcher</span><span class="hud-value warn">MAINT</span></div>
+        <div class="hud-row"><span class="hud-label">PE-CVD</span><span class="hud-value ok">RUNNING</span></div>
+        <div class="hud-row"><span class="hud-label">ALD Chamber</span><span class="hud-value ok">RUNNING</span></div>
+        <div class="hud-row"><span class="hud-label">Wafer Bonder</span><span class="hud-value ok">IDLE</span></div>
+        <div class="hud-row"><span class="hud-label">Dicing Saw</span><span class="hud-value ok">IDLE</span></div>
+        <div class="hud-row"><span class="hud-label">Prober</span><span class="hud-value ok">RUNNING</span></div>
+        <div class="hud-row"><span class="hud-label">Wire Bonder</span><span class="hud-value ok">IDLE</span></div>
+
+        <h4>⚡ Utilities</h4>
+        <div class="hud-row"><span class="hud-label">Power</span><span class="hud-value">2.4 MW</span></div>
+        <div class="hud-row"><span class="hud-label">UPW</span><span class="hud-value ok">18.2 MΩ·cm</span></div>
+        <div class="hud-row"><span class="hud-label">N₂</span><span class="hud-value ok">99.9999%</span></div>
+        <div class="hud-row"><span class="hud-label">Ar</span><span class="hud-value ok">99.999%</span></div>
+        <div class="hud-row"><span class="hud-label">Vacuum</span><span class="hud-value ok">&lt; 1×10⁻⁶ Torr</span></div>
+    </div>
+
+    <!-- Zone Status Bar -->
+    <div class="hud hud-bottom">
+        <div class="zone-card">
+            <h5>🟦 Lithography</h5>
+            <div class="zone-status run">● Running — E-Beam</div>
+        </div>
+        <div class="zone-card">
+            <h5>🟩 Etch</h5>
+            <div class="zone-status warn">● Maintenance</div>
+        </div>
+        <div class="zone-card">
+            <h5>🟨 Deposition</h5>
+            <div class="zone-status run">● Running — PE-CVD</div>
+        </div>
+        <div class="zone-card">
+            <h5>🟪 Bonding</h5>
+            <div class="zone-status ok">● Idle</div>
+        </div>
+        <div class="zone-card">
+            <h5>🟥 Test</h5>
+            <div class="zone-status run">● Running — Prober</div>
+        </div>
+    </div>
+
+    <!-- Legend -->
+    <div class="legend">
+        <div class="legend-item"><div class="legend-color" style="background:#3b82f6"></div> Litho Zone</div>
+        <div class="legend-item"><div class="legend-color" style="background:#22c55e"></div> Etch Zone</div>
+        <div class="legend-item"><div class="legend-color" style="background:#eab308"></div> Dep Zone</div>
+        <div class="legend-item"><div class="legend-color" style="background:#a855f7"></div> Bond Zone</div>
+        <div class="legend-item"><div class="legend-color" style="background:#ef4444"></div> Test Zone</div>
+        <div class="legend-item"><div class="legend-color" style="background:#00d4aa"></div> Wafer Path</div>
+    </div>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x050811);
+
+        const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 200);
+        camera.position.set(25, 20, 25);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.shadowMap.enabled = true;
+        container.appendChild(renderer.domElement);
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.target.set(0, 0, 0);
+
+        // ─── Lights ───
+        scene.add(new THREE.AmbientLight(0x404040, 0.5));
+        const sun = new THREE.DirectionalLight(0xffffff, 0.8);
+        sun.position.set(20, 40, 20);
+        sun.castShadow = true;
+        scene.add(sun);
+
+        // ─── Floor ───
+        const floorGeo = new THREE.PlaneGeometry(40, 40);
+        const floorMat = new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.8 });
+        const floor = new THREE.Mesh(floorGeo, floorMat);
+        floor.rotation.x = -Math.PI / 2;
+        floor.receiveShadow = true;
+        scene.add(floor);
+
+        // Grid
+        const grid = new THREE.GridHelper(40, 40, 0x1e3a5f, 0x0d1b2a);
+        scene.add(grid);
+
+        // ─── Zones (colored floor patches) ───
+        const zones = [];
+        function createZone(x, z, w, d, color, name) {
+            const geo = new THREE.PlaneGeometry(w, d);
+            const mat = new THREE.MeshStandardMaterial({ color, transparent: true, opacity: 0.15, side: THREE.DoubleSide });
+            const mesh = new THREE.Mesh(geo, mat);
+            mesh.rotation.x = -Math.PI / 2;
+            mesh.position.set(x, 0.01, z);
+            scene.add(mesh);
+
+            // Border
+            const border = new THREE.LineSegments(
+                new THREE.EdgesGeometry(new THREE.BoxGeometry(w, 0.02, d)),
+                new THREE.LineBasicMaterial({ color, transparent: true, opacity: 0.4 })
+            );
+            border.position.set(x, 0.01, z);
+            scene.add(border);
+
+            // Label
+            const labelDiv = document.createElement('div');
+            labelDiv.style.cssText = 'position:absolute;background:rgba(5,8,17,0.85);color:#e0e6ed;padding:2px 6px;border-radius:4px;font-size:0.65em;pointer-events:none;';
+            labelDiv.textContent = name;
+            // We'll position in 2D projection during render
+            zones.push({ mesh, border, name, x, z, label: labelDiv });
+            document.body.appendChild(labelDiv);
+
+            return mesh;
+        }
+
+        createZone(-12, -8, 10, 10, 0x3b82f6, 'Lithography');
+        createZone(-12, 6, 10, 10, 0x22c55e, 'Etch');
+        createZone(0, -8, 10, 10, 0xeab308, 'Deposition');
+        createZone(0, 6, 10, 10, 0xa855f7, 'Bonding');
+        createZone(12, -1, 10, 14, 0xef4444, 'Test & Pack');
+
+        // ─── Equipment ───
+        function createEquipment(x, z, w, h, d, color, name) {
+            const geo = new THREE.BoxGeometry(w, h, d);
+            const mat = new THREE.MeshStandardMaterial({ color, roughness: 0.3, metalness: 0.4 });
+            const mesh = new THREE.Mesh(geo, mat);
+            mesh.position.set(x, h / 2, z);
+            mesh.castShadow = true;
+            scene.add(mesh);
+
+            // Status light
+            const lightGeo = new THREE.SphereGeometry(0.1, 8, 8);
+            const lightMat = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+            const light = new THREE.Mesh(lightGeo, lightMat);
+            light.position.set(x, h + 0.15, z);
+            scene.add(light);
+
+            return { mesh, light, name };
+        }
+
+        // Litho equipment
+        createEquipment(-14, -10, 2, 2.5, 1.5, 0x334155, 'E-Beam Writer');
+        createEquipment(-10, -10, 2, 2, 1.5, 0x334155, 'DUV Stepper');
+        createEquipment(-14, -6, 1.5, 1.8, 1, 0x334155, 'Spinner');
+
+        // Etch equipment
+        createEquipment(-14, 4, 2, 2.5, 1.5, 0x334155, 'ICP Etcher');
+        createEquipment(-10, 4, 2, 2, 1.5, 0x334155, 'RIE Chamber');
+        createEquipment(-14, 8, 1.5, 1.5, 1, 0x334155, 'Wet Bench');
+
+        // Deposition
+        createEquipment(-2, -10, 2, 2.5, 1.5, 0x334155, 'PE-CVD');
+        createEquipment(2, -10, 2, 2, 1.5, 0x334155, 'ALD');
+        createEquipment(-2, -6, 1.5, 1.5, 1, 0x334155, 'Sputter');
+
+        // Bonding
+        createEquipment(-2, 4, 2, 2, 1.5, 0x334155, 'Wafer Bonder');
+        createEquipment(2, 4, 2, 1.8, 1.5, 0x334155, 'Flip-Chip');
+        createEquipment(-2, 8, 1.5, 1.5, 1, 0x334155, 'Oven');
+
+        // Test
+        createEquipment(10, -6, 2, 2, 1.5, 0x334155, 'Prober');
+        createEquipment(14, -6, 2, 2, 1.5, 0x334155, 'Wire Bonder');
+        createEquipment(10, -2, 2, 1.8, 1.5, 0x334155, 'Dicing Saw');
+        createEquipment(14, -2, 1.5, 1.5, 1, 0x334155, 'Inspector');
+        createEquipment(12, 4, 2, 2, 1.5, 0x334155, 'Packaging');
+
+        // ─── Wafer Transport Robot ───
+        const robot = new THREE.Group();
+        const armGeo = new THREE.CylinderGeometry(0.05, 0.05, 0.8, 8);
+        const armMat = new THREE.MeshStandardMaterial({ color: 0x888888 });
+        const arm1 = new THREE.Mesh(armGeo, armMat);
+        arm1.position.y = 0.4;
+        robot.add(arm1);
+        const arm2 = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.05, 0.05), armMat);
+        arm2.position.set(0.15, 0.8, 0);
+        robot.add(arm2);
+        // Wafer
+        const wafer = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.15, 0.15, 0.01, 32),
+            new THREE.MeshStandardMaterial({ color: 0x00d4aa, emissive: 0x00d4aa, emissiveIntensity: 0.3, metalness: 0.8, roughness: 0.2 })
+        );
+        wafer.position.set(0.3, 0.83, 0);
+        robot.add(wafer);
+        robot.position.set(0, 0, 0);
+        scene.add(robot);
+
+        // ─── Wafer Path ───
+        const pathPoints = [
+            new THREE.Vector3(-14, 0.5, -10),
+            new THREE.Vector3(-10, 0.5, -10),
+            new THREE.Vector3(-14, 0.5, 4),
+            new THREE.Vector3(-10, 0.5, 4),
+            new THREE.Vector3(-2, 0.5, -10),
+            new THREE.Vector3(2, 0.5, -10),
+            new THREE.Vector3(-2, 0.5, 4),
+            new THREE.Vector3(2, 0.5, 4),
+            new THREE.Vector3(10, 0.5, -6),
+            new THREE.Vector3(14, 0.5, -6),
+        ];
+        const pathCurve = new THREE.CatmullRomCurve3(pathPoints);
+        const tubeGeo = new THREE.TubeGeometry(pathCurve, 100, 0.02, 8, false);
+        const tubeMat = new THREE.MeshBasicMaterial({ color: 0x00d4aa, transparent: true, opacity: 0.3 });
+        scene.add(new THREE.Mesh(tubeGeo, tubeMat));
+
+        // ─── Particles (clean room air flow) ───
+        const particleCount = 200;
+        const pGeo = new THREE.BufferGeometry();
+        const pPos = new Float32Array(particleCount * 3);
+        const pVel = [];
+        for (let i = 0; i < particleCount; i++) {
+            pPos[i * 3] = (Math.random() - 0.5) * 36;
+            pPos[i * 3 + 1] = Math.random() * 8;
+            pPos[i * 3 + 2] = (Math.random() - 0.5) * 36;
+            pVel.push({ x: (Math.random() - 0.5) * 0.01, y: -Math.random() * 0.01 - 0.005, z: (Math.random() - 0.5) * 0.01 });
+        }
+        pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
+        const pMat = new THREE.PointsMaterial({ color: 0x00d4aa, size: 0.05, transparent: true, opacity: 0.4 });
+        const particles = new THREE.Points(pGeo, pMat);
+        scene.add(particles);
+
+        // ─── Animation ───
+        const clock = new THREE.Clock();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const dt = clock.getDelta();
+            const t = clock.getElapsedTime();
+
+            // Robot moves along path
+            const robotT = (t * 0.05) % 1;
+            const robotPos = pathCurve.getPoint(robotT);
+            robot.position.set(robotPos.x, 0, robotPos.z);
+            const nextPos = pathCurve.getPointAt((robotT + 0.01) % 1);
+            robot.lookAt(nextPos.x, 0, nextPos.z);
+
+            // Particles
+            const pos = particles.geometry.attributes.position.array;
+            for (let i = 0; i < particleCount; i++) {
+                pos[i * 3] += pVel[i].x;
+                pos[i * 3 + 1] += pVel[i].y;
+                pos[i * 3 + 2] += pVel[i].z;
+                if (pos[i * 3 + 1] < 0) {
+                    pos[i * 3 + 1] = 8;
+                    pos[i * 3] = (Math.random() - 0.5) * 36;
+                    pos[i * 3 + 2] = (Math.random() - 0.5) * 36;
+                }
+            }
+            particles.geometry.attributes.position.needsUpdate = true;
+
+            // Zone label projection
+            zones.forEach(z => {
+                const vec = new THREE.Vector3(z.x, 0.5, z.z);
+                vec.project(camera);
+                const x = (vec.x * 0.5 + 0.5) * window.innerWidth;
+                const y = (-vec.y * 0.5 + 0.5) * window.innerHeight;
+                z.label.style.left = x + 'px';
+                z.label.style.top = y + 'px';
+                z.label.style.display = (vec.z < 1) ? 'block' : 'none';
+            });
+
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        animate();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
