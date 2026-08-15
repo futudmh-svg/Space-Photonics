@@ -1,471 +1,467 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Foundry Clean Room 3D — Space Photonics</title>
-    <script type="importmap">
-    {
-        "imports": {
-            "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-            "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Photon-1 Manufacturing — Foundry Clean Room | Space Photonics</title>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+        --bg: #050811; --panel: rgba(5,8,17,0.88); --line: rgba(65,90,119,0.5);
+        --teal: #00d4aa; --amber: #ffd166; --red: #e63946; --green: #2a9d8f; --ice: #90e0ef;
+        --ink: #e0e6ed; --dim: #7d8fa3;
     }
-    </script>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #050811; color: #e0e6ed; line-height: 1.6; }
-        .container { max-width: 1200px; margin: 0 auto; padding: 16px; }
-        nav { background: #1b263b; padding: 12px; border-radius: 10px; margin-bottom: 16px; display: flex; flex-wrap: wrap; gap: 8px; }
-        nav a { color: #e0e6ed; text-decoration: none; padding: 8px 14px; border-radius: 6px; font-size: 0.9em; background: #0d1b2a; }
-        nav a:hover, nav a.active { background: #00d4aa; color: #050811; }
-        h1 { font-size: 1.5em; color: #00d4aa; margin: 16px 0 8px; }
-        .subtitle { color: #778da9; font-size: 0.9em; margin-bottom: 16px; }
-        .card { background: #1b263b; border-radius: 12px; padding: 18px; margin-bottom: 16px; border: 1px solid #415a77; }
-        .card h2 { font-size: 1.15em; color: #00d4aa; margin-bottom: 12px; }
-        canvas { width: 100%; background: #0d1b2a; border-radius: 8px; margin: 12px 0; }
-        .controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin: 12px 0; }
-        .control-group label { display: block; font-size: 0.85em; color: #778da9; margin-bottom: 4px; }
-        input[type="range"], select { width: 100%; padding: 8px; background: #0d1b2a; border: 1px solid #415a77; border-radius: 6px; color: #e0e6ed; }
-        input[type="range"] { -webkit-appearance: none; height: 6px; padding: 0; }
-        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: #00d4aa; cursor: pointer; }
-        .btn { padding: 10px 20px; background: #2d6a4f; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9em; margin: 4px; }
-        .btn:hover { background: #40916c; }
-        .btn-danger { background: #6c2e2e; }
-        .btn-danger:hover { background: #9e3a3a; }
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 12px 0; }
-        .stat-box { background: #0d1b2a; padding: 14px; border-radius: 8px; text-align: center; }
-        .stat-value { font-size: 1.5em; font-weight: bold; color: #00d4aa; }
-        .stat-label { font-size: 0.8em; color: #778da9; }
-        footer { text-align: center; padding: 30px; color: #778da9; font-size: 0.8em; }
-        .zone-legend { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
-        .zone-item { display: flex; align-items: center; gap: 6px; font-size: 0.85em; }
-        .zone-color { width: 16px; height: 16px; border-radius: 4px; }
-    </style>
+    body { font-family: 'Segoe UI', Roboto, -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--ink); }
+    .mono { font-family: 'Consolas','SF Mono',monospace; }
+
+    nav { position: sticky; top: 8px; margin: 8px; z-index: 200; background: rgba(5,8,17,0.92); backdrop-filter: blur(12px); border: 1px solid var(--line); border-radius: 10px; padding: 6px; display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; }
+    nav a { color: var(--ice); text-decoration: none; padding: 5px 10px; border-radius: 6px; font-size: 0.78em; background: rgba(13,27,42,0.7); transition: all 0.2s; border: 1px solid transparent; }
+    nav a:hover, nav a.active { background: var(--teal); color: var(--bg); border-color: var(--teal); }
+
+    .nav-hamburger { display: none; position: fixed; top: 8px; left: 8px; z-index: 300; background: rgba(5,8,17,0.92); border: 1px solid var(--teal); color: var(--teal); padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 1.2em; }
+    .nav-overlay { display: none; position: fixed; inset: 0; z-index: 250; background: rgba(5,8,17,0.95); backdrop-filter: blur(12px); flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 20px; }
+    .nav-overlay.active { display: flex; }
+    .nav-overlay a { color: var(--ice); text-decoration: none; padding: 10px 20px; font-size: 1.1em; border-radius: 8px; background: rgba(13,27,42,0.7); border: 1px solid rgba(65,90,119,0.3); width: 200px; text-align: center; }
+    .nav-overlay a:hover { background: var(--teal); color: var(--bg); }
+    .nav-close { position: absolute; top: 8px; right: 8px; color: var(--red); font-size: 1.5em; cursor: pointer; background: none; border: none; padding: 8px; }
+    @media (max-width: 768px) { nav { display: none; } .nav-hamburger { display: block; } }
+
+    .wrap { max-width: 1180px; margin: 0 auto; padding: 24px 16px 80px; }
+
+    /* ── Section chrome: numbered spec-sheet sections ── */
+    section { margin-top: 56px; }
+    .sec-head { display: flex; align-items: baseline; gap: 14px; border-bottom: 1px solid var(--line); padding-bottom: 8px; margin-bottom: 20px; }
+    .sec-num { font-family: monospace; color: var(--teal); font-size: 0.85em; letter-spacing: 0.2em; }
+    .sec-title { font-size: 1.35em; font-weight: 600; letter-spacing: 0.02em; }
+    .sec-tag { margin-left: auto; font-family: monospace; font-size: 0.68em; color: var(--dim); letter-spacing: 0.12em; text-transform: uppercase; }
+
+    .panel { background: var(--panel); backdrop-filter: blur(10px); border: 1px solid var(--line); border-radius: 10px; padding: 16px; }
+
+    /* ── 01 Product header ── */
+    .hero { display: grid; grid-template-columns: 1.1fr 1.6fr; gap: 20px; align-items: stretch; }
+    .hero-id h1 { font-size: 2.1em; line-height: 1.1; letter-spacing: -0.01em; }
+    .hero-id h1 span { color: var(--teal); }
+    .hero-sub { color: var(--dim); margin-top: 10px; font-size: 0.85em; line-height: 1.55; max-width: 38em; }
+    .hero-refs { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 6px; }
+    .chip { font-family: monospace; font-size: 0.66em; letter-spacing: 0.08em; padding: 3px 8px; border: 1px solid var(--line); border-radius: 4px; color: var(--ice); background: rgba(13,27,42,0.6); }
+    .spec-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+    .spec-cell { background: rgba(5,8,17,0.92); padding: 12px 14px; }
+    .spec-cell .k { font-size: 0.62em; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dim); }
+    .spec-cell .v { font-family: monospace; font-size: 1.25em; color: var(--amber); margin-top: 4px; white-space: nowrap; }
+    .spec-cell .v small { font-size: 0.55em; color: var(--dim); }
+    .spec-cell .v.t { color: var(--teal); }
+    .spec-cell .v.i { color: var(--ice); }
+
+    /* ── 02 Process stepper ── */
+    .zone-legend { display: flex; gap: 14px; flex-wrap: wrap; font-family: monospace; font-size: 0.68em; color: var(--dim); margin-bottom: 14px; }
+    .zone-legend b { font-weight: 400; padding: 2px 7px; border-radius: 4px; border: 1px solid var(--line); }
+    .z5 { color: var(--teal); border-color: rgba(0,212,170,0.5) !important; }
+    .z6 { color: var(--amber); border-color: rgba(255,209,102,0.5) !important; }
+    .z7 { color: var(--ice); border-color: rgba(144,224,239,0.5) !important; }
+    .stepper { position: relative; margin-left: 14px; }
+    .stepper::before { content: ''; position: absolute; left: 11px; top: 6px; bottom: 6px; width: 1px; background: linear-gradient(var(--teal), var(--amber), var(--ice)); opacity: 0.5; }
+    .step { position: relative; padding: 0 0 4px 40px; }
+    .step-dot { position: absolute; left: 0; top: 12px; width: 23px; height: 23px; border-radius: 50%; background: var(--bg); border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; font-family: monospace; font-size: 0.62em; color: var(--teal); }
+    .step-head { display: flex; align-items: center; gap: 10px; padding: 10px 14px; cursor: pointer; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); transition: border-color 0.2s; user-select: none; }
+    .step-head:hover { border-color: var(--teal); }
+    .step-head h3 { font-size: 0.92em; font-weight: 600; }
+    .step-iso { font-family: monospace; font-size: 0.62em; padding: 2px 7px; border-radius: 4px; border: 1px solid var(--line); }
+    .step-arrow { margin-left: auto; color: var(--dim); font-size: 0.8em; transition: transform 0.25s; }
+    .step.open .step-arrow { transform: rotate(90deg); color: var(--teal); }
+    .step-body { display: none; margin: 6px 0 14px; padding: 14px; border: 1px solid var(--line); border-top: none; border-radius: 0 0 10px 10px; background: rgba(13,27,42,0.45); }
+    .step.open .step-body { display: block; }
+    .step-body p { font-size: 0.78em; color: #b8c4d2; line-height: 1.55; margin-bottom: 10px; }
+    .kv { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 6px 18px; font-size: 0.72em; }
+    .kv div { display: flex; justify-content: space-between; border-bottom: 1px solid rgba(65,90,119,0.2); padding: 3px 0; }
+    .kv .k { color: var(--ice); } .kv .v { font-family: monospace; color: var(--amber); }
+    .kv .v.g { color: var(--green); }
+
+    /* ── 03 Yield calculator ── */
+    .yield-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 20px; }
+    .slider-row { display: grid; grid-template-columns: 150px 1fr 58px; align-items: center; gap: 12px; padding: 9px 0; border-bottom: 1px solid rgba(65,90,119,0.18); }
+    .slider-row label { font-size: 0.78em; color: var(--ice); }
+    .slider-row input[type=range] { width: 100%; accent-color: var(--teal); height: 4px; }
+    .slider-row .sv { font-family: monospace; color: var(--amber); font-size: 0.85em; text-align: right; }
+    .cap-row { display: grid; grid-template-columns: 150px 1fr 58px; align-items: center; gap: 12px; padding-top: 12px; }
+    .yield-out { display: flex; flex-direction: column; gap: 10px; }
+    .big-out { border: 1px solid var(--line); border-radius: 10px; padding: 14px; background: rgba(13,27,42,0.5); }
+    .big-out .k { font-size: 0.62em; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dim); }
+    .big-out .v { font-family: monospace; font-size: 1.9em; color: var(--teal); margin-top: 2px; }
+    .big-out .sub { font-family: monospace; font-size: 0.68em; color: var(--dim); margin-top: 2px; }
+    .yield-bar { height: 8px; border-radius: 4px; background: rgba(65,90,119,0.3); overflow: hidden; margin-top: 8px; }
+    .yield-bar i { display: block; height: 100%; background: linear-gradient(90deg, var(--red), var(--amber), var(--teal)); transition: width 0.3s; }
+
+    /* ── 04 Contamination ── */
+    .contam-grid { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 16px; }
+    #pc-canvas { width: 100%; height: 170px; display: block; background: rgba(13,27,42,0.5); border-radius: 8px; border: 1px solid var(--line); }
+    .pc-read { display: flex; justify-content: space-between; font-family: monospace; font-size: 0.72em; margin-top: 8px; }
+    .pc-read .ok { color: var(--teal); } .pc-read .warn { color: var(--amber); }
+    .proto-card h4 { color: var(--teal); font-size: 0.85em; margin-bottom: 8px; letter-spacing: 0.05em; }
+    .proto-card ul { list-style: none; font-size: 0.74em; line-height: 1.5; }
+    .proto-card li { padding: 5px 0 5px 14px; border-bottom: 1px solid rgba(65,90,119,0.18); position: relative; color: #b8c4d2; }
+    .proto-card li::before { content: '▸'; position: absolute; left: 0; color: var(--amber); }
+    .proto-card li b { color: var(--ice); font-weight: 600; }
+
+    /* ── 05 Supply chain ── */
+    .supply-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+    .supply-card { border: 1px solid var(--line); border-radius: 10px; padding: 14px; background: var(--panel); }
+    .supply-card .cls { font-family: monospace; font-size: 0.62em; color: var(--amber); letter-spacing: 0.12em; text-transform: uppercase; }
+    .supply-card h4 { font-size: 0.92em; margin: 6px 0; }
+    .supply-card p { font-size: 0.72em; color: #b8c4d2; line-height: 1.5; }
+    .supply-card .stat { margin-top: 10px; font-family: monospace; font-size: 0.66em; color: var(--green); }
+
+    /* ── 06 Quality gates ── */
+    table { width: 100%; border-collapse: collapse; font-size: 0.76em; }
+    th { text-align: left; font-size: 0.85em; letter-spacing: 0.1em; text-transform: uppercase; color: var(--dim); font-weight: 500; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+    td { padding: 8px 10px; border-bottom: 1px solid rgba(65,90,119,0.2); color: #c6d2df; }
+    td.m { font-family: monospace; color: var(--amber); white-space: nowrap; }
+    td.g { font-family: monospace; color: var(--teal); }
+    tr:hover td { background: rgba(0,212,170,0.04); }
+
+    footer { margin-top: 70px; border-top: 1px solid var(--line); padding-top: 14px; display: flex; justify-content: space-between; font-family: monospace; font-size: 0.66em; color: var(--dim); }
+
+    @media (max-width: 980px) {
+        .hero { grid-template-columns: 1fr; }
+        .spec-grid { grid-template-columns: repeat(2, 1fr); }
+        .yield-grid, .contam-grid { grid-template-columns: 1fr; }
+        .supply-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 560px) { .supply-grid { grid-template-columns: 1fr; } .hero-id h1 { font-size: 1.5em; } }
+</style>
 </head>
 <body>
-    <div class="container">
-        <nav>
-            <a href="../index.html">🏠 Dashboard</a>
-            <a href="../pages/architecture.html">🏛️ Architecture</a>
-            <a href="../pages/digital-twin.html">🎮 3D Twin</a>
-            <a href="../pages/opa-analysis.html">📡 OPA</a>
-            <a href="../pages/link-budget.html">📊 Link Budget</a>
-            <a href="../pages/hypersonic.html">🚀 Hypersonic</a>
-            <a href="../pages/vleo-constellation.html">🌐 VLEO</a>
-            <a href="../pages/mapper-3d.html">🗺️ Mapper</a>
-            <a href="../pages/satellite-digital-twin.html">🛰️ Sat Twin</a>
-            <a href="../pages/interception-mission.html">🎯 Intercept</a>
-            <a href="../pages/vehicle-terminal.html">🛰️ Terminal</a>
-            <a href="../pages/ehf-optical-trade.html">📡 EHF vs Opt</a>
-            <a href="../pages/ppln-calculator.html">🔢 PPLN</a>
-            <a href="../pages/research-gaps.html">🔬 Gaps</a>
-            <a href="../pages/foundry.html">🏭 Foundry</a>
-            <a href="../pages/foundry-cleanroom.html">🏭 Clean Room</a>
-        </nav>
+<button class="nav-hamburger" id="nav-hamburger" aria-label="Open navigation">☰</button>
+<div class="nav-overlay" id="nav-overlay">
+    <button class="nav-close" id="nav-close" aria-label="Close navigation">✕</button>
+    <a href="../index.html">🏠 Dashboard</a><a href="architecture.html">🏛️ Architecture</a>
+    <a href="digital-twin.html">🎮 3D Twin</a><a href="opa-analysis.html">📡 OPA</a>
+    <a href="link-budget.html">📊 Link Budget</a><a href="hypersonic.html">🚀 Hypersonic</a>
+    <a href="vleo-constellation.html">🌐 VLEO</a><a href="mapper-3d.html">🗺️ Mapper</a>
+    <a href="satellite-digital-twin.html">🛰️ Sat Twin</a><a href="interception-mission.html">🎯 Intercept</a>
+    <a href="vehicle-terminal.html">🛰️ Terminal</a><a href="ehf-optical-trade.html">📡 EHF vs Opt</a>
+    <a href="ppln-calculator.html">🔢 PPLN</a><a href="research-gaps.html">🔬 Gaps</a>
+    <a href="foundry.html">🏭 Foundry</a><a href="foundry-cleanroom.html">🏭 Clean Room</a>
+</div>
 
-        <h1>🏭 Foundry Clean Room 3D</h1>
-        <p class="subtitle">Real-time digital twin of the photonic foundry clean room</p>
+<nav>
+    <a href="../index.html">🏠 Dashboard</a>
+    <a href="architecture.html">🏛️ Architecture</a>
+    <a href="digital-twin.html">🎮 3D Twin</a>
+    <a href="opa-analysis.html">📡 OPA</a>
+    <a href="link-budget.html">📊 Link Budget</a>
+    <a href="hypersonic.html">🚀 Hypersonic</a>
+    <a href="vleo-constellation.html">🌐 VLEO</a>
+    <a href="mapper-3d.html">🗺️ Mapper</a>
+    <a href="satellite-digital-twin.html">🛰️ Sat Twin</a>
+    <a href="interception-mission.html">🎯 Intercept</a>
+    <a href="vehicle-terminal.html">🛰️ Terminal</a>
+    <a href="ehf-optical-trade.html">📡 EHF vs Opt</a>
+    <a href="ppln-calculator.html">🔢 PPLN</a>
+    <a href="research-gaps.html">🔬 Gaps</a>
+    <a href="foundry.html">🏭 Foundry</a>
+    <a href="foundry-cleanroom.html" class="active">🏭 Clean Room</a>
+</nav>
 
-        <div class="card">
-            <h2>3D Clean Room Visualization</h2>
-            <div id="cleanroom3d-container" style="width:100%;height:500px;position:relative;background:#0d1b2a;border-radius:8px;overflow:hidden;">
-                <canvas id="cleanroom3d" style="width:100%;height:100%;display:block;"></canvas>
-                <div style="position:absolute;top:10px;left:10px;background:rgba(5,8,17,0.85);border:1px solid #415a77;border-radius:8px;padding:10px;font-size:0.7em;max-width:220px;">
-                    <div style="color:#00d4aa;font-weight:600;margin-bottom:4px">🏭 Clean Room Status</div>
-                    <div style="display:flex;justify-content:space-between;margin:2px 0"><span style="color:#90e0ef">Class:</span><span id="cr-class" style="color:#ffd166;font-family:monospace">ISO 5</span></div>
-                    <div style="display:flex;justify-content:space-between;margin:2px 0"><span style="color:#90e0ef">Temp:</span><span id="cr-temp" style="color:#ffd166;font-family:monospace">20.0°C</span></div>
-                    <div style="display:flex;justify-content:space-between;margin:2px 0"><span style="color:#90e0ef">Humidity:</span><span id="cr-hum" style="color:#ffd166;font-family:monospace">45%</span></div>
-                    <div style="display:flex;justify-content:space-between;margin:2px 0"><span style="color:#90e0ef">Wafers:</span><span id="cr-wafers" style="color:#ffd166;font-family:monospace">24</span></div>
-                    <div style="display:flex;justify-content:space-between;margin:2px 0"><span style="color:#90e0ef">Yield:</span><span id="cr-yield" style="color:#ffd166;font-family:monospace">94%</span></div>
-                </div>
+<div class="wrap">
+
+<!-- ═══ 01 PRODUCT ═══ -->
+<section id="product">
+    <div class="sec-head"><span class="sec-num">01 / PRODUCT</span><span class="sec-title">Photon-1 Optical Terminal</span><span class="sec-tag">Doc SP-P1-MFG-Rev C</span></div>
+    <div class="hero">
+        <div class="panel hero-id">
+            <h1>All-optical <span>12U photonic CubeSat</span>, built on one line.</h1>
+            <p class="hero-sub">Photon-1 is a free-space optical communications terminal integrated on a 12U bus. Every unit flows through a single ISO-classified line: SiN waveguide fabrication, thin-film lithium niobate poling, optical phased array assembly, and environmental qualification — with yield gated at every step.</p>
+            <div class="hero-refs">
+                <span class="chip">ECSS-Q-ST-70</span><span class="chip">ISO 14644-1</span><span class="chip">GEVS GSFC-STD-7000</span><span class="chip">MIL-STD-1540</span>
             </div>
-            <div class="zone-legend">
-                <div class="zone-item"><div class="zone-color" style="background:#00d4aa"></div><span>Lithography</span></div>
-                <div class="zone-item"><div class="zone-color" style="background:#90e0ef"></div><span>Etch</span></div>
-                <div class="zone-item"><div class="zone-color" style="background:#ffd166"></div><span>Deposition</span></div>
-                <div class="zone-item"><div class="zone-color" style="background:#e63946"></div><span>Bonding</span></div>
-                <div class="zone-item"><div class="zone-color" style="background:#2a9d8f"></div><span>Test</span></div>
-                <div class="zone-item"><div class="zone-color" style="background:#778da9"></div><span>Storage</span></div>
-            </div>
         </div>
-
-        <div class="card">
-            <h2>Clean Room Controls</h2>
-            <div class="controls">
-                <div class="control-group">
-                    <label>View Mode</label>
-                    <select id="view-mode">
-                        <option value="overview">Overview</option>
-                        <option value="litho">Lithography Zone</option>
-                        <option value="etch">Etch Zone</option>
-                        <option value="dep">Deposition Zone</option>
-                        <option value="bond">Bonding Zone</option>
-                        <option value="test">Test Zone</option>
-                    </select>
-                </div>
-                <div class="control-group">
-                    <label>Wafer Count: <span id="wafer-val">24</span></label>
-                    <input type="range" id="wafer-count" min="1" max="50" value="24">
-                </div>
-                <div class="control-group">
-                    <label>Airflow (m/s): <span id="airflow-val">0.45</span></label>
-                    <input type="range" id="airflow" min="0.1" max="1.0" value="0.45" step="0.01">
-                </div>
-                <div class="control-group">
-                    <label>Filter Status</label>
-                    <select id="filter-status">
-                        <option value="normal">Normal</option>
-                        <option value="warning">Warning</option>
-                        <option value="critical">Critical</option>
-                    </select>
-                </div>
-            </div>
-            <button class="btn" onclick="startCRSim()">▶️ Start Simulation</button>
-            <button class="btn btn-danger" onclick="stopCRSim()">⏹️ Stop</button>
+        <div class="spec-grid">
+            <div class="spec-cell"><div class="k">Bus</div><div class="v t">12U <small>CubeSat</small></div></div>
+            <div class="spec-cell"><div class="k">Mass</div><div class="v">12 <small>kg</small></div></div>
+            <div class="spec-cell"><div class="k">Power</div><div class="v">45 <small>W avg</small></div></div>
+            <div class="spec-cell"><div class="k">Wavelength</div><div class="v i">1550 <small>nm C-band</small></div></div>
+            <div class="spec-cell"><div class="k">Downlink</div><div class="v t">10 <small>Gbps class</small></div></div>
+            <div class="spec-cell"><div class="k">Inter-sat link</div><div class="v t">100 <small>Gbps class</small></div></div>
+            <div class="spec-cell"><div class="k">Aperture</div><div class="v">5 <small>cm, OPA</small></div></div>
+            <div class="spec-cell"><div class="k">Steering</div><div class="v i">±15<small>° electronic</small></div></div>
+            <div class="spec-cell" style="grid-column: span 2"><div class="k">Beamwidth</div><div class="v">31 <small>μrad class, diffraction-limited</small></div></div>
+            <div class="spec-cell" style="grid-column: span 2"><div class="k">Design life</div><div class="v g">5 <small>yr VLEO</small></div></div>
         </div>
-
-        <div class="card">
-            <h2>Process Flow</h2>
-            <canvas id="process-flow" height="200"></canvas>
-        </div>
-
-        <div class="card">
-            <h2>Equipment Status</h2>
-            <canvas id="equipment-status" height="250"></canvas>
-        </div>
-
-        <footer><p>Space Photonics Digital Twin — Foundry Clean Room Module</p></footer>
     </div>
+</section>
 
-    <script type="module">
-        import * as THREE from 'three';
-        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+<!-- ═══ 02 PROCESS FLOW ═══ -->
+<section id="process">
+    <div class="sec-head"><span class="sec-num">02 / PROCESS</span><span class="sec-title">Clean Room Flow — Wafer to Ship</span><span class="sec-tag">8 gated steps · click to expand</span></div>
+    <div class="zone-legend">Cleanliness zones: <b class="z5">ISO 5 — front-end fab</b> <b class="z6">ISO 6 — die & fiber assembly</b> <b class="z7">ISO 7 — integration & test</b></div>
+    <div class="stepper" id="stepper">
+        <div class="step"><div class="step-dot">S1</div>
+            <div class="step-head"><h3>Wafer In — Incoming Inspection</h3><span class="step-iso z7">ISO 7</span><span class="step-arrow">▸</span></div>
+            <div class="step-body"><p>200 mm Si wafers with LPCVD Si₃N₄ film received into the gray room. Lot verified against foundry CoA, surface scanned, and queued into the MES with full traceability.</p>
+                <div class="kv"><div><span class="k">Gate</span><span class="v">CoA + surface scan</span></div><div><span class="k">Particles</span><span class="v">&lt; 50 adders ≥0.1 μm</span></div><div><span class="k">SiN thickness</span><span class="v">100 ± 2 nm</span></div><div><span class="k">Cycle time</span><span class="v">0.5 day</span></div></div></div></div>
+        <div class="step"><div class="step-dot">S2</div>
+            <div class="step-head"><h3>SiN Photonics Fabrication</h3><span class="step-iso z5">ISO 5</span><span class="step-arrow">▸</span></div>
+            <div class="step-body"><p>DUV lithography and ICP etch of ultra-low-loss Si₃N₄ waveguides — routing mesh, ring filters, and spot-size converters for the photonic interposer.</p>
+                <div class="kv"><div><span class="k">Propagation loss</span><span class="v g">&lt; 0.1 dB/cm</span></div><div><span class="k">CD control</span><span class="v">± 10 nm 3σ</span></div><div><span class="k">Sidewall roughness</span><span class="v">&lt; 2 nm RMS</span></div><div><span class="k">Gate</span><span class="v g">inline OCD + loss wafer map</span></div></div></div></div>
+        <div class="step"><div class="step-dot">S3</div>
+            <div class="step-head"><h3>PPLN / TFLN Poling</h3><span class="step-iso z5">ISO 5</span><span class="step-arrow">▸</span></div>
+            <div class="step-body"><p>Periodic poling of thin-film lithium niobate for the frequency-conversion stage — field pulses across patterned electrodes invert domains at the quasi-phase-match period.</p>
+                <div class="kv"><div><span class="k">Poling period</span><span class="v">6.42 μm</span></div><div><span class="k">Duty cycle</span><span class="v">50 ± 3%</span></div><div><span class="k">SHG efficiency</span><span class="v g">&gt; 100 %/W·cm²</span></div><div><span class="k">Gate</span><span class="v g">in-situ SHG monitor</span></div></div></div></div>
+        <div class="step"><div class="step-dot">S4</div>
+            <div class="step-head"><h3>OPA Die Attach</h3><span class="step-iso z6">ISO 6</span><span class="step-arrow">▸</span></div>
+            <div class="step-body"><p>Flip-chip thermocompression bonding of the 64-element OPA die and InP gain chip onto the SiN interposer, with active alignment to the waveguide array.</p>
+                <div class="kv"><div><span class="k">Placement</span><span class="v">± 1 μm</span></div><div><span class="k">Coupling loss</span><span class="v g">&lt; 1.5 dB/facet</span></div><div><span class="k">Elements</span><span class="v">64 ch OPA</span></div><div><span class="k">Gate</span><span class="v g">near-field scan pass</span></div></div></div></div>
+        <div class="step"><div class="step-dot">S5</div>
+            <div class="step-head"><h3>Fiber Attach &amp; Alignment</h3><span class="step-iso z6">ISO 6</span><span class="step-arrow">▸</span></div>
+            <div class="step-body"><p>PM fiber array actively aligned to edge couplers and laser-welded in a hermetic feed-through. Alignment holds through the full thermal range.</p>
+                <div class="kv"><div><span class="k">Alignment</span><span class="v">± 0.5 μm</span></div><div><span class="k">Attach loss</span><span class="v g">&lt; 0.8 dB</span></div><div><span class="k">PER</span><span class="v">&gt; 20 dB</span></div><div><span class="k">Gate</span><span class="v g">post-cure loss re-measure</span></div></div></div></div>
+        <div class="step"><div class="step-dot">S6</div>
+            <div class="step-head"><h3>Terminal Integration</h3><span class="step-iso z7">ISO 7</span><span class="step-arrow">▸</span></div>
+            <div class="step-body"><p>Optical bench married to the 12U bus: avionics stack, 45 W power conditioning, fine-steering mirror backup, and thermal straps. Full functional and aliveness test at ambient.</p>
+                <div class="kv"><div><span class="k">Mass at gate</span><span class="v">12.0 ± 0.2 kg</span></div><div><span class="k">Steering check</span><span class="v">± 15° raster</span></div><div><span class="k">Beamwidth</span><span class="v g">≤ 31 μrad class</span></div><div><span class="k">Gate</span><span class="v g">ambient link demo 10 Gbps</span></div></div></div></div>
+        <div class="step"><div class="step-dot">S7</div>
+            <div class="step-head"><h3>TVAC + Vibration Qualification</h3><span class="step-iso z7">ISO 7</span><span class="step-arrow">▸</span></div>
+            <div class="step-body"><p>Thermal-vacuum cycling and random vibration per GEVS protoflight levels, with optical performance monitored before, during, and after exposure.</p>
+                <div class="kv"><div><span class="k">TVAC</span><span class="v">−30 to +60°C, 8 cyc</span></div><div><span class="k">Vibe</span><span class="v">14.1 g RMS random</span></div><div><span class="k">Drift budget</span><span class="v g">&lt; 0.3 dB post-env</span></div><div><span class="k">Gate</span><span class="v g">vacuum link demo</span></div></div></div></div>
+        <div class="step"><div class="step-dot">S8</div>
+            <div class="step-head"><h3>Final Acceptance &amp; Ship</h3><span class="step-iso z7">ISO 7</span><span class="step-arrow">▸</span></div>
+            <div class="step-body"><p>End-of-line acceptance data package: as-built optical budget, radiation lot data, cleanliness certification, and serialized calibration files. Nitrogen-purged double bag for transport.</p>
+                <div class="kv"><div><span class="k">Acceptance</span><span class="v">ATP per GSFC-STD-7000</span></div><div><span class="k">Purge</span><span class="v">N₂ 99.99%</span></div><div><span class="k">Traceability</span><span class="v">full genealogy</span></div><div><span class="k">Lead time</span><span class="v g">12 wk wafer→ship</span></div></div></div></div>
+    </div>
+</section>
 
-        const cr3dCanvas = document.getElementById('cleanroom3d');
-        const cr3dScene = new THREE.Scene();
-        cr3dScene.background = new THREE.Color(0x0d1b2a);
-        const cr3dCamera = new THREE.PerspectiveCamera(50, cr3dCanvas.clientWidth / cr3dCanvas.clientHeight, 0.1, 100);
-        cr3dCamera.position.set(0, 8, 12);
-        const cr3dRenderer = new THREE.WebGLRenderer({ canvas: cr3dCanvas, antialias: true });
-        cr3dRenderer.setSize(cr3dCanvas.clientWidth, cr3dCanvas.clientHeight);
+<!-- ═══ 03 YIELD MODEL ═══ -->
+<section id="yield">
+    <div class="sec-head"><span class="sec-num">03 / ECONOMICS</span><span class="sec-title">End-to-End Yield Model</span><span class="sec-tag">live · drag sliders</span></div>
+    <div class="yield-grid">
+        <div class="panel">
+            <div class="slider-row"><label for="y-sin">SiN fab yield</label><input type="range" id="y-sin" min="50" max="99" value="92"><span class="sv" id="y-sin-v">92%</span></div>
+            <div class="slider-row"><label for="y-ppln">PPLN/TFLN poling</label><input type="range" id="y-ppln" min="50" max="99" value="85"><span class="sv" id="y-ppln-v">85%</span></div>
+            <div class="slider-row"><label for="y-opa">OPA die attach</label><input type="range" id="y-opa" min="50" max="99" value="78"><span class="sv" id="y-opa-v">78%</span></div>
+            <div class="slider-row"><label for="y-asm">Assembly &amp; align</label><input type="range" id="y-asm" min="50" max="99" value="90"><span class="sv" id="y-asm-v">90%</span></div>
+            <div class="slider-row"><label for="y-tst">Test &amp; qual</label><input type="range" id="y-tst" min="50" max="99" value="95"><span class="sv" id="y-tst-v">95%</span></div>
+            <div class="cap-row"><label for="capacity">Line capacity</label><input type="range" id="capacity" min="4" max="60" value="24"><span class="sv" id="capacity-v">24/mo</span></div>
+            <div class="cap-row"><label for="unitcost">Input cost / unit</label><input type="range" id="unitcost" min="50" max="400" value="120"><span class="sv" id="unitcost-v">$120k</span></div>
+        </div>
+        <div class="yield-out">
+            <div class="big-out"><div class="k">End-to-end yield</div><div class="v" id="out-yield">—</div><div class="yield-bar"><i id="out-bar" style="width:0%"></i></div><div class="sub" id="out-yield-sub">product of 5 gated steps</div></div>
+            <div class="big-out"><div class="k">Good units / month</div><div class="v" id="out-units">—</div><div class="sub" id="out-units-sub">at line capacity</div></div>
+            <div class="big-out"><div class="k">Effective cost / good unit</div><div class="v" id="out-cost">—</div><div class="sub" id="out-cost-sub">input cost amortized over yield</div></div>
+        </div>
+    </div>
+</section>
 
-        const cr3dControls = new OrbitControls(cr3dCamera, cr3dCanvas);
-        cr3dControls.enableDamping = true;
-        cr3dControls.autoRotate = true;
-        cr3dControls.autoRotateSpeed = 0.2;
+<!-- ═══ 04 CONTAMINATION ═══ -->
+<section id="contamination">
+    <div class="sec-head"><span class="sec-num">04 / CONTAMINATION</span><span class="sec-title">Particle, ESD &amp; Garment Control</span><span class="sec-tag">ISO 14644-1 monitoring</span></div>
+    <div class="contam-grid">
+        <div class="panel">
+            <div class="proto-card"><h4>Live particle counter — ≥0.5 μm channel</h4></div>
+            <canvas id="pc-canvas" width="520" height="170"></canvas>
+            <div class="pc-read">
+                <span>Reading: <b class="ok" id="pc-val">—</b> /m³</span>
+                <span>ISO 5 limit: <b class="warn">3,520</b> /m³</span>
+                <span>Status: <b class="ok" id="pc-status">NOMINAL</b></span>
+            </div>
+            <div class="kv" style="margin-top:10px">
+                <div><span class="k">ISO 5 ≥0.5 μm</span><span class="v">3,520 /m³</span></div>
+                <div><span class="k">ISO 6 ≥0.5 μm</span><span class="v">35,200 /m³</span></div>
+                <div><span class="k">ISO 7 ≥0.5 μm</span><span class="v">352,000 /m³</span></div>
+                <div><span class="k">Molecular (AMC)</span><span class="v g">&lt; 1 ppb</span></div>
+            </div>
+        </div>
+        <div class="panel proto-card"><h4>ESD Program — ANSI/ESD S20.20</h4>
+            <ul>
+                <li><b>Wrist straps</b> continuous monitor, 1 MΩ to ground</li>
+                <li><b> flooring</b> 10⁶–10⁹ Ω dissipative, verified weekly</li>
+                <li><b>Ionizers</b> over all die-attach &amp; fiber stations, ±5 V balance</li>
+                <li><b>HBM control</b> &lt; 100 V on all OPA handling</li>
+                <li><b>Packaging</b> shielding bags, N₂ purged, desiccant + HIC</li>
+            </ul>
+        </div>
+        <div class="panel proto-card"><h4>Garment Protocol by Zone</h4>
+            <ul>
+                <li><b>ISO 5:</b> full bunny suit, hood, goggles, double gloves; change every entry</li>
+                <li><b>ISO 6:</b> smock + hood + boots; gloves at stations</li>
+                <li><b>ISO 7:</b> frock + hairnet; ESD heel straps mandatory</li>
+                <li><b>Air shower</b> 20 s cycle at ISO 5 airlock</li>
+                <li><b>Garment audit</b> particle shed test monthly</li>
+            </ul>
+        </div>
+    </div>
+</section>
 
-        cr3dScene.add(new THREE.AmbientLight(0x404040, 0.6));
-        const cr3dSun = new THREE.DirectionalLight(0xffffff, 0.8);
-        cr3dSun.position.set(5, 10, 5);
-        cr3dScene.add(cr3dSun);
+<!-- ═══ 05 SUPPLY CHAIN ═══ -->
+<section id="supply">
+    <div class="sec-head"><span class="sec-num">05 / SUPPLY CHAIN</span><span class="sec-title">Foundry &amp; Partner Classes</span><span class="sec-tag">dual-source policy</span></div>
+    <div class="supply-grid">
+        <div class="supply-card"><span class="cls">Class A — SiN Fab</span><h4>Silicon Nitride Foundry</h4><p>200 mm DUV line for ultra-low-loss waveguide interposers. Qualified at &lt;0.1 dB/cm with statistical process control on CD and loss maps.</p><div class="stat">2 sources qualified · 8 wk cycle</div></div>
+        <div class="supply-card"><span class="cls">Class B — TFLN Fab</span><h4>Thin-Film Lithium Niobate Foundry</h4><p>Poling and etch of TFLN/PPLN dies for frequency conversion at the 6.42 μm QPM period, with in-situ SHG process monitoring.</p><div class="stat">1 source qualified · 2nd in audit</div></div>
+        <div class="supply-card"><span class="cls">Class C — InP Laser Source</span><h4>InP Gain Chip Supplier</h4><p>1550 nm DFB gain chips, space-screened lots with burn-in and wavelength binning ±0.5 nm for the C-band transmitter chain.</p><div class="stat">2 sources · lot burn-in 96 h</div></div>
+        <div class="supply-card"><span class="cls">Class D — Radiation Test</span><h4>Radiation Effects Lab</h4><p>TID and SEE campaign on OPA driver electronics and photonic dies — Co-60 TID to 30 krad(Si), heavy-ion SEE per ESCC 25100.</p><div class="stat">annual lot sample · 30 krad(Si)</div></div>
+    </div>
+</section>
 
-        // Clean room floor
-        const floorGeo = new THREE.PlaneGeometry(20, 15);
-        const floorMat = new THREE.MeshPhongMaterial({ color: 0x1a3a5c, shininess: 100 });
-        const floor = new THREE.Mesh(floorGeo, floorMat);
-        floor.rotation.x = -Math.PI/2;
-        cr3dScene.add(floor);
+<!-- ═══ 06 QUALITY GATES ═══ -->
+<section id="quality">
+    <div class="sec-head"><span class="sec-num">06 / QUALITY</span><span class="sec-title">Quality Gates vs Product Spec</span><span class="sec-tag">pass/fail at each step</span></div>
+    <div class="panel" style="padding:0; overflow:hidden;">
+    <table>
+        <thead><tr><th>Gate</th><th>Parameter</th><th>Spec</th><th>Method</th><th>Step</th></tr></thead>
+        <tbody>
+            <tr><td>G1</td><td>SiN waveguide propagation loss</td><td class="m">&lt; 0.1 dB/cm</td><td class="g">Cutback wafer map</td><td>S2</td></tr>
+            <tr><td>G2</td><td>PPLN poling period / duty cycle</td><td class="m">6.42 μm / 50 ± 3%</td><td class="g">In-situ SHG + SEM</td><td>S3</td></tr>
+            <tr><td>G3</td><td>OPA facet coupling loss</td><td class="m">&lt; 1.5 dB/facet</td><td class="g">Near-field scan</td><td>S4</td></tr>
+            <tr><td>G4</td><td>Fiber attach alignment / loss</td><td class="m">±0.5 μm / &lt; 0.8 dB</td><td class="g">Active align + post-cure re-measure</td><td>S5</td></tr>
+            <tr><td>G5</td><td>Far-field beamwidth</td><td class="m">≤ 31 μrad class</td><td class="g">Goniometric far-field</td><td>S6</td></tr>
+            <tr><td>G6</td><td>OPA steering range</td><td class="m">± 15° full raster</td><td class="g">Beam steering sweep</td><td>S6</td></tr>
+            <tr><td>G7</td><td>Ambient link demonstration</td><td class="m">10 Gbps BER &lt; 10⁻⁹</td><td class="g">BERT loopback</td><td>S6</td></tr>
+            <tr><td>G8</td><td>Post-environment optical drift</td><td class="m">&lt; 0.3 dB</td><td class="g">Pre/post TVAC delta</td><td>S7</td></tr>
+            <tr><td>G9</td><td>Random vibration survival</td><td class="m">14.1 g RMS, no fail</td><td class="g">GEVS protoflight</td><td>S7</td></tr>
+            <tr><td>G10</td><td>Terminal mass at ship</td><td class="m">12.0 ± 0.2 kg</td><td class="g">Calibrated scale</td><td>S8</td></tr>
+        </tbody>
+    </table>
+    </div>
+</section>
 
-        // Clean room walls
-        const wallMat = new THREE.MeshPhongMaterial({ color: 0x2a4a6c, transparent: true, opacity: 0.3 });
-        const wall1 = new THREE.Mesh(new THREE.PlaneGeometry(20, 3), wallMat);
-        wall1.position.set(0, 1.5, -7.5);
-        cr3dScene.add(wall1);
-        const wall2 = new THREE.Mesh(new THREE.PlaneGeometry(20, 3), wallMat);
-        wall2.position.set(0, 1.5, 7.5);
-        wall2.rotation.y = Math.PI;
-        cr3dScene.add(wall2);
-        const wall3 = new THREE.Mesh(new THREE.PlaneGeometry(15, 3), wallMat);
-        wall3.position.set(-10, 1.5, 0);
-        wall3.rotation.y = Math.PI/2;
-        cr3dScene.add(wall3);
-        const wall4 = new THREE.Mesh(new THREE.PlaneGeometry(15, 3), wallMat);
-        wall4.position.set(10, 1.5, 0);
-        wall4.rotation.y = -Math.PI/2;
-        cr3dScene.add(wall4);
+<footer>
+    <span>SP-P1-MFG-REV C · SPACE PHOTONICS FOUNDRY</span>
+    <span>ISO 14644-1 · ECSS-Q-ST-70 · GEVS</span>
+</footer>
+</div>
 
-        // Equipment zones
-        const zones = [
-            { name: 'Lithography', x: -6, z: -4, color: 0x00d4aa, equip: 4 },
-            { name: 'Etch', x: 0, z: -4, color: 0x90e0ef, equip: 3 },
-            { name: 'Deposition', x: 6, z: -4, color: 0xffd166, equip: 5 },
-            { name: 'Bonding', x: -6, z: 4, color: 0xe63946, equip: 3 },
-            { name: 'Test', x: 0, z: 4, color: 0x2a9d8f, equip: 4 },
-            { name: 'Storage', x: 6, z: 4, color: 0x778da9, equip: 2 }
-        ];
+<script>
+(function () {
+    'use strict';
 
-        const equipment = [];
-        zones.forEach(zone => {
-            // Zone platform
-            const platformGeo = new THREE.BoxGeometry(4, 0.1, 4);
-            const platformMat = new THREE.MeshPhongMaterial({ color: zone.color, transparent: true, opacity: 0.2 });
-            const platform = new THREE.Mesh(platformGeo, platformMat);
-            platform.position.set(zone.x, 0.05, zone.z);
-            cr3dScene.add(platform);
-
-            // Equipment boxes
-            for (let i = 0; i < zone.equip; i++) {
-                const equipGeo = new THREE.BoxGeometry(0.8, 1.2, 0.6);
-                const equipMat = new THREE.MeshPhongMaterial({ color: zone.color, shininess: 50 });
-                const equip = new THREE.Mesh(equipGeo, equipMat);
-                equip.position.set(
-                    zone.x + (Math.random() - 0.5) * 2.5,
-                    0.6,
-                    zone.z + (Math.random() - 0.5) * 2.5
-                );
-                equip.userData = { zone: zone.name, status: 'running' };
-                cr3dScene.add(equip);
-                equipment.push(equip);
-
-                // Status light
-                const lightGeo = new THREE.SphereGeometry(0.05, 8, 8);
-                const lightMat = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-                const light = new THREE.Mesh(lightGeo, lightMat);
-                light.position.set(equip.position.x, 1.3, equip.position.z);
-                light.userData.parent = equip;
-                cr3dScene.add(light);
-                equip.userData.light = light;
-            }
+    /* ── Hamburger nav ── */
+    var hamBtn = document.getElementById('nav-hamburger');
+    var navOverlay = document.getElementById('nav-overlay');
+    var navClose = document.getElementById('nav-close');
+    if (hamBtn && navOverlay && navClose) {
+        hamBtn.addEventListener('click', function () { navOverlay.classList.add('active'); });
+        navClose.addEventListener('click', function () { navOverlay.classList.remove('active'); });
+        navOverlay.querySelectorAll('a').forEach(function (a) {
+            a.addEventListener('click', function () { navOverlay.classList.remove('active'); });
         });
+    }
 
-        // Wafer carriers
-        const wafers = [];
-        const waferGeo = new THREE.CylinderGeometry(0.15, 0.15, 0.02, 16);
-        const waferMat = new THREE.MeshPhongMaterial({ color: 0xdddddd, shininess: 100 });
-        for (let i = 0; i < 24; i++) {
-            const wafer = new THREE.Mesh(waferGeo, waferMat);
-            wafer.position.set(
-                (Math.random() - 0.5) * 16,
-                0.02 + i * 0.001,
-                (Math.random() - 0.5) * 12
-            );
-            wafer.userData = { id: i, stage: Math.floor(Math.random() * 6) };
-            cr3dScene.add(wafer);
-            wafers.push(wafer);
-        }
-
-        // Airflow visualization
-        const airflowParticles = [];
-        const particleGeo = new THREE.SphereGeometry(0.02, 4, 4);
-        const particleMat = new THREE.MeshBasicMaterial({ color: 0x90e0ef, transparent: true, opacity: 0.3 });
-        for (let i = 0; i < 200; i++) {
-            const particle = new THREE.Mesh(particleGeo, particleMat);
-            particle.position.set(
-                (Math.random() - 0.5) * 18,
-                Math.random() * 2.5,
-                (Math.random() - 0.5) * 13
-            );
-            particle.userData = { vx: 0, vy: -0.01, vz: 0 };
-            cr3dScene.add(particle);
-            airflowParticles.push(particle);
-        }
-
-        let crAnimId = null;
-        let crTime = 0;
-
-        function updateCRSim() {
-            crTime += 0.016;
-
-            const viewMode = document.getElementById('view-mode').value;
-            const waferCount = parseInt(document.getElementById('wafer-count').value);
-            const airflow = parseFloat(document.getElementById('airflow').value);
-            const filterStatus = document.getElementById('filter-status').value;
-
-            document.getElementById('wafer-val').textContent = waferCount;
-            document.getElementById('airflow-val').textContent = airflow.toFixed(2);
-
-            // Camera view
-            if (viewMode === 'overview') {
-                cr3dCamera.position.lerp(new THREE.Vector3(0, 8, 12), 0.02);
-                cr3dControls.autoRotate = true;
-            } else {
-                const zone = zones.find(z => z.name.toLowerCase().startsWith(viewMode));
-                if (zone) {
-                    cr3dCamera.position.lerp(new THREE.Vector3(zone.x, 4, zone.z + 6), 0.02);
-                    cr3dControls.target.lerp(new THREE.Vector3(zone.x, 0.5, zone.z), 0.02);
-                    cr3dControls.autoRotate = false;
-                }
-            }
-
-            // Update wafers
-            wafers.forEach((wafer, i) => {
-                wafer.visible = i < waferCount;
-                wafer.rotation.y += 0.01;
-            });
-
-            // Update equipment status lights
-            equipment.forEach(equip => {
-                const light = equip.userData.light;
-                if (filterStatus === 'critical' && Math.random() > 0.8) {
-                    light.material.color.setHex(0xff0000);
-                } else if (filterStatus === 'warning' && Math.random() > 0.6) {
-                    light.material.color.setHex(0xffaa00);
-                } else {
-                    light.material.color.setHex(0x00ff00);
-                }
-            });
-
-            // Update airflow particles
-            airflowParticles.forEach(p => {
-                p.position.y += p.userData.vy * airflow;
-                p.position.x += (Math.random() - 0.5) * 0.01;
-                p.position.z += (Math.random() - 0.5) * 0.01;
-                if (p.position.y < 0) {
-                    p.position.y = 2.5;
-                    p.position.x = (Math.random() - 0.5) * 18;
-                    p.position.z = (Math.random() - 0.5) * 13;
-                }
-                p.material.opacity = 0.1 + airflow * 0.4;
-            });
-
-            // Update HUD
-            document.getElementById('cr-class').textContent = filterStatus === 'critical' ? 'ISO 7' : filterStatus === 'warning' ? 'ISO 6' : 'ISO 5';
-            document.getElementById('cr-temp').textContent = (20 + Math.sin(crTime * 0.5) * 0.5).toFixed(1) + '°C';
-            document.getElementById('cr-hum').textContent = (45 + Math.cos(crTime * 0.3) * 3).toFixed(0) + '%';
-            document.getElementById('cr-wafers').textContent = waferCount;
-            const yieldVal = filterStatus === 'critical' ? 78 : filterStatus === 'warning' ? 88 : 94;
-            document.getElementById('cr-yield').textContent = yieldVal + '%';
-
-            cr3dControls.update();
-            cr3dRenderer.render(cr3dScene, cr3dCamera);
-            crAnimId = requestAnimationFrame(updateCRSim);
-        }
-
-        window.startCRSim = () => {
-            if (crAnimId) cancelAnimationFrame(crAnimId);
-            crTime = 0;
-            updateCRSim();
-        };
-
-        window.stopCRSim = () => {
-            if (crAnimId) {
-                cancelAnimationFrame(crAnimId);
-                crAnimId = null;
-            }
-        };
-
-        // Initial render
-        cr3dRenderer.render(cr3dScene, cr3dCamera);
-
-        window.addEventListener('resize', () => {
-            const rect = cr3dCanvas.parentElement.getBoundingClientRect();
-            cr3dCamera.aspect = rect.width / rect.height;
-            cr3dCamera.updateProjectionMatrix();
-            cr3dRenderer.setSize(rect.width, rect.height);
+    /* ── Process stepper expand/collapse ── */
+    var steps = document.querySelectorAll('#stepper .step');
+    steps.forEach(function (step, i) {
+        var head = step.querySelector('.step-head');
+        head.addEventListener('click', function () {
+            var open = step.classList.contains('open');
+            steps.forEach(function (s) { s.classList.remove('open'); });
+            if (!open) { step.classList.add('open'); }
         });
+        if (i === 0) { step.classList.add('open'); }
+    });
 
-        // Process flow canvas
-        const flowCanvas = document.getElementById('process-flow');
-        flowCanvas.width = flowCanvas.clientWidth * 2;
-        flowCanvas.height = flowCanvas.clientHeight * 2;
-        const flowCtx = flowCanvas.getContext('2d');
+    /* ── Yield calculator ── */
+    var ids = ['y-sin', 'y-ppln', 'y-opa', 'y-asm', 'y-tst', 'capacity', 'unitcost'];
+    var els = {};
+    ids.forEach(function (id) { els[id] = document.getElementById(id); });
+    var outYield = document.getElementById('out-yield');
+    var outBar = document.getElementById('out-bar');
+    var outYieldSub = document.getElementById('out-yield-sub');
+    var outUnits = document.getElementById('out-units');
+    var outUnitsSub = document.getElementById('out-units-sub');
+    var outCost = document.getElementById('out-cost');
+    var outCostSub = document.getElementById('out-cost-sub');
 
-        function drawProcessFlow() {
-            flowCtx.clearRect(0, 0, flowCanvas.width, flowCanvas.height);
-            const w = flowCanvas.width;
-            const h = flowCanvas.height;
+    function calcYield() {
+        var y = 1;
+        ['y-sin', 'y-ppln', 'y-opa', 'y-asm', 'y-tst'].forEach(function (id) {
+            var v = parseFloat(els[id].value);
+            document.getElementById(id + '-v').textContent = v + '%';
+            y *= v / 100;
+        });
+        var cap = parseFloat(els.capacity.value);
+        var cost = parseFloat(els.unitcost.value);
+        document.getElementById('capacity-v').textContent = cap + '/mo';
+        document.getElementById('unitcost-v').textContent = '$' + cost + 'k';
 
-            const steps = [
-                { name: 'Wafer In', color: '#778da9' },
-                { name: 'Lithography', color: '#00d4aa' },
-                { name: 'Etch', color: '#90e0ef' },
-                { name: 'Deposition', color: '#ffd166' },
-                { name: 'Bonding', color: '#e63946' },
-                { name: 'Test', color: '#2a9d8f' },
-                { name: 'Wafer Out', color: '#95d5b2' }
-            ];
+        var pct = y * 100;
+        var units = cap * y;
+        var effCost = cost / y;
 
-            const stepW = w / steps.length;
-            const cy = h / 2;
+        outYield.textContent = pct.toFixed(1) + '%';
+        outBar.style.width = pct.toFixed(1) + '%';
+        outYield.style.color = pct >= 45 ? '#00d4aa' : (pct >= 30 ? '#ffd166' : '#e63946');
+        outYieldSub.textContent = 'scrap: ' + (cap - units).toFixed(1) + ' units/mo at capacity';
+        outUnits.textContent = units.toFixed(1);
+        outUnitsSub.textContent = 'of ' + cap + ' units/mo started';
+        outCost.textContent = '$' + (effCost >= 1000 ? (effCost / 1000).toFixed(2) + 'M' : Math.round(effCost) + 'k');
+        outCostSub.textContent = '$' + cost + 'k input ÷ ' + pct.toFixed(1) + '% yield';
+    }
+    ids.forEach(function (id) { els[id].addEventListener('input', calcYield); });
+    calcYield();
 
-            steps.forEach((step, i) => {
-                const x = i * stepW + stepW / 2;
+    /* ── Particle counter animation ── */
+    var canvas = document.getElementById('pc-canvas');
+    var ctx = canvas.getContext('2d');
+    var pcVal = document.getElementById('pc-val');
+    var pcStatus = document.getElementById('pc-status');
+    var ISO5 = 3520;
+    var history = [];
+    var i;
+    for (i = 0; i < 120; i++) { history.push(2800 + Math.random() * 500); }
 
-                // Arrow
-                if (i < steps.length - 1) {
-                    flowCtx.strokeStyle = '#415a77';
-                    flowCtx.lineWidth = 3;
-                    flowCtx.beginPath();
-                    flowCtx.moveTo(x + 30, cy);
-                    flowCtx.lineTo(x + stepW - 30, cy);
-                    flowCtx.stroke();
-                    // Arrowhead
-                    flowCtx.beginPath();
-                    flowCtx.moveTo(x + stepW - 35, cy - 8);
-                    flowCtx.lineTo(x + stepW - 30, cy);
-                    flowCtx.lineTo(x + stepW - 35, cy + 8);
-                    flowCtx.stroke();
-                }
+    function drawParticles() {
+        var latest = Math.max(200, Math.min(ISO5 * 1.25, history[history.length - 1] + (Math.random() - 0.5) * 260));
+        history.push(latest);
+        if (history.length > 120) { history.shift(); }
 
-                // Step circle
-                flowCtx.fillStyle = step.color;
-                flowCtx.beginPath();
-                flowCtx.arc(x, cy, 25, 0, 2 * Math.PI);
-                flowCtx.fill();
+        var w = canvas.width, h = canvas.height;
+        ctx.clearRect(0, 0, w, h);
 
-                // Step name
-                flowCtx.fillStyle = '#e0e6ed';
-                flowCtx.font = '14px sans-serif';
-                flowCtx.textAlign = 'center';
-                flowCtx.fillText(step.name, x, cy + 50);
+        function yFor(v) { return h - 12 - (Math.log10(Math.max(v, 1)) / Math.log10(ISO5 * 1.4)) * (h - 24); }
 
-                // Step number
-                flowCtx.fillStyle = '#050811';
-                flowCtx.font = 'bold 16px sans-serif';
-                flowCtx.fillText(i + 1, x, cy + 5);
-            });
+        /* ISO 5 limit line */
+        ctx.strokeStyle = 'rgba(230,57,70,0.8)';
+        ctx.setLineDash([5, 4]);
+        ctx.beginPath();
+        ctx.moveTo(0, yFor(ISO5));
+        ctx.lineTo(w, yFor(ISO5));
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = 'rgba(230,57,70,0.9)';
+        ctx.font = '10px monospace';
+        ctx.fillText('ISO 5 LIMIT 3,520', 8, yFor(ISO5) - 4);
+
+        /* trace */
+        ctx.strokeStyle = '#00d4aa';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        history.forEach(function (v, idx) {
+            var x = idx / (history.length - 1) * w;
+            var y = yFor(v);
+            if (idx === 0) { ctx.moveTo(x, y); } else { ctx.lineTo(x, y); }
+        });
+        ctx.stroke();
+
+        /* glow at head */
+        var hx = w, hy = yFor(latest);
+        ctx.fillStyle = 'rgba(0,212,170,0.9)';
+        ctx.beginPath();
+        ctx.arc(hx - 2, hy, 3, 0, Math.PI * 2);
+        ctx.fill();
+
+        pcVal.textContent = Math.round(latest).toLocaleString('en-US');
+        if (latest > ISO5) {
+            pcStatus.textContent = 'EXCURSION';
+            pcStatus.className = 'warn';
+            pcVal.className = 'warn';
+        } else {
+            pcStatus.textContent = 'NOMINAL';
+            pcStatus.className = 'ok';
+            pcVal.className = 'ok';
         }
-
-        // Equipment status canvas
-        const eqCanvas = document.getElementById('equipment-status');
-        eqCanvas.width = eqCanvas.clientWidth * 2;
-        eqCanvas.height = eqCanvas.clientHeight * 2;
-        const eqCtx = eqCanvas.getContext('2d');
-
-        function drawEquipmentStatus() {
-            eqCtx.clearRect(0, 0, eqCanvas.width, eqCanvas.height);
-            const w = eqCanvas.width;
-            const h = eqCanvas.height;
-
-            const zones = ['Lithography', 'Etch', 'Deposition', 'Bonding', 'Test', 'Storage'];
-            const colors = ['#00d4aa', '#90e0ef', '#ffd166', '#e63946', '#2a9d8f', '#778da9'];
-            const status = [4, 3, 5, 3, 4, 2];
-            const running = [3, 2, 4, 2, 3, 1];
-
-            const zoneH = h / zones.length;
-
-            zones.forEach((zone, i) => {
-                const y = i * zoneH;
-
-                // Zone label
-                eqCtx.fillStyle = colors[i];
-                eqCtx.font = 'bold 18px sans-serif';
-                eqCtx.fillText(zone, 20, y + zoneH / 2 + 6);
-
-                // Status bars
-                const barX = 200;
-                const barW = (w - 250) / status[i];
-                for (let j = 0; j < status[i]; j++) {
-                    const isRunning = j < running[i];
-                    eqCtx.fillStyle = isRunning ? '#2a9d8f' : '#6c2e2e';
-                    eqCtx.fillRect(barX + j * barW, y + 10, barW - 5, zoneH - 20);
-                    eqCtx.fillStyle = '#e0e6ed';
-                    eqCtx.font = '12px sans-serif';
-                    eqCtx.textAlign = 'center';
-                    eqCtx.fillText(isRunning ? 'RUN' : 'IDLE', barX + j * barW + barW / 2, y + zoneH / 2 + 4);
-                }
-                eqCtx.textAlign = 'left';
-            });
-        }
-
-        setInterval(() => {
-            drawProcessFlow();
-            drawEquipmentStatus();
-        }, 3000);
-
-        drawProcessFlow();
-        drawEquipmentStatus();
-    </script>
+    }
+    drawParticles();
+    setInterval(drawParticles, 500);
+})();
+</script>
 </body>
 </html>
