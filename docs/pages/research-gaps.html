@@ -143,27 +143,26 @@
             <div class="gap-item gap-major">
                 <h4 style="color:#ffd166">🟡 G4: VLEO Drag & Propulsion</h4>
                 <p><strong>TRL:</strong> <span class="trl-med">5-6</span> | <strong>Impact:</strong> Reduces orbit lifetime from years to months</p>
-                <p><strong>Problem:</strong> 300 km altitude has atmospheric density ~10⁻¹¹ kg/m³. A 12U CubeSat (10 kg) experiences ~100 μN drag force. Without propulsion, deorbit in ~6 months.</p>
+                <p><strong>Problem:</strong> 300 km altitude has atmospheric density ~10⁻¹¹ kg/m³. A 12U CubeSat (12 kg) experiences ~7-70 μN drag force depending on solar cycle. Without propulsion, deorbit in months to a few years.</p>
                 <div style="background:#0d1b2a;padding:10px;border-radius:6px;margin:8px 0">
                     <p style="font-size:0.85em;color:#90e0ef">Drag force: F_d = ½ × ρ × v² × C_d × A</p>
                     <p style="font-size:0.85em;color:#e0e1dd">ρ = 10⁻¹¹ kg/m³, v = 7730 m/s, C_d = 2.2, A = 0.01 m²</p>
                     <p style="font-size:0.85em;color:#e0e1dd">F_d = ½ × 10⁻¹¹ × (7730)² × 2.2 × 0.01 = <strong>6.6 × 10⁻⁶ N = 6.6 μN</strong></p>
-                    <p style="font-size:0.85em;color:#e0e1dd">Deorbit time: Δt = m × Δv / F_d = 10 × 100 / (6.6×10⁻⁶) ≈ <strong>1.5 × 10⁸ s ≈ 4.8 years</strong></p>
-                    <p style="font-size:0.8em;color:#778da9">Wait — this contradicts our earlier "6 months" claim. Recalculating with higher density at 300 km...</p>
-                    <p style="font-size:0.85em;color:#e0e1dd">More accurate: ρ(300km) ≈ 10⁻¹⁰ kg/m³ (solar max) → F_d = 66 μN → deorbit in <strong>~180 days</strong></p>
+                    <p style="font-size:0.85em;color:#e0e1dd">Deorbit time: Δt = m × Δv / F_d = 12 × 100 / (6.6×10⁻⁶) ≈ <strong>1.8 × 10⁸ s ≈ 5.8 years</strong></p>
+                    <p style="font-size:0.8em;color:#778da9">Resolution: ρ(300 km) varies 3×10⁻¹¹–2×10⁻¹⁰ kg/m³ over the solar cycle, so drag spans ~2–130 μN and unpropelled lifetime spans ~0.5–10 yr. The "6 months" figure corresponds to solar-max density; ~5 years to solar-min.</p>
                 </div>
                 <p><strong>Solutions:</strong></p>
                 <ul style="color:#e0e1dd;font-size:0.85em;margin-left:20px">
                     <li>Ion thruster (Busek BIT-3: 1.2 mN, 3000 s Isp) — extends lifetime to 5+ years</li>
                     <li>Propellant mass: ~1 kg xenon for 5-year mission</li>
-                    <li>Alternative: Orbit at 400-450 km where drag is 10× lower</li>
+                    <li>Alternative: Orbit at 400-450 km (trade vs the 300 km baseline) where drag is 10× lower</li>
                 </ul>
-                <p><strong>Recommendation:</strong> Target 400 km orbit for first generation. Reduces propulsion burden while maintaining latency advantage.</p>
+                <p><strong>Recommendation:</strong> Keep the 300 km baseline with ion-thruster drag compensation; a 400-450 km first-generation orbit is the fallback if propulsion is descoped.</p>
             </div>
 
             <div class="gap-item gap-major">
                 <h4 style="color:#ffd166">🟡 G5: Cloud-Free Line of Sight</h4>
-                <p><strong>TRL:</strong> <span class="trl-med">6-7</strong> (for ground stations) | <strong>Impact:</strong> Reduces availability to 80-90%</p>
+                <p><strong>TRL:</strong> <span class="trl-med">6-7</span> (for ground stations) | <strong>Impact:</strong> Reduces availability to 80-90%</p>
                 <p><strong>Problem:</strong> Optical links cannot penetrate thick clouds. A single ground station in a temperate climate has ~70% annual cloud cover.</p>
                 <p><strong>Solutions:</strong></p>
                 <ul style="color:#e0e1dd;font-size:0.85em;margin-left:20px">
@@ -241,7 +240,7 @@
                 <tr><th>Claim (from current site)</th><th>Reality</th><th>Fix</th></tr>
                 <tr><td>"400 Gbps per OISL"</td><td>NASA LCRD: 1.2 Gbps. Mynaric: 100 Gbps announced.</td><td>Say "target 100 Gbps, path to 400 Gbps"</td></tr>
                 <tr><td>"All-optical routing"</td><td>Control plane is electronic. MZI switching at TRL 4-5.</td><td>Say "photonic data plane, electronic control"</td></tr>
-                <tr><td>"6-face OPA, 256 elements each"</td><td>Best lab demo: 32 channels on TFLN (2025)</td><td>Say "target 6-face, near-term 2-face demo"</td></tr>
+                <tr><td>"6-face OPA, 64 elements each"</td><td>Best lab demo: 32 channels on TFLN (2025)</td><td>Say "target 6-face, near-term 2-face demo"</td></tr>
                 <tr><td>"<10 ms latency"</td><td>True for OISL, but ground-to-sat adds 2 ms + processing</td><td>Say "<15 ms end-to-end"</td></tr>
                 <tr><td>"Ag-chalcogenide switch"</td><td>Replaced by PPLN in v2.0</td><td>✅ Already fixed</td></tr>
             </table>

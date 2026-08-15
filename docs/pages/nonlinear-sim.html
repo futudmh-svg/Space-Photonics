@@ -245,7 +245,7 @@
             const n2 = 2.6e-20; // m²/W for silica
             for (let x = 0; x <= 600; x += 5) {
                 const z = (x / 600) * length; // position in fiber
-                const P_at_z = pumpPower * 1e-3 * Math.exp(-0.2 * z); // with 0.2 dB/m loss
+                const P_at_z = pumpPower * 1e-3 * Math.exp(-0.2 * z); // alpha = 0.2 Np/m = 0.87 dB/m loss
                 const dn = n2 * P_at_z / (Math.PI * 2.5e-6 * 2.5e-6); // index change
                 const y_ni = 125 - dn * 1e15 * 50;
                 niPoints.push(`${x},${y_ni}`);
