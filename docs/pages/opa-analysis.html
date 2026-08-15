@@ -4,14 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OPA Analysis — Space Photonics</title>
-    <script type="importmap">
-    {
-        "imports": {
-            "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-            "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
-        }
-    }
-    </script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #050811; color: #e0e6ed; line-height: 1.6; }
@@ -34,107 +26,9 @@
         .stat-label { font-size: 0.8em; color: #778da9; }
         .btn { padding: 10px 20px; background: #2d6a4f; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9em; margin: 4px; }
         .btn:hover { background: #40916c; }
-        .btn-secondary { background: #1b4d6e; }
-        .btn-secondary:hover { background: #2a6f97; }
+        .btn-danger { background: #6c2e2e; }
+        .btn-danger:hover { background: #9e3a3a; }
         footer { text-align: center; padding: 30px; color: #778da9; font-size: 0.8em; }
-    
-        /* ─── Responsive & Mobile ─── */
-        @media (max-width: 900px) {
-            nav { flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start; padding: 4px; gap: 2px; }
-            nav a { font-size: 0.65em; padding: 4px 6px; flex-shrink: 0; }
-            .hud-left, .hud-right { width: 180px; font-size: 0.65em; max-height: calc(100vh - 220px); }
-            .hud-left { left: 4px; top: 55px; }
-            .hud-right { right: 4px; top: 55px; }
-            .scenario-controls { top: 55px; }
-            .scenario-btn { padding: 5px 8px; font-size: 0.7em; }
-            .time-controls { padding: 6px 8px; gap: 4px; }
-            .minimap-container { display: none; }
-            .cam-indicator { display: none; }
-            .camera-feed { width: 240px; height: 150px; }
-            #cam-canvas { height: 80px !important; }
-        }
-        @media (max-width: 600px) {
-            .hud-left, .hud-right { width: 150px; font-size: 0.6em; padding: 6px; }
-            .hud-bottom-left, .hud-bottom-right { display: none; }
-            .camera-feed { width: 200px; height: 120px; right: 4px; left: auto; transform: none; bottom: 50px; }
-            .time-controls { left: 4px; transform: none; }
-        }
-        
-        /* Collapsible HUD */
-        .hud-toggle {
-            position: fixed; top: 55px; z-index: 150;
-            background: rgba(5,8,17,0.9); border: 1px solid #00d4aa;
-            color: #00d4aa; padding: 4px 8px; border-radius: 4px;
-            cursor: pointer; font-size: 0.7em; display: none;
-        }
-        @media (max-width: 900px) {
-            .hud-toggle { display: block; }
-            .hud-left.collapsed, .hud-right.collapsed { display: none; }
-        }
-        #toggle-left { left: 4px; }
-        #toggle-right { right: 4px; }
-        
-        /* Fullscreen mode */
-        body.fullscreen nav,
-        body.fullscreen .hud-left,
-        body.fullscreen .hud-right,
-        body.fullscreen .scenario-controls,
-        body.fullscreen .time-controls,
-        body.fullscreen .hud-bottom-left,
-        body.fullscreen .hud-bottom-right,
-        body.fullscreen .camera-feed,
-        body.fullscreen .minimap-container,
-        body.fullscreen .cam-indicator,
-        body.fullscreen .hud-toggle {
-            display: none !important;
-        }
-        #fs-toggle {
-            position: fixed; top: 55px; right: 50%; transform: translateX(50%);
-            z-index: 150; background: rgba(5,8,17,0.9); border: 1px solid #00d4aa;
-            color: #00d4aa; padding: 4px 10px; border-radius: 4px;
-            cursor: pointer; font-size: 0.7em;
-        }
-        body.fullscreen #fs-toggle { display: block !important; top: 8px; right: 8px; transform: none; }
-
-    
-        /* ─── Hamburger Navigation ─── */
-        .nav-hamburger {
-            display: none;
-            position: fixed; top: 8px; left: 8px; z-index: 300;
-            background: rgba(5,8,17,0.92); border: 1px solid #00d4aa;
-            color: #00d4aa; padding: 8px 12px; border-radius: 8px;
-            cursor: pointer; font-size: 1.2em;
-        }
-        .nav-overlay {
-            display: none; position: fixed; inset: 0; z-index: 250;
-            background: rgba(5,8,17,0.95); backdrop-filter: blur(12px);
-            flex-direction: column; align-items: center; justify-content: center;
-            gap: 8px; padding: 20px;
-        }
-        .nav-overlay.active { display: flex; }
-        .nav-overlay a {
-            color: #90e0ef; text-decoration: none; padding: 10px 20px;
-            font-size: 1.1em; border-radius: 8px;
-            background: rgba(13,27,42,0.7); border: 1px solid rgba(65,90,119,0.3);
-            width: 200px; text-align: center;
-        }
-        .nav-overlay a:hover { background: #00d4aa; color: #050811; }
-        .nav-close {
-            position: absolute; top: 8px; right: 8px;
-            color: #e63946; font-size: 1.5em; cursor: pointer;
-            background: none; border: none; padding: 8px;
-        }
-        @media (max-width: 768px) {
-            nav { display: none; }
-            .nav-hamburger { display: block; }
-        }
-
-        .hud-left, .hud-right {
-            transition: transform 0.3s ease, opacity 0.3s ease;
-        }
-        .hud-left.collapsed { transform: translateX(-120%); opacity: 0; }
-        .hud-right.collapsed { transform: translateX(120%); opacity: 0; }
-
     </style>
 </head>
 <body>
@@ -158,105 +52,75 @@
             <a href="../pages/foundry-cleanroom.html">🏭 Clean Room</a>
         </nav>
 
-        <h1>🔭 OPA Beam Analysis</h1>
-        <p class="subtitle">Optical Phased Array — Far-field patterns, grating lobes, beamwidth</p>
-
-        <!-- 3D OPA Simulation -->
-        <div class="card">
-            <h2>🎯 Interactive 3D Beam Steering</h2>
-            <div id="opa3d-container" style="width:100%;height:380px;position:relative;background:#0d1b2a;border-radius:8px;overflow:hidden;">
-                <canvas id="opa3d" style="width:100%;height:100%;display:block;"></canvas>
-                <div style="position:absolute;bottom:10px;left:10px;background:rgba(5,8,17,0.85);border:1px solid #415a77;border-radius:8px;padding:10px;font-size:0.7em;max-width:180px;">
-                    <div style="color:#00d4aa;font-weight:600;margin-bottom:4px">📊 Beam Metrics</div>
-                    <div style="display:flex;justify-content:space-between;margin:2px 0"><span style="color:#90e0ef">Width:</span><span id="opa3d-width" style="color:#ffd166;font-family:monospace">1.2°</span></div>
-                    <div style="display:flex;justify-content:space-between;margin:2px 0"><span style="color:#90e0ef">SLL:</span><span id="opa3d-sll" style="color:#ffd166;font-family:monospace">-18 dB</span></div>
-                    <div style="display:flex;justify-content:space-between;margin:2px 0"><span style="color:#90e0ef">Gain:</span><span id="opa3d-gain" style="color:#ffd166;font-family:monospace">24.5 dBi</span></div>
-                    <div style="display:flex;justify-content:space-between;margin:2px 0"><span style="color:#90e0ef">Eff:</span><span id="opa3d-eff" style="color:#ffd166;font-family:monospace">78%</span></div>
-                </div>
-            </div>
-            <div class="controls" style="margin-top:12px">
-                <div class="control-group">
-                    <label>Azimuth: <span id="az-val3d">0</span>°</label>
-                    <input type="range" id="az-slider3d" min="-45" max="45" value="0">
-                </div>
-                <div class="control-group">
-                    <label>Elevation: <span id="el-val3d">0</span>°</label>
-                    <input type="range" id="el-slider3d" min="-45" max="45" value="0">
-                </div>
-                <div class="control-group">
-                    <label>Wavelength: <span id="wl-val3d">1550</span> nm</label>
-                    <input type="range" id="wl-slider3d" min="780" max="2000" value="1550">
-                </div>
-            </div>
-        </div>
-
-        <div style="margin: 12px 0;">
-            <button class="btn" onclick="startAutoPlay()">▶️ Auto Animate</button>
-            <button class="btn btn-secondary" onclick="stopAutoPlay()">⏹️ Stop</button>
-        </div>
+        <h1>📡 Optical Phased Array (OPA) Analysis</h1>
+        <p class="subtitle">64-element TFLN OPA beam steering simulation</p>
 
         <div class="card">
-            <h2>Array Configuration</h2>
+            <h2>OPA Configuration</h2>
             <div class="controls">
                 <div class="control-group">
-                    <label>Elements (N): <span id="n-val">64</span></label>
-                    <input type="range" id="n-elements" min="8" max="256" value="64" step="8">
+                    <label>Steering Angle (°): <span id="steer-val">0</span></label>
+                    <input type="range" id="steer" min="-15" max="15" value="0" step="0.1">
                 </div>
                 <div class="control-group">
-                    <label>Spacing (μm): <span id="d-val">10.0</span></label>
-                    <input type="range" id="spacing" min="5" max="20" value="10" step="0.5">
+                    <label>Element Pitch (μm): <span id="pitch-val">1.5</span></label>
+                    <input type="range" id="pitch" min="0.5" max="3.0" value="1.5" step="0.1">
                 </div>
                 <div class="control-group">
-                    <label>Wavelength (nm): <span id="lambda-val">1550</span></label>
-                    <input type="range" id="wavelength" min="500" max="2000" value="1550" step="10">
+                    <label>Number of Elements: <span id="n-val">64</span></label>
+                    <input type="range" id="n-elements" min="16" max="128" value="64" step="8">
                 </div>
                 <div class="control-group">
-                    <label>Steering Angle (°): <span id="theta-val">15</span></label>
-                    <input type="range" id="steer-angle" min="-30" max="30" value="15" step="0.5">
+                    <label>Wavelength (nm): <span id="wl-val">1550</span></label>
+                    <input type="range" id="wavelength" min="1500" max="1600" value="1550" step="10">
                 </div>
             </div>
-            
+            <button class="btn" onclick="startOPAAnim()">▶️ Animate Steering</button>
+            <button class="btn btn-danger" onclick="stopOPAAnim()">⏹️ Stop</button>
+        </div>
+
+        <div class="card">
+            <h2>Array Factor (Far-Field Pattern)</h2>
+            <svg id="array-factor" viewBox="0 0 600 300" preserveAspectRatio="none">
+                <rect width="600" height="300" fill="#0d1b2a"/>
+                <polyline id="af-line" fill="none" stroke="#00d4aa" stroke-width="2"/>
+                <line x1="0" y1="250" x2="600" y2="250" stroke="#415a77" stroke-width="1"/>
+                <line x1="300" y1="0" x2="300" y2="300" stroke="#415a77" stroke-width="1" stroke-dasharray="3,3"/>
+                <text x="300" y="290" text-anchor="middle" fill="#778da9" font-size="12">Angle (degrees)</text>
+                <text x="20" y="20" fill="#778da9" font-size="12">|AF| (dB)</text>
+                <circle id="af-marker" r="6" fill="#ffd166"/>
+            </svg>
+        </div>
+
+        <div class="card">
+            <h2>Element Pattern</h2>
+            <svg id="element-pattern" viewBox="0 0 600 250" preserveAspectRatio="none">
+                <rect width="600" height="250" fill="#0d1b2a"/>
+                <polyline id="ep-line" fill="none" stroke="#90e0ef" stroke-width="2"/>
+                <line x1="0" y1="200" x2="600" y2="200" stroke="#415a77" stroke-width="1"/>
+                <line x1="300" y1="0" x2="300" y2="250" stroke="#415a77" stroke-width="1" stroke-dasharray="3,3"/>
+                <text x="300" y="240" text-anchor="middle" fill="#778da9" font-size="12">Angle (degrees)</text>
+                <text x="20" y="20" fill="#778da9" font-size="12">Gain (dBi)</text>
+            </svg>
+        </div>
+
+        <div class="card">
+            <h2>Performance Metrics</h2>
             <div class="stats-grid">
-                <div class="stat-box"><div class="stat-value" id="beamwidth">-</div><div class="stat-label">3dB Beamwidth</div></div>
-                <div class="stat-box"><div class="stat-value" id="grating-lobe">-</div><div class="stat-label">Grating Lobe Sep.</div></div>
-                <div class="stat-box"><div class="stat-value" id="directivity">-</div><div class="stat-label">Directivity (dBi)</div></div>
-                <div class="stat-box"><div class="stat-value" id="sidelobe">-</div><div class="stat-label">Peak Sidelobe</div></div>
+                <div class="stat-box"><div class="stat-value" id="beamwidth">-</div><div class="stat-label">Beamwidth (°)</div></div>
+                <div class="stat-box"><div class="stat-value" id="sll">-</div><div class="stat-label">Side Lobe Level (dB)</div></div>
+                <div class="stat-box"><div class="stat-value" id="gain">-</div><div class="stat-label">Directivity (dBi)</div></div>
+                <div class="stat-box"><div class="stat-value" id="grating">-</div><div class="stat-label">Grating Lobe (dB)</div></div>
             </div>
         </div>
 
         <div class="card">
-            <h2>Far-Field Pattern (Linear)</h2>
-            <svg id="pattern-linear" viewBox="0 0 600 300" preserveAspectRatio="none">
-                <rect width="600" height="300" fill="#0d1b2a"/>
-                <polyline id="pl-line" fill="none" stroke="#00d4aa" stroke-width="2"/>
-                <line x1="0" y1="280" x2="600" y2="280" stroke="#415a77" stroke-width="1"/>
-            </svg>
-        </div>
-
-        <div class="card">
-            <h2>Far-Field Pattern (dB)</h2>
-            <svg id="pattern-db" viewBox="0 0 600 300" preserveAspectRatio="none">
-                <rect width="600" height="300" fill="#0d1b2a"/>
-                <polyline id="pdb-line" fill="none" stroke="#90e0ef" stroke-width="2"/>
-                <line x1="0" y1="280" x2="600" y2="280" stroke="#415a77" stroke-width="1"/>
-            </svg>
-        </div>
-
-        <div class="card">
-            <h2>Beamwidth vs Array Size</h2>
-            <svg id="beamwidth-chart" viewBox="0 0 600 300" preserveAspectRatio="none">
-                <rect width="600" height="300" fill="#0d1b2a"/>
-                <polyline id="bw-line" fill="none" stroke="#ffd166" stroke-width="2"/>
-                <circle id="bw-dot" r="6" fill="#e63946"/>
-            </svg>
-        </div>
-
-        <div class="card">
-            <h2>Grating Lobe Map</h2>
-            <p style="font-size: 0.85em; color: #778da9; margin-bottom: 8px;">Red zones indicate ambiguous directions</p>
-            <svg id="grating-map" viewBox="0 0 600 350" preserveAspectRatio="none">
-                <rect width="600" height="350" fill="#0d1b2a"/>
-                <g id="gl-dots"></g>
+            <h2>2D Beam Pattern</h2>
+            <svg id="beam-2d" viewBox="0 0 600 400" preserveAspectRatio="xMidYMid meet">
+                <rect width="600" height="400" fill="#0d1b2a"/>
+                <g id="beam-plot"></g>
+                <circle cx="300" cy="200" r="150" fill="none" stroke="#415a77" stroke-width="1" stroke-dasharray="3,3"/>
+                <text x="300" y="30" text-anchor="middle" fill="#778da9" font-size="12">2D Far-Field (u-v space)</text>
             </svg>
         </div>
 
@@ -264,336 +128,131 @@
     </div>
 
     <script>
-        let autoPlayInterval = null;
-        let autoPlayDirection = 1;
+        let opaAnimId = null;
+        let opaAnimAngle = 0;
 
-        function computePattern(N, d, lambda, theta0, angles) {
-            const k = 2 * Math.PI / lambda;
-            const results = [];
-            let maxI = 0;
-            for (let theta of angles) {
-                let real = 0, imag = 0;
-                for (let n = 0; n < N; n++) {
-                    const phase = k * d * n * (Math.sin(theta) - Math.sin(theta0));
-                    real += Math.cos(phase);
-                    imag += Math.sin(phase);
+        function computeArrayFactor(angle, steer, pitch, n, wavelength) {
+            const theta = angle * Math.PI / 180;
+            const theta_s = steer * Math.PI / 180;
+            const k = 2 * Math.PI / (wavelength * 1e-9);
+            const d = pitch * 1e-6;
+            
+            let real = 0, imag = 0;
+            for (let i = 0; i < n; i++) {
+                const phase = k * d * i * (Math.sin(theta) - Math.sin(theta_s));
+                real += Math.cos(phase);
+                imag += Math.sin(phase);
+            }
+            
+            const mag = Math.sqrt(real * real + imag * imag) / n;
+            return 20 * Math.log10(Math.max(mag, 1e-6));
+        }
+
+        function computeElementPattern(angle) {
+            const theta = angle * Math.PI / 180;
+            return 10 * Math.log10(Math.max(Math.cos(theta) ** 2, 1e-6));
+        }
+
+        function drawOPA() {
+            const steer = parseFloat(document.getElementById('steer').value);
+            const pitch = parseFloat(document.getElementById('pitch').value);
+            const n = parseInt(document.getElementById('n-elements').value);
+            const wavelength = parseFloat(document.getElementById('wavelength').value);
+            
+            document.getElementById('steer-val').textContent = steer.toFixed(1);
+            document.getElementById('pitch-val').textContent = pitch.toFixed(1);
+            document.getElementById('n-val').textContent = n;
+            document.getElementById('wl-val').textContent = wavelength;
+            
+            // Array factor
+            const afPoints = [];
+            let maxAF = -Infinity;
+            let maxAFAngle = 0;
+            let sll = -Infinity;
+            
+            for (let a = -30; a <= 30; a += 0.5) {
+                const af = computeArrayFactor(a, steer, pitch, n, wavelength);
+                const x = 300 + (a / 30) * 300;
+                const y = 250 - (af + 40) * 5;
+                afPoints.push(`${x},${y}`);
+                
+                if (af > maxAF) {
+                    sll = maxAF;
+                    maxAF = af;
+                    maxAFAngle = a;
+                } else if (af > sll && Math.abs(a - maxAFAngle) > 2) {
+                    sll = af;
                 }
-                const I = (real * real + imag * imag) / (N * N);
-                results.push(I);
-                if (I > maxI) maxI = I;
             }
-            return { results, maxI };
-        }
-
-        function findBeamwidth(pattern, angles) {
-            const maxI = Math.max(...pattern);
-            const threshold = maxI * 0.5;
-            let first = -1, last = -1;
-            for (let i = 0; i < pattern.length; i++) {
-                if (pattern[i] >= threshold) {
-                    if (first < 0) first = i;
-                    last = i;
-                }
+            document.getElementById('af-line').setAttribute('points', afPoints.join(' '));
+            
+            // Element pattern
+            const epPoints = [];
+            for (let a = -90; a <= 90; a += 1) {
+                const ep = computeElementPattern(a);
+                const x = 300 + (a / 90) * 300;
+                const y = 200 - (ep + 20) * 8;
+                epPoints.push(`${x},${y}`);
             }
-            if (first < 0) return 0;
-            return Math.abs(angles[last] - angles[first]) * 180 / Math.PI;
-        }
-
-        function findGratingLobeSeparation(d, lambda) {
-            return Math.asin(lambda / d) * 180 / Math.PI;
-        }
-
-        function computeDirectivity(N, d, lambda) {
-            const L = N * d;
-            return 10 * Math.log10(2 * L / lambda);
-        }
-
-        function findPeakSidelobe(pattern) {
-            const maxI = Math.max(...pattern);
-            let inMainLobe = true;
-            let peakSL = 0;
-            for (let i = 0; i < pattern.length; i++) {
-                if (inMainLobe && pattern[i] < maxI * 0.1) inMainLobe = false;
-                if (!inMainLobe && pattern[i] > peakSL) peakSL = pattern[i];
-            }
-            return 10 * Math.log10(peakSL / maxI);
-        }
-
-        function draw() {
-            const N = parseInt(document.getElementById('n-elements').value);
-            const d = parseFloat(document.getElementById('spacing').value) * 1e-6;
-            const lambda = parseFloat(document.getElementById('wavelength').value) * 1e-9;
-            const theta0 = parseFloat(document.getElementById('steer-angle').value) * Math.PI / 180;
+            document.getElementById('ep-line').setAttribute('points', epPoints.join(' '));
             
-            document.getElementById('n-val').textContent = N;
-            document.getElementById('d-val').textContent = (d * 1e6).toFixed(1);
-            document.getElementById('lambda-val').textContent = (lambda * 1e9).toFixed(0);
-            document.getElementById('theta-val').textContent = (theta0 * 180 / Math.PI).toFixed(1);
+            // Metrics
+            const d = pitch * 1e-6;
+            const lambda = wavelength * 1e-9;
+            const L = n * d;
+            const beamwidth = 1.22 * lambda / L * 180 / Math.PI;
+            const directivity = 10 * Math.log10(4 * Math.PI * L * L / (lambda * lambda));
+            const gratingLobe = d > lambda / 2 ? 20 * Math.log10(1 / (2 * d / lambda - 1)) : -Infinity;
             
-            const angles = [];
-            for (let t = -45; t <= 45; t += 0.2) angles.push(t * Math.PI / 180);
+            document.getElementById('beamwidth').textContent = beamwidth.toFixed(2);
+            document.getElementById('sll').textContent = sll.toFixed(1);
+            document.getElementById('gain').textContent = directivity.toFixed(1);
+            document.getElementById('grating').textContent = gratingLobe === -Infinity ? 'None' : gratingLobe.toFixed(1);
             
-            const { results, maxI } = computePattern(N, d, lambda, theta0, angles);
-            
-            const bw = findBeamwidth(results, angles);
-            const gl = findGratingLobeSeparation(d, lambda);
-            const dir = computeDirectivity(N, d, lambda);
-            const sl = findPeakSidelobe(results);
-            
-            document.getElementById('beamwidth').textContent = bw.toFixed(2) + '°';
-            document.getElementById('grating-lobe').textContent = gl.toFixed(1) + '°';
-            document.getElementById('directivity').textContent = dir.toFixed(1) + ' dBi';
-            document.getElementById('sidelobe').textContent = sl.toFixed(1) + ' dB';
-            
-            // Linear plot
-            const plPoints = [];
-            for (let i = 0; i < results.length; i++) {
-                const x = (i / results.length) * 600;
-                const y = 280 - (results[i] / maxI) * 260;
-                plPoints.push(`${x},${y}`);
-            }
-            document.getElementById('pl-line').setAttribute('points', plPoints.join(' '));
-            
-            // dB plot
-            const pdbPoints = [];
-            for (let i = 0; i < results.length; i++) {
-                const x = (i / results.length) * 600;
-                const db = 10 * Math.log10(results[i] + 1e-10);
-                const y = 280 - ((db + 60) / 65) * 260;
-                pdbPoints.push(`${x},${y}`);
-            }
-            document.getElementById('pdb-line').setAttribute('points', pdbPoints.join(' '));
-            
-            // Beamwidth vs N
-            const bwPoints = [];
-            for (let n = 8; n <= 256; n += 8) {
-                const testAngles = [];
-                for (let t = -45; t <= 45; t += 0.5) testAngles.push(t * Math.PI / 180);
-                const { results: testPattern } = computePattern(n, d, lambda, 0, testAngles);
-                const testBw = findBeamwidth(testPattern, testAngles);
-                const x = ((n - 8) / 248) * 600;
-                const y = 280 - (testBw / 10) * 260;
-                bwPoints.push(`${x},${y}`);
-            }
-            document.getElementById('bw-line').setAttribute('points', bwPoints.join(' '));
-            
-            const curX = ((N - 8) / 248) * 600;
-            const curY = 280 - (bw / 10) * 260;
-            document.getElementById('bw-dot').setAttribute('cx', curX);
-            document.getElementById('bw-dot').setAttribute('cy', curY);
-            
-            // Grating lobe map
-            const glGroup = document.getElementById('gl-dots');
-            glGroup.innerHTML = '';
-            for (let steer = -30; steer <= 30; steer += 1) {
-                for (let angle = -45; angle <= 45; angle += 1) {
-                    const { results: mapPattern } = computePattern(N, d, lambda, steer * Math.PI / 180, [angle * Math.PI / 180]);
-                    const I = mapPattern[0];
-                    if (I > 0.01) {
-                        const x = ((angle + 45) / 90) * 600;
-                        const y = ((steer + 30) / 60) * 350;
-                        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-                        circle.setAttribute('cx', x);
-                        circle.setAttribute('cy', y);
-                        circle.setAttribute('r', 3);
-                        circle.setAttribute('fill', `rgba(230, 57, 70, ${Math.min(I, 1)})`);
-                        glGroup.appendChild(circle);
-                    }
+            // 2D beam pattern
+            const beamPlot = document.getElementById('beam-plot');
+            beamPlot.innerHTML = '';
+            for (let u = -1; u <= 1; u += 0.05) {
+                for (let v = -1; v <= 1; v += 0.05) {
+                    if (u * u + v * v > 1) continue;
+                    const theta = Math.asin(Math.sqrt(u * u + v * v)) * 180 / Math.PI;
+                    const phi = Math.atan2(v, u) * 180 / Math.PI;
+                    const af = computeArrayFactor(theta, steer, pitch, n, wavelength);
+                    const intensity = Math.max(0, (af + 40) / 40);
+                    const x = 300 + u * 150;
+                    const y = 200 + v * 150;
+                    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    circle.setAttribute('cx', x);
+                    circle.setAttribute('cy', y);
+                    circle.setAttribute('r', 2);
+                    circle.setAttribute('fill', `rgba(0, 212, 170, ${intensity})`);
+                    beamPlot.appendChild(circle);
                 }
             }
         }
 
-        function startAutoPlay() {
-            if (autoPlayInterval) return;
-            autoPlayInterval = setInterval(() => {
-                const slider = document.getElementById('steer-angle');
-                let val = parseFloat(slider.value);
-                val += autoPlayDirection * 0.5;
-                if (val >= 30 || val <= -30) autoPlayDirection *= -1;
-                slider.value = val;
-                draw();
+        function startOPAAnim() {
+            if (opaAnimId) return;
+            opaAnimId = setInterval(() => {
+                opaAnimAngle += 0.5;
+                if (opaAnimAngle > 15) opaAnimAngle = -15;
+                document.getElementById('steer').value = opaAnimAngle;
+                drawOPA();
             }, 100);
         }
 
-        function stopAutoPlay() {
-            if (autoPlayInterval) {
-                clearInterval(autoPlayInterval);
-                autoPlayInterval = null;
+        function stopOPAAnim() {
+            if (opaAnimId) {
+                clearInterval(opaAnimId);
+                opaAnimId = null;
             }
         }
 
-        ['n-elements', 'spacing', 'wavelength', 'steer-angle'].forEach(id => {
-            document.getElementById(id).addEventListener('input', draw);
+        ['steer', 'pitch', 'n-elements', 'wavelength'].forEach(id => {
+            document.getElementById(id).addEventListener('input', drawOPA);
         });
 
-        // Auto-play on load
-        draw();
-        startAutoPlay();
-        setTimeout(stopAutoPlay, 5000); // Stop after 5 seconds
-    </script>
-
-    <!-- 3D OPA Beam Steering Simulation -->
-    <script type="module">
-        import * as THREE from 'three';
-        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-
-        const canvas = document.getElementById('opa3d');
-        const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x0d1b2a);
-
-        const camera = new THREE.PerspectiveCamera(50, canvas.clientWidth / canvas.clientHeight, 0.1, 100);
-        camera.position.set(8, 8, 12);
-
-        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-        renderer.setSize(canvas.clientWidth, canvas.clientHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-
-        const controls = new OrbitControls(camera, canvas);
-        controls.enableDamping = true;
-        controls.target.set(0, 0, 5);
-
-        scene.add(new THREE.AmbientLight(0x404040, 0.5));
-        const light = new THREE.DirectionalLight(0xffffff, 0.8);
-        light.position.set(5, 10, 5);
-        scene.add(light);
-
-        // OPA Array (8x8 = 64 elements)
-        const N = 8;
-        const spacing = 0.3;
-        const elements = [];
-        const elementGroup = new THREE.Group();
-
-        for (let i = 0; i < N; i++) {
-            for (let j = 0; j < N; j++) {
-                const el = new THREE.Mesh(
-                    new THREE.BoxGeometry(0.2, 0.05, 0.2),
-                    new THREE.MeshPhongMaterial({ color: 0x888888 })
-                );
-                el.position.set((i - N/2 + 0.5) * spacing, 0, (j - N/2 + 0.5) * spacing);
-                elementGroup.add(el);
-                elements.push({ mesh: el, x: i, y: j, ix: i - N/2 + 0.5, iy: j - N/2 + 0.5 });
-            }
-        }
-        scene.add(elementGroup);
-
-        // Beam direction indicator
-        const beamDir = new THREE.ArrowHelper(
-            new THREE.Vector3(0, 1, 0), new THREE.Vector3(0, 0, 0), 6,
-            0x00d4aa, 0.5, 0.3
-        );
-        scene.add(beamDir);
-
-        // Far-field pattern (simplified as a cone)
-        const beamCone = new THREE.Mesh(
-            new THREE.ConeGeometry(0.5, 8, 16, 1, true),
-            new THREE.MeshBasicMaterial({ color: 0x00d4aa, transparent: true, opacity: 0.08, side: THREE.DoubleSide, blending: THREE.AdditiveBlending })
-        );
-        beamCone.position.set(0, 4, 0);
-        scene.add(beamCone);
-
-        // Side lobes (smaller cones)
-        const sideLobes = [];
-        for (let i = 0; i < 4; i++) {
-            const lobe = new THREE.Mesh(
-                new THREE.ConeGeometry(0.3, 3, 12, 1, true),
-                new THREE.MeshBasicMaterial({ color: 0xffd166, transparent: true, opacity: 0.04, side: THREE.DoubleSide, blending: THREE.AdditiveBlending })
-            );
-            scene.add(lobe);
-            sideLobes.push(lobe);
-        }
-
-        // Ground plane
-        const grid = new THREE.GridHelper(20, 20, 0x415a77, 0x1a2a3a);
-        grid.position.y = -0.5;
-        scene.add(grid);
-
-        function updateBeam() {
-            const az = parseFloat(document.getElementById('az-slider3d').value) * Math.PI / 180;
-            const el = parseFloat(document.getElementById('el-slider3d').value) * Math.PI / 180;
-            const wl = parseFloat(document.getElementById('wl-slider3d').value);
-
-            // Calculate beam direction
-            const dir = new THREE.Vector3(
-                Math.sin(az) * Math.cos(el),
-                Math.sin(el),
-                Math.cos(az) * Math.cos(el)
-            );
-
-            // Update arrow
-            beamDir.setDirection(dir);
-
-            // Update cone
-            beamCone.position.copy(dir.clone().multiplyScalar(4));
-            beamCone.lookAt(beamCone.position.clone().add(dir));
-
-            // Update side lobes
-            sideLobes.forEach((lobe, i) => {
-                const angle = (i / 4) * Math.PI * 2;
-                const offset = new THREE.Vector3(
-                    Math.cos(angle) * 0.4,
-                    0.2,
-                    Math.sin(angle) * 0.4
-                );
-                lobe.position.copy(dir.clone().multiplyScalar(3).add(offset));
-                lobe.lookAt(lobe.position.clone().add(dir));
-            });
-
-            // Phase coloring of elements
-            const k = 2 * Math.PI / (wl * 1e-9 / 1e-6); // simplified
-            elements.forEach(e => {
-                const phase = k * (e.ix * spacing * Math.sin(az) + e.iy * spacing * Math.sin(el));
-                const intensity = 0.5 + 0.5 * Math.cos(phase);
-                e.mesh.material.color.setRGB(intensity * 0.5, intensity * 0.8, intensity);
-                e.mesh.material.emissive.setRGB(intensity * 0.1, intensity * 0.3, intensity * 0.2);
-            });
-
-            // Update metrics
-            const beamwidth = 51 * wl * 1e-9 / (N * spacing * 1e-6) * 57.3;
-            const gain = 10 * Math.log10(N * N);
-            const sll = -13.2;
-            document.getElementById('opa3d-width').textContent = beamwidth.toFixed(1) + '°';
-            document.getElementById('opa3d-sll').textContent = sll.toFixed(1) + ' dB';
-            document.getElementById('opa3d-gain').textContent = gain.toFixed(1) + ' dBi';
-            document.getElementById('opa3d-eff').textContent = '78%';
-
-            controls.update();
-            renderer.render(scene, camera);
-        }
-
-        // Event listeners
-        ['az-slider3d', 'el-slider3d', 'wl-slider3d'].forEach(id => {
-            document.getElementById(id).addEventListener('input', () => {
-                const labelId = id.replace('slider', 'val');
-                document.getElementById(labelId).textContent = document.getElementById(id).value;
-                updateBeam();
-            });
-        });
-
-        function animate() {
-            requestAnimationFrame(animate);
-            updateBeam();
-        }
-        animate();
-
-        window.addEventListener('resize', () => {
-            const rect = canvas.parentElement.getBoundingClientRect();
-            camera.aspect = rect.width / rect.height;
-            camera.updateProjectionMatrix();
-            renderer.setSize(rect.width, rect.height);
-        });
-    
-        // Hamburger nav
-        const hamBtn = document.getElementById('nav-hamburger');
-        const navOverlay = document.getElementById('nav-overlay');
-        const navClose = document.getElementById('nav-close');
-        if (hamBtn && navOverlay) {
-            hamBtn.addEventListener('click', () => navOverlay.classList.add('active'));
-            navClose.addEventListener('click', () => navOverlay.classList.remove('active'));
-            navOverlay.querySelectorAll('a').forEach(a => {
-                a.addEventListener('click', () => navOverlay.classList.remove('active'));
-            });
-        }
-
+        drawOPA();
     </script>
 </body>
 </html>
