@@ -57,6 +57,7 @@
             <a href="../pages/ppln-calculator.html">🔢 PPLN</a>
             <a href="../pages/research-gaps.html">🔬 Gaps</a>
             <a href="../pages/foundry.html">🏭 Foundry</a>
+            <a href="../pages/foundry-cleanroom.html">🏭 Clean Room</a>
         </nav>
 
         <h1>🔭 OPA Beam Analysis</h1>
@@ -331,6 +332,157 @@
         draw();
         startAutoPlay();
         setTimeout(stopAutoPlay, 5000); // Stop after 5 seconds
+    </script>
+
+    <!-- 3D OPA Beam Steering Simulation -->
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        const canvas = document.getElementById('opa3d');
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x0d1b2a);
+
+        const camera = new THREE.PerspectiveCamera(50, canvas.clientWidth / canvas.clientHeight, 0.1, 100);
+        camera.position.set(8, 8, 12);
+
+        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+        renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+        const controls = new OrbitControls(camera, canvas);
+        controls.enableDamping = true;
+        controls.target.set(0, 0, 5);
+
+        scene.add(new THREE.AmbientLight(0x404040, 0.5));
+        const light = new THREE.DirectionalLight(0xffffff, 0.8);
+        light.position.set(5, 10, 5);
+        scene.add(light);
+
+        // OPA Array (8x8 = 64 elements)
+        const N = 8;
+        const spacing = 0.3;
+        const elements = [];
+        const elementGroup = new THREE.Group();
+
+        for (let i = 0; i < N; i++) {
+            for (let j = 0; j < N; j++) {
+                const el = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.2, 0.05, 0.2),
+                    new THREE.MeshPhongMaterial({ color: 0x888888 })
+                );
+                el.position.set((i - N/2 + 0.5) * spacing, 0, (j - N/2 + 0.5) * spacing);
+                elementGroup.add(el);
+                elements.push({ mesh: el, x: i, y: j, ix: i - N/2 + 0.5, iy: j - N/2 + 0.5 });
+            }
+        }
+        scene.add(elementGroup);
+
+        // Beam direction indicator
+        const beamDir = new THREE.ArrowHelper(
+            new THREE.Vector3(0, 1, 0), new THREE.Vector3(0, 0, 0), 6,
+            0x00d4aa, 0.5, 0.3
+        );
+        scene.add(beamDir);
+
+        // Far-field pattern (simplified as a cone)
+        const beamCone = new THREE.Mesh(
+            new THREE.ConeGeometry(0.5, 8, 16, 1, true),
+            new THREE.MeshBasicMaterial({ color: 0x00d4aa, transparent: true, opacity: 0.08, side: THREE.DoubleSide, blending: THREE.AdditiveBlending })
+        );
+        beamCone.position.set(0, 4, 0);
+        scene.add(beamCone);
+
+        // Side lobes (smaller cones)
+        const sideLobes = [];
+        for (let i = 0; i < 4; i++) {
+            const lobe = new THREE.Mesh(
+                new THREE.ConeGeometry(0.3, 3, 12, 1, true),
+                new THREE.MeshBasicMaterial({ color: 0xffd166, transparent: true, opacity: 0.04, side: THREE.DoubleSide, blending: THREE.AdditiveBlending })
+            );
+            scene.add(lobe);
+            sideLobes.push(lobe);
+        }
+
+        // Ground plane
+        const grid = new THREE.GridHelper(20, 20, 0x415a77, 0x1a2a3a);
+        grid.position.y = -0.5;
+        scene.add(grid);
+
+        function updateBeam() {
+            const az = parseFloat(document.getElementById('az-slider3d').value) * Math.PI / 180;
+            const el = parseFloat(document.getElementById('el-slider3d').value) * Math.PI / 180;
+            const wl = parseFloat(document.getElementById('wl-slider3d').value);
+
+            // Calculate beam direction
+            const dir = new THREE.Vector3(
+                Math.sin(az) * Math.cos(el),
+                Math.sin(el),
+                Math.cos(az) * Math.cos(el)
+            );
+
+            // Update arrow
+            beamDir.setDirection(dir);
+
+            // Update cone
+            beamCone.position.copy(dir.clone().multiplyScalar(4));
+            beamCone.lookAt(beamCone.position.clone().add(dir));
+
+            // Update side lobes
+            sideLobes.forEach((lobe, i) => {
+                const angle = (i / 4) * Math.PI * 2;
+                const offset = new THREE.Vector3(
+                    Math.cos(angle) * 0.4,
+                    0.2,
+                    Math.sin(angle) * 0.4
+                );
+                lobe.position.copy(dir.clone().multiplyScalar(3).add(offset));
+                lobe.lookAt(lobe.position.clone().add(dir));
+            });
+
+            // Phase coloring of elements
+            const k = 2 * Math.PI / (wl * 1e-9 / 1e-6); // simplified
+            elements.forEach(e => {
+                const phase = k * (e.ix * spacing * Math.sin(az) + e.iy * spacing * Math.sin(el));
+                const intensity = 0.5 + 0.5 * Math.cos(phase);
+                e.mesh.material.color.setRGB(intensity * 0.5, intensity * 0.8, intensity);
+                e.mesh.material.emissive.setRGB(intensity * 0.1, intensity * 0.3, intensity * 0.2);
+            });
+
+            // Update metrics
+            const beamwidth = 51 * wl * 1e-9 / (N * spacing * 1e-6) * 57.3;
+            const gain = 10 * Math.log10(N * N);
+            const sll = -13.2;
+            document.getElementById('opa3d-width').textContent = beamwidth.toFixed(1) + '°';
+            document.getElementById('opa3d-sll').textContent = sll.toFixed(1) + ' dB';
+            document.getElementById('opa3d-gain').textContent = gain.toFixed(1) + ' dBi';
+            document.getElementById('opa3d-eff').textContent = '78%';
+
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        // Event listeners
+        ['az-slider3d', 'el-slider3d', 'wl-slider3d'].forEach(id => {
+            document.getElementById(id).addEventListener('input', () => {
+                const labelId = id.replace('slider', 'val');
+                document.getElementById(labelId).textContent = document.getElementById(id).value;
+                updateBeam();
+            });
+        });
+
+        function animate() {
+            requestAnimationFrame(animate);
+            updateBeam();
+        }
+        animate();
+
+        window.addEventListener('resize', () => {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            camera.aspect = rect.width / rect.height;
+            camera.updateProjectionMatrix();
+            renderer.setSize(rect.width, rect.height);
+        });
     </script>
 </body>
 </html>
