@@ -92,8 +92,8 @@
                 <div style="font-size:0.8em;color:#90e0ef;margin-top:4px">Real-time VLEO constellation + hypersonic tracking</div>
             </div>
             <div class="hero-stats">
-                <div class="hero-stat"><div class="hero-stat-value" id="h-sats">120</div><div class="hero-stat-label">Sats</div></div>
-                <div class="hero-stat"><div class="hero-stat-value" id="h-enemy">M10.2</div><div class="hero-stat-label">Enemy</div></div>
+                <div class="hero-stat"><div class="hero-stat-value" id="h-sats">150</div><div class="hero-stat-label">Sats</div></div>
+                <div class="hero-stat"><div class="hero-stat-value" id="h-enemy">M5.2</div><div class="hero-stat-label">Enemy</div></div>
                 <div class="hero-stat"><div class="hero-stat-value" id="h-friendly">M7.8</div><div class="hero-stat-label">Friendly</div></div>
                 <div class="hero-stat"><div class="hero-stat-value" id="h-links">24</div><div class="hero-stat-label">Links</div></div>
             </div>
@@ -235,13 +235,13 @@
         // Satellites
         const SAT_R = EARTH_R * 1.15;
         const sats = [];
-        for (let p = 0; p < 3; p++) {
-            for (let s = 0; s < 16; s++) {
+        for (let p = 0; p < 6; p++) {
+            for (let s = 0; s < 25; s++) {
                 const sat = new THREE.Mesh(
                     new THREE.BoxGeometry(0.15, 0.1, 0.25),
                     new THREE.MeshPhongMaterial({ color: 0x888888 })
                 );
-                sat.userData = { type: 'sat', name: `SAT-${p}-${s}`, plane: p, angle: (s/16)*Math.PI*2 + (p/3)*Math.PI };
+                sat.userData = { type: 'sat', name: `SAT-${p}-${s}`, plane: p, angle: (s/25)*Math.PI*2 + (p/6)*Math.PI };
                 scene.add(sat);
                 sats.push(sat);
             }
@@ -260,7 +260,7 @@
             new THREE.MeshBasicMaterial({ color: 0xff6600, transparent: true, opacity: 0.12, blending: THREE.AdditiveBlending })
         );
         enemyG.add(ePlasma);
-        enemyG.userData = { type: 'enemy', name: 'HGV-ALPHA', mach: 10.2 };
+        enemyG.userData = { type: 'enemy', name: 'HGV-ALPHA', mach: 5.2 };
         scene.add(enemyG);
 
         // Friendly HGV
@@ -375,7 +375,7 @@
                 sat.userData.angle += 0.0008;
                 const a = sat.userData.angle;
                 const inc = 53 * Math.PI / 180;
-                const raan = (sat.userData.plane / 3) * Math.PI;
+                const raan = (sat.userData.plane / 6) * Math.PI;
                 sat.position.set(
                     SAT_R * (Math.cos(raan)*Math.cos(a) - Math.sin(raan)*Math.cos(inc)*Math.sin(a)),
                     SAT_R * Math.sin(inc)*Math.sin(a),
@@ -445,7 +445,7 @@
             }
 
             // Update stats
-            document.getElementById('h-sats').textContent = '120';
+            document.getElementById('h-sats').textContent = '150';
             document.getElementById('h-enemy').textContent = 'M' + (10 + 0.2 * Math.sin(t)).toFixed(1);
             document.getElementById('h-friendly').textContent = 'M' + (7.8 + 0.2 * Math.cos(t)).toFixed(1);
             document.getElementById('h-links').textContent = Math.floor(20 + 4 * Math.sin(t * 0.5));

@@ -63,7 +63,7 @@
             <h2>Design Requirements</h2>
             <table>
                 <tr><th>Parameter</th><th>Requirement</th><th>Challenge Level</th></tr>
-                <tr><td>Operating speed</td><td>Mach 5-10 (1.7-3.4 km/s)</td><td><span class="danger">EXTREME</span></td></tr>
+                <tr><td>Operating speed</td><td>Mach 5-10 (1.5-3.0 km/s at 25-42 km, a≈302 m/s)</td><td><span class="danger">EXTREME</span></td></tr>
                 <tr><td>Surface temperature</td><td>1000-2200°C (stagnation point)</td><td><span class="danger">EXTREME</span></td></tr>
                 <tr><td>Plasma electron density</td><td>10¹⁷-10¹⁹ m⁻³</td><td><span class="warn">HIGH</span></td></tr>
                 <tr><td>Vibration (launch)</td><td>50-100 g RMS</td><td><span class="danger">EXTREME</span></td></tr>
@@ -203,13 +203,13 @@
 
             <h3>Line-of-Sight Kinematics</h3>
             <div class="equation">
-                Vehicle velocity: v = 3430 m/s (Mach 10)
+                Vehicle velocity: v = 3020 m/s (Mach 10, a≈302 m/s at 25-42 km)
                 <br>
-                Satellite angular rate: ω = v / R = 3430 / 300000 = <strong>11.4 mrad/s = 0.65°/s</strong>
+                Satellite angular rate: ω = v / R = 3020 / 300000 = <strong>10.1 mrad/s = 0.58°/s</strong>
                 <br><br>
                 Required track bandwidth: f_3dB &gt; 5 × ω_max / θ_accuracy
                 <br>
-                = 5 × 0.65°/s / 0.006° = <strong>542 Hz</strong>
+                = 5 × 0.58°/s / 0.006° = <strong>483 Hz</strong>
                 <br><br>
                 FSM must update at &gt; 1 kHz with &lt; 100 μrad resolution.
             </div>
