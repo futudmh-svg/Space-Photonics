@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Specifications & Parameters — Space Photonics</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #050811; color: #e0e6ed; line-height: 1.6; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 16px; }
+        nav { background: #1b263b; padding: 12px; border-radius: 10px; margin-bottom: 16px; display: flex; flex-wrap: wrap; gap: 8px; }
+        nav a { color: #e0e6ed; text-decoration: none; padding: 8px 14px; border-radius: 6px; font-size: 0.9em; background: #0d1b2a; }
+        nav a:hover, nav a.active { background: #00d4aa; color: #050811; }
+        h1 { font-size: 1.5em; color: #00d4aa; margin: 16px 0 8px; }
+        .subtitle { color: #778da9; font-size: 0.9em; margin-bottom: 16px; }
+        .card { background: #1b263b; border-radius: 12px; padding: 18px; margin-bottom: 16px; border: 1px solid #415a77; }
+        .card h2 { font-size: 1.15em; color: #00d4aa; margin-bottom: 12px; }
+        .hud { background: rgba(5,8,17,0.88); border: 1px solid rgba(65,90,119,0.5); border-radius: 10px; backdrop-filter: blur(12px); padding: 18px; margin-bottom: 16px; }
+        footer { text-align: center; padding: 30px; color: #778da9; font-size: 0.8em; }
+
+        /* ─── Section markers (numbered, editorial) ─── */
+        .sec-marker { font-family: 'SF Mono', ui-monospace, Menlo, monospace; font-size: 0.7em; letter-spacing: 0.25em; color: #ffd166; text-transform: uppercase; margin-bottom: 4px; }
+        .sec-marker::before { content: ''; display: inline-block; width: 22px; height: 1px; background: #ffd166; vertical-align: middle; margin-right: 8px; }
+
+        /* ─── Asymmetric hero ─── */
+        .hero { display: grid; grid-template-columns: 1.4fr 1fr; gap: 20px; align-items: end; margin: 20px 0 24px; }
+        .hero h1 { font-size: 2.1em; line-height: 1.25; color: #e0e6ed; margin: 6px 0 10px; }
+        .hero h1 .tag { display: inline-block; padding: 1px 10px; border-radius: 6px; font-size: 0.55em; vertical-align: middle; font-family: ui-monospace, Menlo, monospace; }
+        .tag-teal { background: rgba(0,212,170,0.15); color: #00d4aa; border: 1px solid rgba(0,212,170,0.4); }
+        .tag-amber { background: rgba(255,209,102,0.12); color: #ffd166; border: 1px solid rgba(255,209,102,0.4); }
+        .hero-meta { font-family: ui-monospace, Menlo, monospace; font-size: 0.72em; color: #778da9; }
+        .hero-meta div { display: flex; justify-content: space-between; border-bottom: 1px dashed rgba(65,90,119,0.5); padding: 4px 0; }
+        .hero-meta span:last-child { color: #90e0ef; }
+
+        /* ─── Registry tables ─── */
+        .reg-group { margin-bottom: 8px; }
+        .reg-group h3 { font-size: 0.95em; color: #90e0ef; margin: 14px 0 6px; font-family: ui-monospace, Menlo, monospace; font-weight: 600; }
+        .reg-group h3::before { content: '▸ '; color: #00d4aa; }
+        .spec-table { width: 100%; border-collapse: collapse; font-size: 0.8em; }
+        .spec-table th { background: #0d1b2a; padding: 7px 9px; text-align: left; color: #00d4aa; font-size: 0.85em; letter-spacing: 0.08em; text-transform: uppercase; }
+        .spec-table td { padding: 6px 9px; border-bottom: 1px solid rgba(65,90,119,0.35); vertical-align: top; }
+        .spec-table td.val { color: #ffd166; font-family: ui-monospace, Menlo, monospace; white-space: nowrap; }
+        .spec-table td.formula { color: #778da9; font-family: ui-monospace, Menlo, monospace; font-size: 0.92em; }
+        .use-tag { display: inline-block; background: #0d1b2a; border: 1px solid rgba(144,224,239,0.35); color: #90e0ef; border-radius: 4px; padding: 0 6px; font-size: 0.85em; margin: 1px 2px 1px 0; font-family: ui-monospace, Menlo, monospace; }
+
+        /* ─── Correlations engine ─── */
+        .engine { display: grid; grid-template-columns: 300px 1fr; gap: 16px; }
+        .controls label { display: flex; justify-content: space-between; font-size: 0.78em; color: #778da9; margin: 8px 0 2px; font-family: ui-monospace, Menlo, monospace; }
+        .controls label span { color: #ffd166; }
+        input[type="range"] { width: 100%; -webkit-appearance: none; height: 6px; border-radius: 3px; background: #415a77; }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: #00d4aa; cursor: pointer; }
+        input[type="number"] { width: 70px; background: #0d1b2a; border: 1px solid #415a77; color: #ffd166; border-radius: 4px; padding: 3px 6px; font-family: ui-monospace, Menlo, monospace; font-size: 0.85em; }
+        .out-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 8px; }
+        .out-box { background: rgba(13,27,42,0.7); border: 1px solid rgba(65,90,119,0.4); border-radius: 8px; padding: 10px 12px; }
+        .out-box .k { font-size: 0.68em; color: #778da9; text-transform: uppercase; letter-spacing: 0.08em; }
+        .out-box .v { font-size: 1.15em; color: #00d4aa; font-family: ui-monospace, Menlo, monospace; font-weight: 600; }
+        .out-box .f { font-size: 0.65em; color: #415a77; font-family: ui-monospace, Menlo, monospace; margin-top: 2px; }
+        .out-box.warn .v { color: #ffd166; }
+        .out-box.bad .v { color: #e63946; }
+        .corr-list { margin-top: 14px; font-size: 0.78em; font-family: ui-monospace, Menlo, monospace; }
+        .corr { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 6px 0; border-bottom: 1px dashed rgba(65,90,119,0.4); }
+        .corr b { padding: 1px 8px; border-radius: 4px; font-weight: 600; }
+        .c-teal b { background: rgba(0,212,170,0.15); color: #00d4aa; }
+        .c-amber b { background: rgba(255,209,102,0.12); color: #ffd166; }
+        .c-red b { background: rgba(230,57,70,0.15); color: #e63946; }
+        .c-ice b { background: rgba(144,224,239,0.12); color: #90e0ef; }
+        .c-green b { background: rgba(42,157,143,0.2); color: #2a9d8f; }
+        .corr .arrow { color: #415a77; }
+        .budget-row, .yield-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.78em; padding: 3px 0; color: #778da9; font-family: ui-monospace, Menlo, monospace; }
+
+        /* ─── Dependency diagram ─── */
+        svg.diagram { width: 100%; background: #0d1b2a; border-radius: 8px; }
+        .dnode { fill: #1b263b; stroke: #415a77; }
+        .dnode.hot { stroke: #00d4aa; }
+        .dlabel { fill: #e0e6ed; font-size: 11px; font-family: ui-monospace, Menlo, monospace; }
+        .dedge { stroke: #415a77; fill: none; marker-end: url(#darr); }
+        .dedge-lbl { fill: #778da9; font-size: 9px; font-family: ui-monospace, Menlo, monospace; }
+
+        /* ─── Hamburger Navigation ─── */
+        .nav-hamburger { display: none; position: fixed; top: 8px; left: 8px; z-index: 300; background: rgba(5,8,17,0.92); border: 1px solid #00d4aa; color: #00d4aa; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 1.2em; }
+        .nav-overlay { display: none; position: fixed; inset: 0; z-index: 250; background: rgba(5,8,17,0.95); backdrop-filter: blur(12px); flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 20px; overflow-y: auto; }
+        .nav-overlay.active { display: flex; }
+        .nav-overlay a { color: #90e0ef; text-decoration: none; padding: 10px 20px; font-size: 1.1em; border-radius: 8px; background: rgba(13,27,42,0.7); border: 1px solid rgba(65,90,119,0.3); width: 200px; text-align: center; }
+        .nav-overlay a:hover, .nav-overlay a.active { background: #00d4aa; color: #050811; }
+        .nav-close { position: absolute; top: 8px; right: 8px; color: #e63946; font-size: 1.5em; cursor: pointer; background: none; border: none; padding: 8px; }
+
+        @media (max-width: 900px) {
+            .hero { grid-template-columns: 1fr; }
+            .engine { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 768px) {
+            nav { display: none; }
+            .nav-hamburger { display: block; }
+            .hero h1 { font-size: 1.5em; }
+            .spec-table { font-size: 0.7em; }
+        }
+    </style>
+</head>
+<body>
+    <button class="nav-hamburger" id="nav-hamburger">☰</button>
+    <div class="nav-overlay" id="nav-overlay">
+        <button class="nav-close" id="nav-close">✕</button>
+        <a href="../index.html">🏠 Dashboard</a>
+        <a href="../pages/architecture.html">🏛️ Architecture</a>
+        <a href="../pages/digital-twin.html">🎮 3D Twin</a>
+        <a href="../pages/opa-analysis.html">📡 OPA</a>
+        <a href="../pages/link-budget.html">📊 Link Budget</a>
+        <a href="../pages/hypersonic.html">🚀 Hypersonic</a>
+        <a href="../pages/vleo-constellation.html">🌐 VLEO</a>
+        <a href="../pages/mapper-3d.html">🗺️ Mapper</a>
+        <a href="../pages/satellite-digital-twin.html">🛰️ Sat Twin</a>
+        <a href="../pages/interception-mission.html">🎯 Intercept</a>
+        <a href="../pages/vehicle-terminal.html">🛰️ Terminal</a>
+        <a href="../pages/ehf-optical-trade.html">📡 EHF vs Opt</a>
+        <a href="../pages/ppln-calculator.html">🔢 PPLN</a>
+        <a href="../pages/research-gaps.html">🔬 Gaps</a>
+        <a href="../pages/specifications.html" class="active">📐 Specs</a>
+        <a href="../pages/foundry.html">🏭 Foundry</a>
+        <a href="../pages/foundry-cleanroom.html">🏭 Clean Room</a>
+    </div>
+
+    <div class="container">
+        <nav>
+            <a href="../index.html">🏠 Dashboard</a>
+            <a href="../pages/architecture.html">🏛️ Architecture</a>
+            <a href="../pages/digital-twin.html">🎮 3D Twin</a>
+            <a href="../pages/opa-analysis.html">📡 OPA</a>
+            <a href="../pages/link-budget.html">📊 Link Budget</a>
+            <a href="../pages/hypersonic.html">🚀 Hypersonic</a>
+            <a href="../pages/vleo-constellation.html">🌐 VLEO</a>
+            <a href="../pages/mapper-3d.html">🗺️ Mapper</a>
+            <a href="../pages/satellite-digital-twin.html">🛰️ Sat Twin</a>
+            <a href="../pages/interception-mission.html">🎯 Intercept</a>
+            <a href="../pages/vehicle-terminal.html">🛰️ Terminal</a>
+            <a href="../pages/ehf-optical-trade.html">📡 EHF vs Opt</a>
+            <a href="../pages/ppln-calculator.html">🔢 PPLN</a>
+            <a href="../pages/research-gaps.html">🔬 Gaps</a>
+            <a href="../pages/specifications.html" class="active">📐 Specs</a>
+            <a href="../pages/foundry.html">🏭 Foundry</a>
+            <a href="../pages/foundry-cleanroom.html">🏭 Clean Room</a>
+        </nav>
+
+        <!-- HERO -->
+        <div class="hero">
+            <div>
+                <div class="sec-marker">17 / Specifications &amp; Parameters</div>
+                <h1>📐 Master Parameter Registry — <span class="tag tag-teal">one source of truth</span> every number <span class="tag tag-amber">cross-referenced</span></h1>
+                <p class="subtitle" style="margin-bottom:0">Every value below is the canonical figure used across all 16 sibling pages. If two pages disagree, this page wins. Drag a slider in the Correlations Engine to see how the parameters couple.</p>
+            </div>
+            <div class="hero-meta">
+                <div><span>λ carrier</span><span>1550 nm C-band</span></div>
+                <div><span>Constellation</span><span>150 sats · 6×25 · 53°</span></div>
+                <div><span>Aperture</span><span>5 cm → ~100 dBi</span></div>
+                <div><span>ISL rate</span><span>100 Gbps class</span></div>
+                <div><span>Tracking CEP</span><span>10–50 m</span></div>
+                <div><span>Yield target</span><span>≥ 60 % E2E</span></div>
+            </div>
+        </div>
+
+        <!-- 01 MASTER REGISTRY -->
+        <div class="card">
+            <div class="sec-marker">01 / Registry</div>
+            <h2>📋 Master Registry</h2>
+
+            <div class="reg-group">
+                <h3>Constellation — VLEO shell</h3>
+                <table class="spec-table">
+                    <tr><th>Parameter</th><th>Value</th><th>Unit</th><th>Formula / Source</th><th>Used in pages</th></tr>
+                    <tr><td>Satellite count</td><td class="val">150</td><td>sats</td><td class="formula">6 planes × 25 sats</td><td><span class="use-tag">vleo</span><span class="use-tag">mapper</span><span class="use-tag">interception</span></td></tr>
+                    <tr><td>Orbital planes</td><td class="val">6 × 25</td><td>planes × sats</td><td class="formula">Walker-style shell</td><td><span class="use-tag">vleo</span><span class="use-tag">mapper</span></td></tr>
+                    <tr><td>Inclination</td><td class="val">53</td><td>°</td><td class="formula">mid-latitude coverage</td><td><span class="use-tag">vleo</span><span class="use-tag">mapper</span></td></tr>
+                    <tr><td>Altitude</td><td class="val">300</td><td>km</td><td class="formula">VLEO drag-balanced</td><td><span class="use-tag">vleo</span><span class="use-tag">link-budget</span><span class="use-tag">interception</span></td></tr>
+                    <tr><td>Orbital period</td><td class="val">~90.5</td><td>min</td><td class="formula">T = 2π√(a³/μ), a = 6678 km</td><td><span class="use-tag">vleo</span><span class="use-tag">digital-twin</span></td></tr>
+                </table>
+            </div>
+
+            <div class="reg-group">
+                <h3>Bus — 12U CubeSat class</h3>
+                <table class="spec-table">
+                    <tr><th>Parameter</th><th>Value</th><th>Unit</th><th>Formula / Source</th><th>Used in pages</th></tr>
+                    <tr><td>Form factor</td><td class="val">12U · 20×20×30</td><td>cm</td><td class="formula">CubeSat standard</td><td><span class="use-tag">architecture</span><span class="use-tag">sat-twin</span></td></tr>
+                    <tr><td>Mass</td><td class="val">12</td><td>kg</td><td class="formula">dry mass budget</td><td><span class="use-tag">vleo</span><span class="use-tag">foundry</span></td></tr>
+                    <tr><td>Solar power</td><td class="val">45</td><td>W</td><td class="formula">body-mounted + deployable</td><td><span class="use-tag">architecture</span><span class="use-tag">link-budget</span></td></tr>
+                    <tr><td>ADCS accuracy</td><td class="val">±0.1</td><td>°</td><td class="formula">star tracker + RW</td><td><span class="use-tag">interception</span><span class="use-tag">terminal</span></td></tr>
+                </table>
+            </div>
+
+            <div class="reg-group">
+                <h3>Optical Payload</h3>
+                <table class="spec-table">
+                    <tr><th>Parameter</th><th>Value</th><th>Unit</th><th>Formula / Source</th><th>Used in pages</th></tr>
+                    <tr><td>Wavelength</td><td class="val">1550</td><td>nm</td><td class="formula">C-band, ITU grid tunable</td><td><span class="use-tag">all optical pages</span></td></tr>
+                    <tr><td>TX power (EDFA)</td><td class="val">1</td><td>W</td><td class="formula">+30 dBm, booster EDFA</td><td><span class="use-tag">link-budget</span><span class="use-tag">ehf-opt</span></td></tr>
+                    <tr><td>Aperture</td><td class="val">5</td><td>cm</td><td class="formula">projection optics</td><td><span class="use-tag">opa</span><span class="use-tag">link-budget</span></td></tr>
+                    <tr><td>Antenna gain</td><td class="val">≈ 100</td><td>dBi</td><td class="formula">G = (πD/λ)² → 20log₁₀(πD/λ) = 100.6</td><td><span class="use-tag">link-budget</span><span class="use-tag">interception</span></td></tr>
+                </table>
+            </div>
+
+            <div class="reg-group">
+                <h3>OPA Steering — TFLN phased array</h3>
+                <table class="spec-table">
+                    <tr><th>Parameter</th><th>Value</th><th>Unit</th><th>Formula / Source</th><th>Used in pages</th></tr>
+                    <tr><td>Array</td><td class="val">64×64</td><td>elements</td><td class="formula">λ/2 pitch → ~2×2 mm emissive chip</td><td><span class="use-tag">opa</span><span class="use-tag">architecture</span></td></tr>
+                    <tr><td>Projection aperture</td><td class="val">5</td><td>cm</td><td class="formula">chip → telescope magnification</td><td><span class="use-tag">opa</span><span class="use-tag">link-budget</span></td></tr>
+                    <tr><td>Steering FOV</td><td class="val">±15</td><td>° / face</td><td class="formula">4 faces for near-4π coverage</td><td><span class="use-tag">opa</span><span class="use-tag">interception</span></td></tr>
+                    <tr><td>Repoint time</td><td class="val">≤ 100</td><td>μs</td><td class="formula">thermal v1 / TFLN-EO v2 (&lt;1 μs)</td><td><span class="use-tag">opa</span><span class="use-tag">terminal</span></td></tr>
+                    <tr><td>Beamwidth</td><td class="val">31</td><td>μrad class</td><td class="formula">θ = λ/D = 1.55e-6/0.05</td><td><span class="use-tag">opa</span><span class="use-tag">link-budget</span></td></tr>
+                    <tr><td>Pointing accuracy</td><td class="val">≤ 3</td><td>μrad</td><td class="formula">fast-steering loop + Kalman</td><td><span class="use-tag">interception</span><span class="use-tag">mapper</span></td></tr>
+                </table>
+            </div>
+
+            <div class="reg-group">
+                <h3>Network &amp; Modem</h3>
+                <table class="spec-table">
+                    <tr><th>Parameter</th><th>Value</th><th>Unit</th><th>Formula / Source</th><th>Used in pages</th></tr>
+                    <tr><td>Waveform</td><td class="val">OOK-NRZ + LDPC</td><td>—</td><td class="formula">SDA OISL standard 3.1</td><td><span class="use-tag">link-budget</span><span class="use-tag">terminal</span></td></tr>
+                    <tr><td>Data rate</td><td class="val">0.1 – 100</td><td>Gbps</td><td class="formula">rate-configurable modem</td><td><span class="use-tag">link-budget</span><span class="use-tag">vleo</span></td></tr>
+                    <tr><td>ISL rate</td><td class="val">100</td><td>Gbps class</td><td class="formula">400 Gbps coherent roadmap</td><td><span class="use-tag">vleo</span><span class="use-tag">architecture</span></td></tr>
+                    <tr><td>Downlink</td><td class="val">10 ground / 2.4 HGV</td><td>Gbps</td><td class="formula">ground station / hypersonic vehicle</td><td><span class="use-tag">interception</span><span class="use-tag">hypersonic</span></td></tr>
+                    <tr><td>RX sensitivity</td><td class="val">−50</td><td>dBm</td><td class="formula">PPLN receiver, BER ≤ 1e-6</td><td><span class="use-tag">link-budget</span><span class="use-tag">architecture</span></td></tr>
+                    <tr><td>BER</td><td class="val">≤ 1e-6</td><td>—</td><td class="formula">pre-FEC, LDPC closed</td><td><span class="use-tag">link-budget</span><span class="use-tag">terminal</span></td></tr>
+                </table>
+            </div>
+
+            <div class="reg-group">
+                <h3>Tracking &amp; Timing</h3>
+                <table class="spec-table">
+                    <tr><th>Parameter</th><th>Value</th><th>Unit</th><th>Formula / Source</th><th>Used in pages</th></tr>
+                    <tr><td>Position CEP</td><td class="val">10 – 50</td><td>m</td><td class="formula">multi-sat triangulation</td><td><span class="use-tag">mapper</span><span class="use-tag">interception</span></td></tr>
+                    <tr><td>Acquisition time</td><td class="val">&lt; 30</td><td>s target</td><td class="formula">spiral scan + handoff</td><td><span class="use-tag">terminal</span><span class="use-tag">interception</span></td></tr>
+                    <tr><td>Time sync</td><td class="val">ns-class</td><td>s</td><td class="formula">two-way optical time transfer</td><td><span class="use-tag">mapper</span><span class="use-tag">vleo</span></td></tr>
+                </table>
+            </div>
+
+            <div class="reg-group">
+                <h3>Manufacturing — foundry flow</h3>
+                <table class="spec-table">
+                    <tr><th>Parameter</th><th>Value</th><th>Unit</th><th>Formula / Source</th><th>Used in pages</th></tr>
+                    <tr><td>Cleanroom classes</td><td class="val">ISO 5 / 6 / 7</td><td>—</td><td class="formula">litho / process / assembly zones</td><td><span class="use-tag">foundry</span><span class="use-tag">cleanroom</span></td></tr>
+                    <tr><td>End-to-end yield</td><td class="val">≥ 60</td><td>% target</td><td class="formula">Π of 5 step yields</td><td><span class="use-tag">foundry</span><span class="use-tag">cleanroom</span></td></tr>
+                    <tr><td>Throughput</td><td class="val">5 – 10</td><td>units / week</td><td class="formula">pilot line capacity</td><td><span class="use-tag">foundry</span></td></tr>
+                    <tr><td>Process standard</td><td class="val">ECSS-Q-ST-70</td><td>—</td><td class="formula">ESA space workmanship</td><td><span class="use-tag">foundry</span><span class="use-tag">cleanroom</span></td></tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- 02 CORRELATIONS ENGINE -->
+        <div class="hud">
+            <div class="sec-marker">02 / Correlations</div>
+            <h2 style="font-size:1.15em;color:#00d4aa;margin-bottom:12px">🔗 Correlations Engine — dependency playground</h2>
+            <p style="font-size:0.82em;color:#778da9;margin-bottom:12px">Every output recomputes live from the drivers. Formulas are shown under each result; nothing here is hard-coded. Sanity: D=5 cm, 1 W, 10 Gbps → max range ~3,000 km class; Mach 10 @ 30 km → 3,020 m/s, +1.95 GHz Doppler, 9.8 GHz plasma cutoff.</p>
+            <div class="engine">
+                <div class="controls">
+                    <label>Aperture D <span id="v-D">5 cm</span></label>
+                    <input type="range" id="in-D" min="2" max="20" step="0.5" value="5">
+                    <label>TX power <span id="v-Pt">1 W</span></label>
+                    <input type="range" id="in-Pt" min="0.1" max="10" step="0.1" value="1">
+                    <label>Data rate <span id="v-rate">10 Gbps</span></label>
+                    <input type="range" id="in-rate" min="0.1" max="100" step="0.1" value="10">
+                    <label>Link range <span id="v-range">3000 km</span></label>
+                    <input type="range" id="in-range" min="100" max="10000" step="50" value="3000">
+                    <label>System loss <span id="v-loss">13 dB</span></label>
+                    <input type="range" id="in-loss" min="0" max="20" step="0.5" value="13">
+                    <label>Mach <span id="v-mach">10</span></label>
+                    <input type="range" id="in-mach" min="1" max="25" step="0.5" value="10">
+                    <label>Altitude <span id="v-alt">30 km</span></label>
+                    <input type="range" id="in-alt" min="0" max="47" step="0.5" value="30">
+                    <label>OPA elements/side <span id="v-N">64</span></label>
+                    <input type="range" id="in-N" min="8" max="256" step="8" value="64">
+                    <label>OPA chip aperture <span id="v-chip">2 mm</span></label>
+                    <input type="range" id="in-chip" min="0.5" max="10" step="0.1" value="2">
+                </div>
+                <div>
+                    <div class="out-grid">
+                        <div class="out-box"><div class="k">Antenna gain</div><div class="v" id="o-gain">–</div><div class="f">G = 20·log₁₀(πD/λ)</div></div>
+                        <div class="out-box"><div class="k">Beamwidth</div><div class="v" id="o-bw">–</div><div class="f">θ = λ/D (μrad)</div></div>
+                        <div class="out-box"><div class="k">Spot @ range</div><div class="v" id="o-spot">–</div><div class="f">spot = θ · R</div></div>
+                        <div class="out-box" id="box-rmax"><div class="k">Max range (Friis)</div><div class="v" id="o-rmax">–</div><div class="f">R = λ/4π · 10^((Pt+2G−Ls−sens)/20), sens rate-scaled</div></div>
+                        <div class="out-box" id="box-margin"><div class="k">Link margin @ R</div><div class="v" id="o-margin">–</div><div class="f">Pr − sens, Pr = Pt+2G−Ls−20log₁₀(4πR/λ)</div></div>
+                        <div class="out-box"><div class="k">Sound speed a(h)</div><div class="v" id="o-a">–</div><div class="f">a = √(1.4·287·T(h)), US-Std-Atmos</div></div>
+                        <div class="out-box"><div class="k">Vehicle velocity</div><div class="v" id="o-vel">–</div><div class="f">v = Mach · a(h)</div></div>
+                        <div class="out-box"><div class="k">Doppler shift</div><div class="v" id="o-doppler">–</div><div class="f">Δf = v/λ @1550 nm</div></div>
+                        <div class="out-box"><div class="k">Electron density</div><div class="v" id="o-ne">–</div><div class="f">Nₑ = 1.2e18·(M/10)² m⁻³</div></div>
+                        <div class="out-box" id="box-fp"><div class="k">Plasma cutoff</div><div class="v" id="o-fp">–</div><div class="f">f_p = 8980·√Nₑ Hz</div></div>
+                        <div class="out-box"><div class="k">OPA pitch</div><div class="v" id="o-pitch">–</div><div class="f">pitch = D_chip/√N_total</div></div>
+                        <div class="out-box" id="box-grating"><div class="k">Grating lobe</div><div class="v" id="o-grating">–</div><div class="f">asin(λ/pitch) if pitch &gt; λ</div></div>
+                    </div>
+                    <div class="out-box" style="margin-top:8px" id="box-verdict"><div class="k">OPA verdict</div><div class="v" id="o-verdict" style="font-size:0.9em">–</div></div>
+
+                    <div class="corr-list">
+                        <div class="corr c-teal"><b>D ↑</b><span class="arrow">→</span><span>beamwidth ↓</span><span class="arrow">→</span><span>spot ↓</span><span class="arrow">→</span><b>pointing accuracy must ↑</b><span style="color:#778da9">(≤3 μrad on a 31 μrad beam)</span></div>
+                        <div class="corr c-amber"><b>rate ↑</b><span class="arrow">→</span><span>sens degrades +10·log₁₀(rate/10G)</span><span class="arrow">→</span><b>max range ↓</b></div>
+                        <div class="corr c-red"><b>Mach ↑</b><span class="arrow">→</span><span>Nₑ ∝ M²</span><span class="arrow">→</span><b>plasma f_p ↑</b><span style="color:#778da9">(RF blackout; optical immune)</span></div>
+                        <div class="corr c-ice"><b>altitude ↑</b><span class="arrow">→</span><span>T(h) changes</span><span class="arrow">→</span><span>a(h) shifts</span><span class="arrow">→</span><b>Doppler ∝ M·a(h)</b></div>
+                        <div class="corr c-green"><b>N ↑</b><span class="arrow">→</span><span>pitch ↓</span><span class="arrow">→</span><b>grating lobes vanish at pitch ≤ λ/2</b></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Power budget -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px" class="pw-yield">
+                <div>
+                    <h3 style="font-size:0.9em;color:#90e0ef;margin-bottom:6px;font-family:ui-monospace,Menlo,monospace">⚡ Power budget — 45 W bus limit</h3>
+                    <div class="budget-row"><span>Laser + EO comb</span><span><input type="number" id="pw-laser" value="8" min="0" max="45" step="0.5"> W</span></div>
+                    <div class="budget-row"><span>EDFA booster</span><span><input type="number" id="pw-edfa" value="12" min="0" max="45" step="0.5"> W</span></div>
+                    <div class="budget-row"><span>OPA drivers</span><span><input type="number" id="pw-opa" value="10" min="0" max="45" step="0.5"> W</span></div>
+                    <div class="budget-row"><span>Modem / DSP</span><span><input type="number" id="pw-modem" value="8" min="0" max="45" step="0.5"> W</span></div>
+                    <div class="budget-row"><span>ADCS + thermal</span><span><input type="number" id="pw-adcs" value="5" min="0" max="45" step="0.5"> W</span></div>
+                    <div class="budget-row" style="border-top:1px solid #415a77;margin-top:4px;padding-top:6px"><span style="color:#e0e6ed">Total</span><span class="v" id="o-pw-total" style="color:#00d4aa;font-weight:600">–</span></div>
+                    <div class="budget-row"><span>Margin vs 45 W</span><span id="o-pw-margin">–</span></div>
+                </div>
+                <div>
+                    <h3 style="font-size:0.9em;color:#90e0ef;margin-bottom:6px;font-family:ui-monospace,Menlo,monospace">🏭 Yield chain — Π of 5 steps</h3>
+                    <div class="yield-row"><span>Wafer fab (TFLN)</span><span><input type="number" id="y-1" value="92" min="1" max="100" step="1"> %</span></div>
+                    <div class="yield-row"><span>Litho / etch</span><span><input type="number" id="y-2" value="90" min="1" max="100" step="1"> %</span></div>
+                    <div class="yield-row"><span>Die test / binning</span><span><input type="number" id="y-3" value="88" min="1" max="100" step="1"> %</span></div>
+                    <div class="yield-row"><span>Packaging / coupling</span><span><input type="number" id="y-4" value="95" min="1" max="100" step="1"> %</span></div>
+                    <div class="yield-row"><span>Final integration</span><span><input type="number" id="y-5" value="90" min="1" max="100" step="1"> %</span></div>
+                    <div class="yield-row" style="border-top:1px solid #415a77;margin-top:4px;padding-top:6px"><span style="color:#e0e6ed">End-to-end</span><span id="o-yield" style="color:#00d4aa;font-weight:600">–</span></div>
+                    <div class="yield-row"><span>vs ≥60 % target</span><span id="o-yield-verdict">–</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 03 DEPENDENCY DIAGRAM -->
+        <div class="card">
+            <div class="sec-marker">03 / Dependency Graph</div>
+            <h2>📐 Parameter Dependency Diagram</h2>
+            <p style="font-size:0.82em;color:#778da9;margin-bottom:10px">Edges carry the coupling formula. Teal nodes are independent drivers; ice nodes are derived quantities; the amber node is the hard constraint.</p>
+            <svg class="diagram" viewBox="0 0 900 460" role="img" aria-label="Parameter dependency diagram">
+                <defs>
+                    <marker id="darr" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#415a77"/></marker>
+                </defs>
+                <!-- edges -->
+                <path class="dedge" d="M150,80 C250,60 300,60 380,70"/>
+                <text class="dedge-lbl" x="235" y="48">G = 20log(πD/λ)</text>
+                <path class="dedge" d="M150,95 C240,120 280,140 360,160"/>
+                <text class="dedge-lbl" x="215" y="135">θ = λ/D</text>
+                <path class="dedge" d="M470,85 C560,100 600,130 660,170"/>
+                <text class="dedge-lbl" x="545" y="105">Friis, sens(rate)</text>
+                <path class="dedge" d="M140,210 C220,220 280,200 360,180"/>
+                <text class="dedge-lbl" x="195" y="215">Pt dBm adds</text>
+                <path class="dedge" d="M150,300 C260,290 320,240 375,195"/>
+                <text class="dedge-lbl" x="195" y="285">sens ∝ 10log(rate)</text>
+                <path class="dedge" d="M480,170 C560,180 620,185 655,188"/>
+                <path class="dedge" d="M470,410 C560,395 620,330 668,250"/>
+                <text class="dedge-lbl" x="560" y="390">spot = θ·R; CEP feed</text>
+                <path class="dedge" d="M150,390 C240,395 300,405 350,408"/>
+                <text class="dedge-lbl" x="200" y="382">v = M·a(h)</text>
+                <path class="dedge" d="M455,425 C540,430 620,340 668,265"/>
+                <text class="dedge-lbl" x="540" y="435">Δf = v/λ; f_p = 8980√Nₑ(M)</text>
+                <path class="dedge" d="M745,205 C750,240 748,260 745,285"/>
+                <text class="dedge-lbl" x="700" y="250">margin ≥ 0 ?</text>
+                <!-- nodes -->
+                <rect class="dnode hot" x="60" y="60" width="90" height="40" rx="8"/><text class="dlabel" x="105" y="84" text-anchor="middle">Aperture D</text>
+                <rect class="dnode hot" x="60" y="185" width="90" height="40" rx="8"/><text class="dlabel" x="105" y="209" text-anchor="middle">TX Power</text>
+                <rect class="dnode hot" x="60" y="280" width="90" height="40" rx="8"/><text class="dlabel" x="105" y="304" text-anchor="middle">Data Rate</text>
+                <rect class="dnode hot" x="60" y="370" width="90" height="40" rx="8"/><text class="dlabel" x="105" y="394" text-anchor="middle">Mach / h</text>
+                <rect class="dnode" x="380" y="55" width="90" height="40" rx="8" stroke="#90e0ef"/><text class="dlabel" x="425" y="79" text-anchor="middle">Gain (dBi)</text>
+                <rect class="dnode" x="380" y="145" width="100" height="40" rx="8" stroke="#90e0ef"/><text class="dlabel" x="430" y="169" text-anchor="middle">Beamwidth θ</text>
+                <rect class="dnode" x="350" y="390" width="110" height="40" rx="8" stroke="#90e0ef"/><text class="dlabel" x="405" y="414" text-anchor="middle">v, Δf, f_p</text>
+                <rect class="dnode" x="660" y="170" width="110" height="44" rx="8" stroke="#90e0ef"/><text class="dlabel" x="715" y="189" text-anchor="middle">Max Range</text><text class="dlabel" x="715" y="203" text-anchor="middle" font-size="9">/ spot / Doppler</text>
+                <rect class="dnode" x="655" y="285" width="120" height="40" rx="8" stroke="#ffd166"/><text class="dlabel" x="715" y="309" text-anchor="middle" fill="#ffd166">45 W / BER / CEP</text>
+                <rect class="dnode hot" x="60" y="120" width="90" height="40" rx="8"/><text class="dlabel" x="105" y="144" text-anchor="middle">Elements N</text>
+                <path class="dedge" d="M150,140 C260,150 300,155 378,163"/>
+                <text class="dedge-lbl" x="240" y="160">pitch = D_chip/√N</text>
+            </svg>
+        </div>
+
+        <footer><p>Space Photonics Digital Twin — Master Parameter Registry (page 17)</p></footer>
+    </div>
+
+    <script>
+        'use strict';
+        // ─── Pure physics (node-verifiable) ───
+        const LAMBDA = 1550e-9; // m
+        function gainDb(Dm) { return 20 * Math.log10(Math.PI * Dm / LAMBDA); }
+        function beamwidthRad(Dm) { return LAMBDA / Dm; }
+        function sensDbm(rateGbps) { return -50 + 10 * Math.log10(rateGbps / 10); } // −50 dBm @ 10 Gbps reference
+        function maxRangeM(Dm, PtW, rateGbps, lossDb) {
+            const G = gainDb(Dm);
+            const ptDbm = 10 * Math.log10(PtW * 1000);
+            return LAMBDA / (4 * Math.PI) * Math.pow(10, (ptDbm + 2 * G - lossDb - sensDbm(rateGbps)) / 20);
+        }
+        function rxPowerDbm(Dm, PtW, rangeM, lossDb) {
+            const G = gainDb(Dm);
+            return 10 * Math.log10(PtW * 1000) + 2 * G - lossDb - 20 * Math.log10(4 * Math.PI * rangeM / LAMBDA);
+        }
+        function tempAtAlt(hKm) { // US Standard Atmosphere (piecewise), h in km
+            if (hKm < 11) return 288.15 - 6.5 * hKm;
+            if (hKm < 20) return 216.65;
+            if (hKm < 32) return 216.65 + 1.0 * (hKm - 20);
+            return 228.65 + 2.8 * (hKm - 32);
+        }
+        function soundSpeed(hKm) { return Math.sqrt(1.4 * 287 * tempAtAlt(hKm)); }
+        function velocity(mach, hKm) { return mach * soundSpeed(hKm); }
+        function dopplerHz(mach, hKm) { return velocity(mach, hKm) / LAMBDA; }
+        function electronDensity(mach) { return 1.2e18 * Math.pow(mach / 10, 2); }
+        function plasmaFreqHz(mach) { return 8980 * Math.sqrt(electronDensity(mach) / 1e6); } // 8980·√Nₑ with Nₑ in cm⁻³
+        function opaPitchM(chipM, nSide) { return chipM / nSide; } // pitch = D_chip/√N_total, N_total = nSide²
+        function gratingLobeDeg(pitchM) { return pitchM > LAMBDA ? Math.asin(LAMBDA / pitchM) * 180 / Math.PI : null; }
+
+        // ─── DOM wiring ───
+        if (typeof document !== 'undefined') {
+            const $ = id => document.getElementById(id);
+            const fmt = (x, d = 1) => x.toLocaleString('en-US', { maximumFractionDigits: d });
+
+            function recompute() {
+                const D = parseFloat($('in-D').value) / 100;       // m
+                const Pt = parseFloat($('in-Pt').value);          // W
+                const rate = parseFloat($('in-rate').value);      // Gbps
+                const R = parseFloat($('in-range').value) * 1000; // m
+                const loss = parseFloat($('in-loss').value);      // dB
+                const mach = parseFloat($('in-mach').value);
+                const alt = parseFloat($('in-alt').value);        // km
+                const N = parseInt($('in-N').value);
+                const chip = parseFloat($('in-chip').value) / 1000; // m
+
+                $('v-D').textContent = $('in-D').value + ' cm';
+                $('v-Pt').textContent = $('in-Pt').value + ' W';
+                $('v-rate').textContent = $('in-rate').value + ' Gbps';
+                $('v-range').textContent = $('in-range').value + ' km';
+                $('v-loss').textContent = $('in-loss').value + ' dB';
+                $('v-mach').textContent = $('in-mach').value;
+                $('v-alt').textContent = $('in-alt').value + ' km';
+                $('v-N').textContent = String(N);
+                $('v-chip').textContent = $('in-chip').value + ' mm';
+
+                $('o-gain').textContent = gainDb(D).toFixed(1) + ' dBi';
+                const bw = beamwidthRad(D);
+                $('o-bw').textContent = (bw * 1e6).toFixed(1) + ' μrad';
+                $('o-spot').textContent = fmt(bw * R) + ' m';
+                const rmax = maxRangeM(D, Pt, rate, loss);
+                $('o-rmax').textContent = fmt(rmax / 1000) + ' km';
+                $('box-rmax').className = 'out-box' + (rmax >= R ? '' : ' bad');
+                const margin = rxPowerDbm(D, Pt, R, loss) - sensDbm(rate);
+                $('o-margin').textContent = (margin >= 0 ? '+' : '') + margin.toFixed(1) + ' dB';
+                $('box-margin').className = 'out-box' + (margin >= 6 ? '' : margin >= 0 ? ' warn' : ' bad');
+
+                $('o-a').textContent = soundSpeed(alt).toFixed(1) + ' m/s';
+                $('o-vel').textContent = fmt(velocity(mach, alt), 0) + ' m/s';
+                $('o-doppler').textContent = '+' + (dopplerHz(mach, alt) / 1e9).toFixed(2) + ' GHz';
+                $('o-ne').textContent = electronDensity(mach).toExponential(2) + ' m⁻³';
+                const fp = plasmaFreqHz(mach);
+                $('o-fp').textContent = (fp / 1e9).toFixed(2) + ' GHz';
+                $('box-fp').className = 'out-box' + (fp > 10e9 ? ' warn' : '');
+
+                const pitch = opaPitchM(chip, N);
+                $('o-pitch').textContent = (pitch * 1e6).toFixed(1) + ' μm';
+                const gl = gratingLobeDeg(pitch);
+                $('o-grating').textContent = gl === null ? 'none (pitch ≤ λ)' : gl.toFixed(2) + '°';
+                $('box-grating').className = 'out-box' + (pitch <= LAMBDA / 2 ? '' : gl !== null && gl < 15 ? ' bad' : ' warn');
+                let verdict, vClass;
+                if (pitch <= LAMBDA / 2) { verdict = '✅ pitch ≤ λ/2 — grating-lobe-free over full ±15° FOV (canonical design)'; vClass = 'out-box'; }
+                else if (gl !== null && gl < 15) { verdict = '❌ grating lobes inside ±15° steering cone — ambiguous beams'; vClass = 'out-box bad'; }
+                else { verdict = '⚠️ pitch > λ/2 — grating lobe at ' + gl.toFixed(1) + '°, outside ±15° FOV but radiating'; vClass = 'out-box warn'; }
+                $('o-verdict').textContent = verdict;
+                $('box-verdict').className = vClass;
+
+                // Power budget
+                const parts = ['pw-laser', 'pw-edfa', 'pw-opa', 'pw-modem', 'pw-adcs'].map(id => parseFloat($(id).value) || 0);
+                const total = parts.reduce((a, b) => a + b, 0);
+                const pm = 45 - total;
+                $('o-pw-total').textContent = total.toFixed(1) + ' W';
+                $('o-pw-total').style.color = pm < 0 ? '#e63946' : pm < 3 ? '#ffd166' : '#00d4aa';
+                $('o-pw-margin').textContent = (pm >= 0 ? '+' : '') + pm.toFixed(1) + ' W ' + (pm < 0 ? '— OVER BUDGET' : pm < 3 ? '— tight' : '— OK');
+                $('o-pw-margin').style.color = pm < 0 ? '#e63946' : pm < 3 ? '#ffd166' : '#2a9d8f';
+
+                // Yield chain
+                const ys = ['y-1', 'y-2', 'y-3', 'y-4', 'y-5'].map(id => (parseFloat($(id).value) || 0) / 100);
+                const yTot = ys.reduce((a, b) => a * b, 1) * 100;
+                $('o-yield').textContent = yTot.toFixed(1) + ' %';
+                $('o-yield').style.color = yTot >= 60 ? '#00d4aa' : '#e63946';
+                $('o-yield-verdict').textContent = yTot >= 60 ? '✅ meets target' : '❌ below target by ' + (60 - yTot).toFixed(1) + ' pts';
+                $('o-yield-verdict').style.color = yTot >= 60 ? '#2a9d8f' : '#e63946';
+            }
+
+            ['in-D', 'in-Pt', 'in-rate', 'in-range', 'in-loss', 'in-mach', 'in-alt', 'in-N', 'in-chip',
+             'pw-laser', 'pw-edfa', 'pw-opa', 'pw-modem', 'pw-adcs', 'y-1', 'y-2', 'y-3', 'y-4', 'y-5'
+            ].forEach(id => $(id).addEventListener('input', recompute));
+            recompute();
+
+            // Hamburger nav
+            const hamBtn = $('nav-hamburger'), navOverlay = $('nav-overlay'), navClose = $('nav-close');
+            hamBtn.addEventListener('click', () => navOverlay.classList.add('active'));
+            navClose.addEventListener('click', () => navOverlay.classList.remove('active'));
+            navOverlay.querySelectorAll('a').forEach(a => a.addEventListener('click', () => navOverlay.classList.remove('active')));
+        }
+    </script>
+</body>
+</html>
