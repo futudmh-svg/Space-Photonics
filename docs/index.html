@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Space Photonics — Multi-Face OPA Digital Twin</title>
+    <title>Space Photonics — Interactive 3D Command Center</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -12,86 +12,103 @@
             color: #e0e6ed;
             line-height: 1.6;
         }
+
+        /* ─── 3D Hero ─── */
+        #hero-container { position: relative; width: 100%; height: 65vh; overflow: hidden; }
+        #hero-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+
+        .hero-overlay {
+            position: absolute; bottom: 20px; left: 20px; right: 20px;
+            background: rgba(5,8,17,0.85); backdrop-filter: blur(10px);
+            border: 1px solid rgba(65,90,119,0.5); border-radius: 12px;
+            padding: 16px; display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between;
+            align-items: center; z-index: 10;
+        }
+        .hero-title { font-size: 1.4em; color: #00d4aa; font-weight: 600; }
+        .hero-stats { display: flex; gap: 20px; flex-wrap: wrap; }
+        .hero-stat { text-align: center; }
+        .hero-stat-value { font-size: 1.1em; color: #ffd166; font-family: monospace; font-weight: bold; }
+        .hero-stat-label { font-size: 0.7em; color: #90e0ef; }
+        .hero-controls { display: flex; gap: 8px; }
+        .hero-btn {
+            background: rgba(13,27,42,0.9); color: #e0e6ed; border: 1px solid rgba(65,90,119,0.5);
+            padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8em;
+        }
+        .hero-btn:hover { background: #00d4aa; color: #050811; }
+        .hero-btn.active { background: #00d4aa; color: #050811; }
+
+        /* ─── Tooltip ─── */
+        #tooltip {
+            position: absolute; z-index: 20; pointer-events: none;
+            background: rgba(5,8,17,0.92); border: 1px solid #00d4aa; border-radius: 8px;
+            padding: 8px 12px; font-size: 0.75em; display: none; max-width: 220px;
+        }
+        #tooltip h4 { color: #00d4aa; margin-bottom: 4px; font-size: 0.9em; }
+        #tooltip .tt-row { display: flex; justify-content: space-between; gap: 12px; margin: 2px 0; }
+        #tooltip .tt-label { color: #90e0ef; }
+        #tooltip .tt-value { color: #ffd166; font-family: monospace; }
+
         .container { max-width: 900px; margin: 0 auto; padding: 16px; }
-        
+
         nav { background: #1b263b; padding: 12px; border-radius: 10px; margin-bottom: 16px; display: flex; flex-wrap: wrap; gap: 8px; }
         nav a { color: #e0e6ed; text-decoration: none; padding: 8px 14px; border-radius: 6px; font-size: 0.9em; background: #0d1b2a; }
         nav a:hover, nav a.active { background: #00d4aa; color: #050811; }
-        
-        header {
-            text-align: center;
-            padding: 30px 16px;
-            background: linear-gradient(135deg, #0d1b2a 0%, #1b263b 50%, #0d1b2a 100%);
-            border-radius: 16px;
-            margin-bottom: 20px;
-            border: 1px solid #415a77;
-        }
-        h1 { font-size: 1.6em; color: #00d4aa; margin-bottom: 6px; }
+
+        header { text-align: center; padding: 20px 16px; background: linear-gradient(135deg, #0d1b2a 0%, #1b263b 50%, #0d1b2a 100%); border-radius: 16px; margin-bottom: 20px; border: 1px solid #415a77; }
+        h1 { font-size: 1.5em; color: #00d4aa; margin-bottom: 6px; }
         .subtitle { color: #778da9; font-size: 0.9em; }
-        
-        .card {
-            background: #1b263b;
-            border-radius: 12px;
-            padding: 18px;
-            margin-bottom: 16px;
-            border: 1px solid #415a77;
-        }
-        .card h2 {
-            font-size: 1.15em;
-            color: #00d4aa;
-            margin-bottom: 12px;
-        }
-        
-        #github-status { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-        .gh-stat { background: #0d1b2a; padding: 12px; border-radius: 8px; text-align: center; }
-        .gh-stat-value { font-size: 1.4em; font-weight: bold; color: #00d4aa; }
-        .gh-stat-label { font-size: 0.8em; color: #778da9; }
-        
-        .face-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 12px 0; }
-        .face-card { background: #0d1b2a; border-radius: 10px; padding: 12px; border: 1px solid #415a77; }
-        .face-card h3 { font-size: 0.95em; color: #e0e1dd; margin-bottom: 8px; }
-        .face-svg { width: 100%; height: 150px; background: #050811; border-radius: 6px; }
-        .face-controls { margin-top: 8px; }
-        .face-controls label { font-size: 0.8em; color: #778da9; }
-        .face-controls input { width: 100%; margin-top: 4px; }
-        
-        #tracker-svg { width: 100%; height: 300px; background: #050811; border-radius: 8px; margin: 12px 0; }
-        
-        .tracker-controls { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 10px; }
-        .control-group label { display: block; font-size: 0.8em; color: #778da9; margin-bottom: 4px; }
-        .control-group input, .control-group select { width: 100%; padding: 8px; background: #0d1b2a; border: 1px solid #415a77; border-radius: 6px; color: #e0e6ed; font-size: 0.9em; }
-        
-        .calc-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 12px 0; }
-        .calc-result { background: #0d1b2a; padding: 14px; border-radius: 8px; text-align: center; margin-top: 12px; }
-        .calc-result-value { font-size: 1.8em; font-weight: bold; color: #00d4aa; }
-        .calc-result-label { font-size: 0.85em; color: #778da9; }
-        
-        .btn { display: block; width: 100%; padding: 12px; background: #2d6a4f; color: white; border: none; border-radius: 8px; font-size: 1em; text-align: center; text-decoration: none; margin: 8px 0; cursor: pointer; }
-        .btn:hover { background: #40916c; }
-        .btn-secondary { background: #1b4d6e; }
-        .btn-secondary:hover { background: #2a6f97; }
-        .btn-danger { background: #6c2e2e; }
-        .btn-danger:hover { background: #9e3a3a; }
-        
-        .badge { display: inline-block; padding: 4px 10px; border-radius: 12px; font-size: 0.75em; margin: 2px; }
-        .ok { background: #2d6a4f; color: #95d5b2; }
-        .warn { background: #6c5b1e; color: #ffd166; }
-        .info { background: #1b4d6e; color: #90e0ef; }
-        
-        input[type="range"] { -webkit-appearance: none; width: 100%; height: 6px; border-radius: 3px; background: #415a77; outline: none; }
-        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: #00d4aa; cursor: pointer; }
-        
-        footer { text-align: center; padding: 30px; color: #778da9; font-size: 0.8em; }
-        
-        @media (max-width: 600px) {
-            .face-grid, .tracker-controls, .calc-grid { grid-template-columns: 1fr; }
-        }
+
+        .card { background: #1b263b; border-radius: 12px; padding: 18px; margin-bottom: 16px; border: 1px solid #415a77; }
+        .card h2 { font-size: 1.15em; color: #00d4aa; margin-bottom: 10px; }
+        .card p { font-size: 0.9em; color: #778da9; margin-bottom: 12px; }
+        .badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 0.75em; margin: 2px; }
+        .badge.ok { background: #2a9d8f; color: #fff; }
+        .badge.info { background: #3a86ff; color: #fff; }
+        .badge.warn { background: #ffd166; color: #050811; }
+        .badge.danger { background: #e63946; color: #fff; }
+        .btn { display: inline-block; padding: 10px 20px; background: #00d4aa; color: #050811; text-decoration: none; border-radius: 8px; font-weight: 600; margin: 4px; }
+        .btn:hover { background: #2a9d8f; }
+
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 20px; }
+
+        footer { text-align: center; padding: 20px; color: #778da9; font-size: 0.8em; margin-top: 30px; border-top: 1px solid #1b263b; }
     </style>
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        }
+    }
+    </script>
 </head>
 <body>
+    <!-- 3D Hero -->
+    <div id="hero-container">
+        <canvas id="hero-canvas"></canvas>
+        <div class="hero-overlay">
+            <div>
+                <div class="hero-title">🛰️ Space Photonics Command Center</div>
+                <div style="font-size:0.8em;color:#90e0ef;margin-top:4px">Real-time VLEO constellation + hypersonic tracking</div>
+            </div>
+            <div class="hero-stats">
+                <div class="hero-stat"><div class="hero-stat-value" id="h-sats">120</div><div class="hero-stat-label">Sats</div></div>
+                <div class="hero-stat"><div class="hero-stat-value" id="h-enemy">M10.2</div><div class="hero-stat-label">Enemy</div></div>
+                <div class="hero-stat"><div class="hero-stat-value" id="h-friendly">M7.8</div><div class="hero-stat-label">Friendly</div></div>
+                <div class="hero-stat"><div class="hero-stat-value" id="h-links">24</div><div class="hero-stat-label">Links</div></div>
+            </div>
+            <div class="hero-controls">
+                <button class="hero-btn active" onclick="setHeroView('orbit')">🌍 Orbit</button>
+                <button class="hero-btn" onclick="setHeroView('enemy')">🔴 Enemy</button>
+                <button class="hero-btn" onclick="setHeroView('friendly')">🛡️ Friendly</button>
+            </div>
+        </div>
+        <div id="tooltip"></div>
+    </div>
+
     <div class="container">
         <nav>
-            <a href="index.html">🏠 Dashboard</a>
+            <a href="index.html" class="active">🏠 Dashboard</a>
             <a href="pages/architecture.html">🏛️ Architecture</a>
             <a href="pages/digital-twin.html">🎮 3D Twin</a>
             <a href="pages/opa-analysis.html">📡 OPA</a>
@@ -106,524 +123,354 @@
             <a href="pages/ppln-calculator.html">🔢 PPLN</a>
             <a href="pages/research-gaps.html">🔬 Gaps</a>
             <a href="pages/foundry.html">🏭 Foundry</a>
+            <a href="pages/foundry-cleanroom.html">🏭 Clean Room</a>
         </nav>
 
         <header>
-            <h1>🛰️ Space Photonics</h1>
-            <p class="subtitle">Multi-Face OPA Digital Twin for Hypersonic Tracking, Control & Interception — v3.4</p>
-            <div style="margin-top: 12px;">
-                <span class="badge ok">v3.4</span>
+            <h1>Space Photonics</h1>
+            <p class="subtitle">Multi-Face OPA Digital Twin for Hypersonic Tracking, Control & Interception — v3.5</p>
+            <div style="margin-top:12px">
+                <span class="badge ok">v3.5</span>
                 <span class="badge info">PPLN Receiver</span>
                 <span class="badge ok">6-Face OPA</span>
                 <span class="badge warn">Hypersonic Track</span>
                 <span class="badge info">3D Mapper</span>
                 <span class="badge danger">Interception</span>
+                <span class="badge ok">Clean Room</span>
             </div>
         </header>
 
-        <!-- GitHub Integration -->
-        <div class="card">
-            <h2>🔗 GitHub Repository</h2>
-            <div id="github-status">
-                <div class="gh-stat">
-                    <div class="gh-stat-value" id="gh-stars">-</div>
-                    <div class="gh-stat-label">⭐ Stars</div>
-                </div>
-                <div class="gh-stat">
-                    <div class="gh-stat-value" id="gh-forks">-</div>
-                    <div class="gh-stat-label">🍴 Forks</div>
-                </div>
-                <div class="gh-stat">
-                    <div class="gh-stat-value" id="gh-commits">-</div>
-                    <div class="gh-stat-label">📝 Commits</div>
-                </div>
-                <div class="gh-stat">
-                    <div class="gh-stat-value" id="gh-updated">-</div>
-                    <div class="gh-stat-label">🕐 Updated</div>
-                </div>
+        <div class="grid">
+            <div class="card">
+                <h2>🌐 VLEO Mega-Constellation v3.0</h2>
+                <p>150 satellites in VLEO as a single photonic fabric. Hypersonic tracking & control — enemy HGV triangulation + friendly two-way comms.</p>
+                <a href="pages/vleo-constellation.html" class="btn">Explore Constellation</a>
             </div>
-            <div style="margin-top: 12px;">
-                <a href="https://github.com/futudmh-svg/Space-Photonics" class="btn">📂 Open GitHub Repo</a>
-                <a href="https://github.com/futudmh-svg/Space-Photonics/tree/main/space-photonics/twin" class="btn btn-secondary">📁 Browse Source Code</a>
+            <div class="card">
+                <h2>🗺️ 3D Orbital Mapper</h2>
+                <p>Real-time 3D visualization of the full VLEO constellation, hypersonic vehicle trajectories, rocket swarm launches, and multi-link optical beams.</p>
+                <a href="pages/mapper-3d.html" class="btn">Open 3D Mapper</a>
             </div>
-        </div>
-
-        <!-- VLEO Mega-Constellation -->
-        <div class="card">
-            <h2>🌐 VLEO Mega-Constellation v3.0</h2>
-            <p style="font-size: 0.85em; color: #778da9; margin-bottom: 12px;">
-                150 satellites in VLEO as a single photonic fabric. Now with <strong>hypersonic tracking & control</strong> — enemy HGV triangulation + friendly two-way comms.
-            </p>
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 12px 0;">
-                <div style="background: #0d1b2a; padding: 10px; border-radius: 8px; text-align: center;">
-                    <div style="font-size: 1.2em; color: #00d4aa; font-weight: bold;">1 cm</div>
-                    <div style="font-size: 0.7em; color: #778da9;">Track accuracy</div>
+            <div class="card">
+                <h2>🎯 Interception Mission Simulator</h2>
+                <p>Enemy HGV with live camera feed vs. GMD interceptor. Terminal phase, trajectory calculations, end-to-end bandwidth.</p>
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0">
+                    <div style="background:#0d1b2a;padding:10px;border-radius:8px;text-align:center"><div style="font-size:1.2em;color:#e63946;font-weight:bold">HGV-ALPHA</div><div style="font-size:0.7em;color:#778da9">Enemy</div></div>
+                    <div style="background:#0d1b2a;padding:10px;border-radius:8px;text-align:center"><div style="font-size:1.2em;color:#2a9d8f;font-weight:bold">GMD-E1</div><div style="font-size:0.7em;color:#778da9">Interceptor</div></div>
+                    <div style="background:#0d1b2a;padding:10px;border-radius:8px;text-align:center"><div style="font-size:1.2em;color:#ffd166;font-weight:bold">92%</div><div style="font-size:0.7em;color:#778da9">P_kill</div></div>
                 </div>
-                <div style="background: #0d1b2a; padding: 10px; border-radius: 8px; text-align: center;">
-                    <div style="font-size: 1.2em; color: #00d4aa; font-weight: bold;">2.2 GHz</div>
-                    <div style="font-size: 0.7em; color: #778da9;">Doppler @ Mach 10</div>
-                </div>
-                <div style="background: #0d1b2a; padding: 10px; border-radius: 8px; text-align: center;">
-                    <div style="font-size: 1.2em; color: #00d4aa; font-weight: bold;">+36 dB</div>
-                    <div style="font-size: 0.7em; color: #778da9;">Link margin</div>
-                </div>
+                <a href="pages/interception-mission.html" class="btn">Launch Interception Sim</a>
             </div>
-            <a href="pages/vleo-constellation.html" class="btn">📖 Read Architecture</a>
-            <a href="pages/digital-twin.html" class="btn btn-secondary">🎮 Launch 3D Twin</a>
-        </div>
-
-        <!-- 3D Orbital Mapper -->
-        <div class="card">
-            <h2>🗺️ 3D Orbital Mapper</h2>
-            <p style="font-size: 0.85em; color: #778da9; margin-bottom: 12px;">
-                Real-time interactive 3D visualization of the full VLEO constellation, hypersonic vehicle trajectories, rocket swarm launches, and multi-link optical beams. Live telemetry HUD with physics-accurate parameters.
-            </p>
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 12px 0;">
-                <div style="background: #0d1b2a; padding: 10px; border-radius: 8px; text-align: center;">
-                    <div style="font-size: 1.2em; color: #00d4aa; font-weight: bold;">120</div>
-                    <div style="font-size: 0.7em; color: #778da9;">Satellites</div>
-                </div>
-                <div style="background: #0d1b2a; padding: 10px; border-radius: 8px; text-align: center;">
-                    <div style="font-size: 1.2em; color: #00d4aa; font-weight: bold;">4</div>
-                    <div style="font-size: 0.7em; color: #778da9;">Rockets</div>
-                </div>
-                <div style="background: #0d1b2a; padding: 10px; border-radius: 8px; text-align: center;">
-                    <div style="font-size: 1.2em; color: #00d4aa; font-weight: bold;">3</div>
-                    <div style="font-size: 0.7em; color: #778da9;">Scenarios</div>
-                </div>
+            <div class="card">
+                <h2>🛰️ Satellite Digital Twin</h2>
+                <p>Interactive cutaway of the 12U CubeSat bus. PPLN receiver, TFLN OPA faces, Si₃N₄ router, animated photon signal flow.</p>
+                <a href="pages/satellite-digital-twin.html" class="btn">Open Satellite Twin</a>
             </div>
-            <a href="pages/mapper-3d.html" class="btn">🗺️ Launch 3D Mapper</a>
-        </div>
-
-        <!-- Satellite Digital Twin -->
-        <div class="card">
-            <h2>🛰️ Satellite Digital Twin</h2>
-            <p style="font-size: 0.85em; color: #778da9; margin-bottom: 12px;">
-                Interactive cutaway of the 12U CubeSat bus. Explore PPLN receiver, TFLN OPA faces, Si₃N₄ router, FPGA control, and animated photon signal flow. Toggle layers, explode view, hover for component specs.
-            </p>
-            <div style="margin: 10px 0;">
-                <span class="badge ok">PPLN</span>
-                <span class="badge info">TFLN OPA</span>
-                <span class="badge ok">Si₃N₄</span>
-                <span class="badge warn">SPAD</span>
+            <div class="card">
+                <h2>🏭 Foundry Clean Room 3D</h2>
+                <p>Real-time 3D digital twin of the photonic foundry. Walk through lithography, etch, deposition, bonding, and test zones.</p>
+                <a href="pages/foundry-cleanroom.html" class="btn">Enter Clean Room</a>
             </div>
-            <a href="pages/satellite-digital-twin.html" class="btn">🛰️ Open Satellite Twin</a>
-        </div>
-
-        <!-- Interception Mission -->
-        <div class="card">
-            <h2>🎯 Interception Mission Simulator</h2>
-            <p style="font-size: 0.85em; color: #778da9; margin-bottom: 12px;">
-                Real-time interception scenario: enemy HGV with live camera feed vs. GMD interceptor. Watch the terminal phase, trajectory calculations, and end-to-end bandwidth. Satellite-relayed optical command & control.
-            </p>
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 12px 0;">
-                <div style="background: #0d1b2a; padding: 10px; border-radius: 8px; text-align: center;">
-                    <div style="font-size: 1.2em; color: #e63946; font-weight: bold;">HGV-ALPHA</div>
-                    <div style="font-size: 0.7em; color: #778da9;">Enemy Vehicle</div>
-                </div>
-                <div style="background: #0d1b2a; padding: 10px; border-radius: 8px; text-align: center;">
-                    <div style="font-size: 1.2em; color: #2a9d8f; font-weight: bold;">GMD-E1</div>
-                    <div style="font-size: 0.7em; color: #778da9;">Interceptor</div>
-                </div>
-                <div style="background: #0d1b2a; padding: 10px; border-radius: 8px; text-align: center;">
-                    <div style="font-size: 1.2em; color: #ffd166; font-weight: bold;">92%</div>
-                    <div style="font-size: 0.7em; color: #778da9;">P_kill</div>
-                </div>
-            </div>
-            <a href="pages/interception-mission.html" class="btn">🎯 Launch Interception Sim</a>
-        </div>
-
-        <!-- Foundry Fabrication -->
-        <div class="card">
-            <h2>🏭 Foundry Fabrication</h2>
-            <p style="font-size: 0.85em; color: #778da9; margin-bottom: 12px;">
-                TFLN + Si₃N₄ + PPLN foundry flow. Hybrid photonic-CMOS 3D stacking. Space qualification roadmap.
-            </p>
-            <div style="margin: 10px 0;">
-                <span class="badge ok">TFLN PDK</span>
-                <span class="badge info">PPLN Receiver</span>
-                <span class="badge ok">Si₃N₄ Mesh</span>
-                <span class="badge warn">Hybrid 3D Stack</span>
-            </div>
-            <a href="pages/foundry.html" class="btn">📖 Read Roadmap</a>
-        </div>
-
-        <!-- Foundry Clean Room 3D -->
-        <div class="card">
-            <h2>🏭 Foundry Clean Room 3D</h2>
-            <p style="font-size: 0.85em; color: #778da9; margin-bottom: 12px;">
-                Real-time 3D digital twin of the photonic foundry clean room. Walk through lithography, etch, deposition, bonding, and test zones. Watch wafer transport robots move between equipment. Live environment monitoring: ISO Class 1, temperature, humidity, particle counts.
-            </p>
-            <div style="margin: 10px 0;">
-                <span class="badge ok">ISO 3</span>
-                <span class="badge info">TFLN</span>
-                <span class="badge ok">Si₃N₄</span>
-                <span class="badge warn">PPLN</span>
-                <span class="badge ok">Hybrid Stack</span>
-            </div>
-            <a href="pages/foundry-cleanroom.html" class="btn">🏭 Enter Clean Room</a>
-        </div>
-
-        <!-- Multi-Face OPA -->
-        <div class="card">
-            <h2>🔭 Multi-Face OPA (4 Faces)</h2>
-            <p style="font-size: 0.85em; color: #778da9; margin-bottom: 12px;">
-                4 faces × 64 elements each. Drag sliders to steer each face.
-            </p>
-            <div class="face-grid">
-                <div class="face-card">
-                    <h3>Face 1 — Forward (+X)</h3>
-                    <svg id="face1" class="face-svg" viewBox="0 0 300 150" preserveAspectRatio="none">
-                        <rect width="300" height="150" fill="#050811"/>
-                        <polyline id="face1-pattern" fill="none" stroke="#00d4aa" stroke-width="2"/>
-                    </svg>
-                    <div class="face-controls">
-                        <label>Azimuth: <span id="f1-az-val">0</span>°</label>
-                        <input type="range" id="f1-az" min="-45" max="45" value="0">
-                        <label>Elevation: <span id="f1-el-val">0</span>°</label>
-                        <input type="range" id="f1-el" min="-45" max="45" value="0">
-                    </div>
-                </div>
-                <div class="face-card">
-                    <h3>Face 2 — Aft (-X)</h3>
-                    <svg id="face2" class="face-svg" viewBox="0 0 300 150" preserveAspectRatio="none">
-                        <rect width="300" height="150" fill="#050811"/>
-                        <polyline id="face2-pattern" fill="none" stroke="#90e0ef" stroke-width="2"/>
-                    </svg>
-                    <div class="face-controls">
-                        <label>Azimuth: <span id="f2-az-val">180</span>°</label>
-                        <input type="range" id="f2-az" min="135" max="225" value="180">
-                        <label>Elevation: <span id="f2-el-val">0</span>°</label>
-                        <input type="range" id="f2-el" min="-45" max="45" value="0">
-                    </div>
-                </div>
-                <div class="face-card">
-                    <h3>Face 3 — Starboard (+Y)</h3>
-                    <svg id="face3" class="face-svg" viewBox="0 0 300 150" preserveAspectRatio="none">
-                        <rect width="300" height="150" fill="#050811"/>
-                        <polyline id="face3-pattern" fill="none" stroke="#ffd166" stroke-width="2"/>
-                    </svg>
-                    <div class="face-controls">
-                        <label>Azimuth: <span id="f3-az-val">90</span>°</label>
-                        <input type="range" id="f3-az" min="45" max="135" value="90">
-                        <label>Elevation: <span id="f3-el-val">0</span>°</label>
-                        <input type="range" id="f3-el" min="-45" max="45" value="0">
-                    </div>
-                </div>
-                <div class="face-card">
-                    <h3>Face 4 — Port (-Y)</h3>
-                    <svg id="face4" class="face-svg" viewBox="0 0 300 150" preserveAspectRatio="none">
-                        <rect width="300" height="150" fill="#050811"/>
-                        <polyline id="face4-pattern" fill="none" stroke="#e63946" stroke-width="2"/>
-                    </svg>
-                    <div class="face-controls">
-                        <label>Azimuth: <span id="f4-az-val">270</span>°</label>
-                        <input type="range" id="f4-az" min="225" max="315" value="270">
-                        <label>Elevation: <span id="f4-el-val">0</span>°</label>
-                        <input type="range" id="f4-el" min="-45" max="45" value="0">
-                    </div>
-                </div>
-            </div>
-            <button class="btn" onclick="syncAllFaces()">🔄 Sync All Faces to Track Target</button>
-        </div>
-
-        <!-- Hypersonic Tracker -->
-        <div class="card">
-            <h2>🚀 Hypersonic Vehicle Tracker</h2>
-            <svg id="tracker-svg" viewBox="0 0 600 300" preserveAspectRatio="xMidYMid meet">
-                <rect width="600" height="300" fill="#050811"/>
-                <!-- Ground line -->
-                <line x1="0" y1="255" x2="600" y2="255" stroke="#415a77" stroke-dasharray="5,5"/>
-                <!-- Satellite -->
-                <circle cx="300" cy="45" r="12" fill="#00d4aa"/>
-                <text x="300" y="50" text-anchor="middle" fill="#050811" font-size="14">🛰️</text>
-                <!-- Coverage zones -->
-                <path d="M 300 45 L 300 -50 A 95 95 0 0 1 395 45 Z" fill="rgba(0,212,170,0.15)"/>
-                <path d="M 300 45 L 395 45 A 95 95 0 0 1 300 140 Z" fill="rgba(144,224,239,0.15)"/>
-                <path d="M 300 45 L 300 140 A 95 95 0 0 1 205 45 Z" fill="rgba(255,209,102,0.15)"/>
-                <path d="M 300 45 L 205 45 A 95 95 0 0 1 300 -50 Z" fill="rgba(230,57,70,0.15)"/>
-                <!-- Vehicle -->
-                <circle id="vehicle-dot" cx="180" cy="150" r="8" fill="#e63946"/>
-                <text id="vehicle-label" x="180" y="154" text-anchor="middle" fill="#050811" font-size="12">🚀</text>
-                <!-- Tracking line -->
-                <line id="track-line" x1="300" y1="45" x2="180" y2="150" stroke="#ffd166" stroke-width="2" stroke-dasharray="5,5"/>
-                <!-- Labels -->
-                <text x="300" y="85" text-anchor="middle" fill="#778da9" font-size="11">VLEO Satellite</text>
-                <text x="180" y="130" text-anchor="middle" fill="#778da9" font-size="11">Hypersonic Vehicle</text>
-                <text x="20" y="20" fill="#778da9" font-size="11" id="track-dist">Distance: 200 km</text>
-            </svg>
-            <div class="tracker-controls">
-                <div class="control-group">
-                    <label>Vehicle Speed (Mach)</label>
-                    <select id="vehicle-speed">
-                        <option value="5">Mach 5</option>
-                        <option value="10" selected>Mach 10</option>
-                        <option value="15">Mach 15</option>
-                        <option value="20">Mach 20</option>
-                    </select>
-                </div>
-                <div class="control-group">
-                    <label>Tracking Mode</label>
-                    <select id="track-mode">
-                        <option value="single">Single Face</option>
-                        <option value="multi" selected>Multi-Face Handoff</option>
-                    </select>
-                </div>
-            </div>
-            <button class="btn" onclick="startTracking()">▶️ Start Tracking</button>
-            <button class="btn btn-danger" onclick="stopTracking()">⏹️ Stop</button>
-        </div>
-
-        <!-- Link Budget Calculator -->
-        <div class="card">
-            <h2>📡 Link Budget Calculator</h2>
-            <div class="calc-grid">
-                <div class="control-group">
-                    <label>TX Power (W)</label>
-                    <input type="range" id="tx-power" min="0.1" max="100" value="10" step="0.1">
-                    <span id="tx-power-val" style="font-size: 0.8em; color: #778da9;">10.0 W</span>
-                </div>
-                <div class="control-group">
-                    <label>Distance (km)</label>
-                    <input type="range" id="link-dist" min="10" max="500" value="100">
-                    <span id="link-dist-val" style="font-size: 0.8em; color: #778da9;">100 km</span>
-                </div>
-                <div class="control-group">
-                    <label>Wavelength (nm)</label>
-                    <select id="link-wavelength">
-                        <option value="1550" selected>1550 nm</option>
-                        <option value="1064">1064 nm</option>
-                        <option value="780">780 nm</option>
-                    </select>
-                </div>
-                <div class="control-group">
-                    <label>Aperture (cm)</label>
-                    <input type="range" id="aperture" min="5" max="50" value="20">
-                    <span id="aperture-val" style="font-size: 0.8em; color: #778da9;">20 cm</span>
-                </div>
-            </div>
-            <div class="calc-result">
-                <div class="calc-result-value" id="link-budget">-45.2</div>
-                <div class="calc-result-label">Link Margin (dB)</div>
-            </div>
-        </div>
-
-        <!-- Component Status -->
-        <div class="card">
-            <h2>🔬 System Components</h2>
-            <div style="margin: 10px 0;">
-                <span class="badge ok">TFLN OPA ✅</span>
-                <span class="badge ok">BTO OPA ✅</span>
-                <span class="badge ok">Ag-Chalcogenide Amp ✅</span>
-                <span class="badge ok">4-Face Array ✅</span>
-                <span class="badge ok">Optical PLL ✅</span>
-                <span class="badge ok">Kalman Tracker ✅</span>
-                <span class="badge ok">Atmosphere Model ✅</span>
-                <span class="badge ok">VLEO Thermal ✅</span>
-                <span class="badge" id="link-budget-badge">Link Budget ⚠️</span>
+            <div class="card">
+                <h2>📡 OPA Beam Steering</h2>
+                <p>Interactive 64-element optical phased array simulation. Real-time far-field pattern, side lobe analysis.</p>
+                <a href="pages/opa-analysis.html" class="btn">Steer Beam</a>
             </div>
         </div>
 
         <footer>
-            <p>Space Photonics Digital Twin v0.3.0</p>
-            <p>Auto-synced from <a href="https://github.com/futudmh-svg/Space-Photonics">GitHub</a></p>
-            <p id="sync-time">Last sync: now</p>
+            Space Photonics — Built with Three.js & WebGL<br>
+            <a href="https://github.com/futudmh-svg/Space-Photonics" style="color:#00d4aa">GitHub Repository</a>
         </footer>
     </div>
 
-    <script>
-        // ===== GitHub API Integration =====
-        async function fetchGitHubData() {
-            try {
-                const res = await fetch('https://api.github.com/repos/futudmh-svg/Space-Photonics');
-                const data = await res.json();
-                document.getElementById('gh-stars').textContent = data.stargazers_count;
-                document.getElementById('gh-forks').textContent = data.forks_count;
-                document.getElementById('gh-commits').textContent = '...';
-                
-                const pushed = new Date(data.pushed_at);
-                const now = new Date();
-                const diff = Math.floor((now - pushed) / 60000);
-                document.getElementById('gh-updated').textContent = diff < 60 ? `${diff}m ago` : `${Math.floor(diff/60)}h ago`;
-                document.getElementById('sync-time').textContent = 'Last sync: ' + now.toLocaleTimeString();
-            } catch (e) {
-                console.error('GitHub fetch failed:', e);
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        const canvas = document.getElementById('hero-canvas');
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x050811);
+
+        const camera = new THREE.PerspectiveCamera(50, canvas.clientWidth / canvas.clientHeight, 0.1, 200);
+        camera.position.set(0, 12, 22);
+
+        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+        renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+        const controls = new OrbitControls(camera, canvas);
+        controls.enableDamping = true;
+        controls.autoRotate = true;
+        controls.autoRotateSpeed = 0.5;
+        controls.enablePan = false;
+        controls.minDistance = 14;
+        controls.maxDistance = 40;
+
+        scene.add(new THREE.AmbientLight(0x404040, 0.5));
+        const sun = new THREE.DirectionalLight(0xffffff, 1.0);
+        sun.position.set(20, 30, 10);
+        scene.add(sun);
+
+        // Earth
+        const EARTH_R = 8;
+        const earth = new THREE.Mesh(
+            new THREE.SphereGeometry(EARTH_R, 48, 48),
+            new THREE.MeshPhongMaterial({ color: 0x1a3a5c, emissive: 0x0a1a2a, shininess: 25 })
+        );
+        scene.add(earth);
+
+        // Atmosphere
+        const atm = new THREE.Mesh(
+            new THREE.SphereGeometry(EARTH_R * 1.06, 32, 32),
+            new THREE.MeshBasicMaterial({ color: 0x4488cc, transparent: true, opacity: 0.05, side: THREE.BackSide })
+        );
+        scene.add(atm);
+
+        // Grid
+        const grid = new THREE.PolarGridHelper(EARTH_R * 1.01, 12, 8, 64, 0x00d4aa, 0x00d4aa);
+        grid.material.transparent = true; grid.material.opacity = 0.08;
+        scene.add(grid);
+
+        // Satellites
+        const SAT_R = EARTH_R * 1.15;
+        const sats = [];
+        for (let p = 0; p < 3; p++) {
+            for (let s = 0; s < 16; s++) {
+                const sat = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.15, 0.1, 0.25),
+                    new THREE.MeshPhongMaterial({ color: 0x888888 })
+                );
+                sat.userData = { type: 'sat', name: `SAT-${p}-${s}`, plane: p, angle: (s/16)*Math.PI*2 + (p/3)*Math.PI };
+                scene.add(sat);
+                sats.push(sat);
             }
         }
-        fetchGitHubData();
-        setInterval(fetchGitHubData, 30000);
 
-        // ===== Multi-Face OPA Visualization (SVG) =====
-        function drawFacePattern(svgId, azimuth, elevation, color) {
-            const svg = document.getElementById(svgId);
-            const polyline = svg.querySelector('polyline');
-            
-            const N = 64;
-            const steeringRad = azimuth * Math.PI / 180;
-            const points = [];
-            
-            for (let thetaDeg = -45; thetaDeg <= 45; thetaDeg += 0.5) {
-                const theta = thetaDeg * Math.PI / 180;
-                let real = 0, imag = 0;
-                for (let n = 0; n < N; n++) {
-                    const phase = n * (Math.sin(theta) - Math.sin(steeringRad)) * 20;
-                    real += Math.cos(phase);
-                    imag += Math.sin(phase);
-                }
-                const I = 10 * Math.log10((real * real + imag * imag) / (N * N) + 1e-10);
-                const x = ((thetaDeg + 45) / 90) * 300;
-                const y = 150 - ((I + 60) / 65) * 135 - 7.5;
-                points.push(`${x},${y}`);
-            }
-            
-            polyline.setAttribute('points', points.join(' '));
-            polyline.setAttribute('stroke', color);
+        // Enemy HGV
+        const enemyG = new THREE.Group();
+        const eBody = new THREE.Mesh(
+            new THREE.ConeGeometry(0.12, 0.5, 8),
+            new THREE.MeshPhongMaterial({ color: 0xe63946, emissive: 0x440000, emissiveIntensity: 0.3 })
+        );
+        eBody.rotation.x = Math.PI/2;
+        enemyG.add(eBody);
+        const ePlasma = new THREE.Mesh(
+            new THREE.SphereGeometry(0.25, 12, 12),
+            new THREE.MeshBasicMaterial({ color: 0xff6600, transparent: true, opacity: 0.12, blending: THREE.AdditiveBlending })
+        );
+        enemyG.add(ePlasma);
+        enemyG.userData = { type: 'enemy', name: 'HGV-ALPHA', mach: 10.2 };
+        scene.add(enemyG);
+
+        // Friendly HGV
+        const friendlyG = new THREE.Group();
+        const fBody = new THREE.Mesh(
+            new THREE.ConeGeometry(0.1, 0.4, 8),
+            new THREE.MeshPhongMaterial({ color: 0x2a9d8f, emissive: 0x004433, emissiveIntensity: 0.2 })
+        );
+        fBody.rotation.x = Math.PI/2;
+        friendlyG.add(fBody);
+        const fPlasma = new THREE.Mesh(
+            new THREE.SphereGeometry(0.2, 12, 12),
+            new THREE.MeshBasicMaterial({ color: 0x00ffaa, transparent: true, opacity: 0.08, blending: THREE.AdditiveBlending })
+        );
+        friendlyG.add(fPlasma);
+        friendlyG.userData = { type: 'friendly', name: 'HGV-FRIEND', mach: 7.8 };
+        scene.add(friendlyG);
+
+        // Rockets
+        const rockets = [];
+        for (let i = 0; i < 2; i++) {
+            const rg = new THREE.Group();
+            const rb = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.06, 0.08, 0.6, 8),
+                new THREE.MeshPhongMaterial({ color: 0xdddddd })
+            );
+            rb.rotation.x = Math.PI/2;
+            rg.add(rb);
+            const rf = new THREE.Mesh(
+                new THREE.ConeGeometry(0.05, 0.3, 8),
+                new THREE.MeshBasicMaterial({ color: 0xff4400, transparent: true, opacity: 0.6, blending: THREE.AdditiveBlending })
+            );
+            rf.rotation.x = -Math.PI/2;
+            rf.position.z = -0.4;
+            rg.add(rf);
+            rg.userData = { type: 'rocket', name: `FALCON-${i+1}` };
+            scene.add(rg);
+            rockets.push(rg);
         }
 
-        const faceColors = ['#00d4aa', '#90e0ef', '#ffd166', '#e63946'];
-        
-        function updateAllFaces() {
-            for (let f = 1; f <= 4; f++) {
-                const az = parseFloat(document.getElementById(`f${f}-az`).value);
-                const el = parseFloat(document.getElementById(`f${f}-el`).value);
-                document.getElementById(`f${f}-az-val`).textContent = az.toFixed(0);
-                document.getElementById(`f${f}-el-val`).textContent = el.toFixed(0);
-                drawFacePattern(`face${f}`, az, el, faceColors[f-1]);
-            }
+        // Beams
+        const beams = [];
+        for (let i = 0; i < 8; i++) {
+            const b = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.006, 0.006, 1, 4),
+                new THREE.MeshBasicMaterial({ color: 0x00d4aa, transparent: true, opacity: 0.2 })
+            );
+            b.geometry.rotateX(Math.PI/2);
+            b.visible = false;
+            scene.add(b);
+            beams.push(b);
         }
 
-        for (let f = 1; f <= 4; f++) {
-            document.getElementById(`f${f}-az`).addEventListener('input', updateAllFaces);
-            document.getElementById(`f${f}-el`).addEventListener('input', updateAllFaces);
-        }
+        // Raycaster for tooltips
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+        const tooltip = document.getElementById('tooltip');
 
-        function syncAllFaces() {
-            for (let f = 1; f <= 4; f++) {
-                document.getElementById(`f${f}-az`).value = 30 + (f-1) * 5;
-                document.getElementById(`f${f}-el`).value = 15;
-            }
-            updateAllFaces();
-        }
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+            mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
 
-        // ===== Hypersonic Tracker (SVG) =====
-        let trackingAnimation = null;
-        let vehicleAngle = 0;
-        let trackingActive = false;
+            raycaster.setFromCamera(mouse, camera);
+            const allObjs = [...sats, enemyG, friendlyG, ...rockets];
+            const hits = raycaster.intersectObjects(allObjs, true);
 
-        function updateTracker() {
-            const vehicleDot = document.getElementById('vehicle-dot');
-            const vehicleLabel = document.getElementById('vehicle-label');
-            const trackLine = document.getElementById('track-line');
-            const trackDist = document.getElementById('track-dist');
-            
-            const cx = 300 + 120 * Math.cos(vehicleAngle);
-            const cy = 150 + 100 * Math.sin(vehicleAngle);
-            
-            vehicleDot.setAttribute('cx', cx);
-            vehicleDot.setAttribute('cy', cy);
-            vehicleLabel.setAttribute('x', cx);
-            vehicleLabel.setAttribute('y', cy + 4);
-            
-            trackLine.setAttribute('x2', cx);
-            trackLine.setAttribute('y2', cy);
-            
-            const dist = Math.sqrt(Math.pow(cx - 300, 2) + Math.pow(cy - 45, 2));
-            trackDist.textContent = `Distance: ${(dist / 10).toFixed(0)} km`;
-        }
-
-        function animateTracker() {
-            if (!trackingActive) return;
-            const speed = parseFloat(document.getElementById('vehicle-speed').value) * 0.01;
-            vehicleAngle += speed;
-            updateTracker();
-            trackingAnimation = requestAnimationFrame(animateTracker);
-        }
-
-        function startTracking() {
-            trackingActive = true;
-            animateTracker();
-        }
-
-        function stopTracking() {
-            trackingActive = false;
-            if (trackingAnimation) cancelAnimationFrame(trackingAnimation);
-        }
-
-        // ===== Link Budget Calculator =====
-        function calculateLinkBudget() {
-            const txPowerW = parseFloat(document.getElementById('tx-power').value);
-            const distKm = parseFloat(document.getElementById('link-dist').value);
-            const wavelengthNm = parseFloat(document.getElementById('link-wavelength').value);
-            const apertureCm = parseFloat(document.getElementById('aperture').value);
-            
-            const wavelength = wavelengthNm * 1e-9; // m
-            const dist = distKm * 1000; // m
-            const aperture = apertureCm * 0.01; // m
-            
-            // Proper optical link budget calculation
-            // TX power in dBm
-            const txPowerDbm = 10 * Math.log10(txPowerW * 1000);
-            
-            // Beam divergence (diffraction limited) ~λ/D
-            const divergenceRad = wavelength / aperture; // radians
-            const divergenceUrad = divergenceRad * 1e6;
-            
-            // Spot radius at distance R
-            const spotRadius = divergenceRad * dist; // m
-            const spotArea = Math.PI * Math.pow(spotRadius, 2); // m²
-            
-            // RX aperture area
-            const rxArea = Math.PI * Math.pow(aperture / 2, 2); // m²
-            
-            // Geometric loss (fraction of beam collected)
-            const geoLoss = Math.min(rxArea / spotArea, 1);
-            const geoLossDb = 10 * Math.log10(geoLoss);
-            
-            // Atmospheric loss (simplified model)
-            // At 1550nm, clear air attenuation ~0.1-0.5 dB/km
-            const atmLossDb = 0.2 * distKm;
-            
-            // Pointing loss (assume 0.1 μrad pointing error)
-            const pointingError = 0.1e-6; // rad
-            const pointingLossDb = -4.34 * Math.pow(pointingError / divergenceRad, 2);
-            
-            // Total received power
-            const rxPowerDbm = txPowerDbm + geoLossDb - atmLossDb + pointingLossDb;
-            
-            // RX sensitivity (APD receiver at 1550nm)
-            const rxSensitivity = -60; // dBm
-            
-            // Link margin
-            const margin = rxPowerDbm - rxSensitivity;
-            
-            document.getElementById('link-budget').textContent = margin.toFixed(1);
-            document.getElementById('tx-power-val').textContent = txPowerW.toFixed(1) + ' W';
-            document.getElementById('link-dist-val').textContent = distKm + ' km';
-            document.getElementById('aperture-val').textContent = apertureCm.toFixed(0) + ' cm';
-            
-            // Update link budget badge
-            const badge = document.getElementById('link-budget-badge');
-            if (margin > 3) {
-                badge.className = 'badge ok';
-                badge.textContent = 'Link Budget ✅';
-            } else if (margin > 0) {
-                badge.className = 'badge warn';
-                badge.textContent = 'Link Budget ⚠️';
+            if (hits.length > 0) {
+                let obj = hits[0].object;
+                while (obj.parent && !obj.userData.type) obj = obj.parent;
+                const d = obj.userData;
+                tooltip.style.display = 'block';
+                tooltip.style.left = (e.clientX + 15) + 'px';
+                tooltip.style.top = (e.clientY + 15) + 'px';
+                let html = `<h4>${d.name}</h4>`;
+                if (d.type === 'sat') html += `<div class="tt-row"><span class="tt-label">Plane</span><span class="tt-value">${d.plane}</span></div>`;
+                if (d.type === 'enemy' || d.type === 'friendly') html += `<div class="tt-row"><span class="tt-label">Mach</span><span class="tt-value">${d.mach}</span></div>`;
+                if (d.type === 'rocket') html += `<div class="tt-row"><span class="tt-label">Status</span><span class="tt-value">Ascending</span></div>`;
+                tooltip.innerHTML = html;
             } else {
-                badge.className = 'badge warn';
-                badge.textContent = 'Link Budget ⚠️';
+                tooltip.style.display = 'none';
             }
-        }
-
-        ['tx-power', 'link-dist', 'link-wavelength', 'aperture'].forEach(id => {
-            document.getElementById(id).addEventListener('input', calculateLinkBudget);
-            document.getElementById(id).addEventListener('change', calculateLinkBudget);
         });
 
-        // Initialize
-        updateAllFaces();
-        updateTracker();
-        calculateLinkBudget();
+        // Hero view controls
+        window.setHeroView = (view) => {
+            document.querySelectorAll('.hero-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            if (view === 'enemy') {
+                controls.autoRotate = false;
+                heroViewTarget = 'enemy';
+            } else if (view === 'friendly') {
+                controls.autoRotate = false;
+                heroViewTarget = 'friendly';
+            } else {
+                controls.autoRotate = true;
+                heroViewTarget = null;
+            }
+        };
+        let heroViewTarget = null;
+
+        // Animation
+        const clock = new THREE.Clock();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const dt = clock.getDelta();
+            const t = clock.getElapsedTime();
+
+            // Update sats
+            sats.forEach(sat => {
+                sat.userData.angle += 0.0008;
+                const a = sat.userData.angle;
+                const inc = 53 * Math.PI / 180;
+                const raan = (sat.userData.plane / 3) * Math.PI;
+                sat.position.set(
+                    SAT_R * (Math.cos(raan)*Math.cos(a) - Math.sin(raan)*Math.cos(inc)*Math.sin(a)),
+                    SAT_R * Math.sin(inc)*Math.sin(a),
+                    SAT_R * (Math.sin(raan)*Math.cos(a) + Math.cos(raan)*Math.cos(inc)*Math.sin(a))
+                );
+                sat.lookAt(0,0,0);
+            });
+
+            // Enemy orbit
+            const eLat = 30 + 15 * Math.sin(t * 0.2);
+            const eLon = t * 15;
+            const eAlt = 30;
+            const eR = EARTH_R + eAlt * 0.001;
+            enemyG.position.set(
+                eR * Math.cos(eLat*0.017) * Math.cos(eLon*0.017),
+                eR * Math.sin(eLat*0.017),
+                eR * Math.cos(eLat*0.017) * Math.sin(eLon*0.017)
+            );
+            enemyG.lookAt(enemyG.position.clone().add(new THREE.Vector3(1,0,0.5)));
+            ePlasma.material.opacity = 0.1 + 0.1 * Math.sin(t * 3);
+
+            // Friendly orbit
+            const fLat = 40 + 10 * Math.cos(t * 0.15);
+            const fLon = -80 + t * 12;
+            const fAlt = 25;
+            const fR = EARTH_R + fAlt * 0.001;
+            friendlyG.position.set(
+                fR * Math.cos(fLat*0.017) * Math.cos(fLon*0.017),
+                fR * Math.sin(fLat*0.017),
+                fR * Math.cos(fLat*0.017) * Math.sin(fLon*0.017)
+            );
+            friendlyG.lookAt(friendlyG.position.clone().add(new THREE.Vector3(0.7,0,0.7)));
+
+            // Rockets
+            rockets.forEach((rg, i) => {
+                const rt = t * 0.3 + i * 2;
+                const rLat = 28.5 + rt * 2;
+                const rAlt = Math.min(rt * 8, 200);
+                const rR = EARTH_R + rAlt * 0.001;
+                rg.position.set(
+                    rR * Math.cos(rLat*0.017) * Math.cos(-80*0.017),
+                    rR * Math.sin(rLat*0.017),
+                    rR * Math.cos(rLat*0.017) * Math.sin(-80*0.017)
+                );
+                rg.lookAt(0,0,0);
+                rg.children[1].scale.y = 0.5 + 0.5 * Math.sin(t * 10 + i);
+            });
+
+            // Beams
+            for (let i = 0; i < 4; i++) {
+                const sat = sats[i * 4];
+                const dir = sat.position.clone().sub(enemyG.position);
+                beams[i].position.copy(enemyG.position).add(dir.multiplyScalar(0.5));
+                beams[i].scale.set(1, 1, dir.length());
+                beams[i].lookAt(sat.position);
+                beams[i].visible = true;
+                beams[i].material.opacity = 0.15 + 0.1 * Math.sin(t * 2 + i);
+            }
+            for (let i = 0; i < 2; i++) {
+                const sat = sats[20 + i];
+                const dir = sat.position.clone().sub(friendlyG.position);
+                beams[4 + i].position.copy(friendlyG.position).add(dir.multiplyScalar(0.5));
+                beams[4 + i].scale.set(1, 1, dir.length());
+                beams[4 + i].lookAt(sat.position);
+                beams[4 + i].visible = true;
+                beams[4 + i].material.color.setHex(0x2a9d8f);
+            }
+
+            // Update stats
+            document.getElementById('h-sats').textContent = '120';
+            document.getElementById('h-enemy').textContent = 'M' + (10 + 0.2 * Math.sin(t)).toFixed(1);
+            document.getElementById('h-friendly').textContent = 'M' + (7.8 + 0.2 * Math.cos(t)).toFixed(1);
+            document.getElementById('h-links').textContent = Math.floor(20 + 4 * Math.sin(t * 0.5));
+
+            // Camera follow
+            if (heroViewTarget === 'enemy') {
+                camera.position.lerp(enemyG.position.clone().add(new THREE.Vector3(3, 2, 3)), 0.03);
+                controls.target.lerp(enemyG.position, 0.05);
+            } else if (heroViewTarget === 'friendly') {
+                camera.position.lerp(friendlyG.position.clone().add(new THREE.Vector3(3, 2, 3)), 0.03);
+                controls.target.lerp(friendlyG.position, 0.05);
+            }
+
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        animate();
+
+        window.addEventListener('resize', () => {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            camera.aspect = rect.width / rect.height;
+            camera.updateProjectionMatrix();
+            renderer.setSize(rect.width, rect.height);
+        });
     </script>
 </body>
 </html>
