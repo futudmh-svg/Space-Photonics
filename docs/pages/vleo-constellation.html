@@ -139,7 +139,7 @@
                     <div class="icon">🎯</div>
                     <div class="scale">~5 cm</div>
                     <div class="name">OPA Face Module</div>
-                    <div class="desc">32×32 emitters, 2D beam steering ±15°, multi-beam generation</div>
+                    <div class="desc">5 cm receive aperture + OPA steering layer (2×2 mm emissive chip, 64×64 at λ/2 pitch), ±15° steering, 31 μrad class beamwidth (λ/D at 5 cm), multi-beam generation</div>
                 </div>
                 <div class="mm-card">
                     <div class="icon">🛰️</div>
@@ -149,7 +149,7 @@
                 </div>
                 <div class="mm-card">
                     <div class="icon">🌐</div>
-                    <div class="scale">~500 km</div>
+                    <div class="scale">~300 km</div>
                     <div class="name">Orbital Plane</div>
                     <div class="desc">25 satellites per plane, 6 planes, Walker-delta configuration</div>
                 </div>
@@ -170,7 +170,7 @@
     ↓
 [Si₃N₄ Router] — Low-loss splitting to 6 OPA faces (<0.1 dB/cm)
     ↓
-[OPA Emitter] — 32×32 grating array, electronic phase control
+[OPA Emitter] — 64×64 grating array at λ/2 pitch (~2×2 mm chip), electronic phase control
     ↓
 [Free Space] — 1550 nm beam to target satellite / hypersonic vehicle
     ↓
@@ -206,7 +206,7 @@
                         <br><br>
                         Where:<br>
                         r = slant range to target (~300 km)<br>
-                        B = satellite baseline (~500 km cross-plane)<br>
+                        B = satellite baseline (~300 km cross-plane)<br>
                         σ_α = angular measurement precision
                     </div>
                     <div class="equation">
@@ -222,7 +222,7 @@
                     </div>
                     
                     <h4>Tracking Loop Requirements</h4>
-                    <div class="param-row"><span class="param-label">Vehicle speed (Mach 10)</span><span class="param-value">3,430 m/s</span></div>
+                    <div class="param-row"><span class="param-label">Vehicle speed (Mach 10)</span><span class="param-value">3,020 m/s</span></div>
                     <div class="param-row"><span class="param-label">Max angular rate (satellite view)</span><span class="param-value">0.73 °/s</span></div>
                     <div class="param-row"><span class="param-label">Required tracker bandwidth</span><span class="param-value">≥ 100 Hz</span></div>
                     <div class="param-row"><span class="param-label">OPA phase update rate</span><span class="param-value">1 kHz (10× margin)</span></div>
@@ -257,10 +257,10 @@
                         Δf = f × (v/c) × cos(θ)
                         <br><br>
                         f = c/λ = 193.5 THz<br>
-                        v = 3,430 m/s (Mach 10)<br>
+                        v = 3,020 m/s (Mach 10, a≈302 m/s at 25-42 km)<br>
                         θ = 0° (head-on)
                         <br><br>
-                        Δf = 193.5×10¹² × (3430/3×10⁸) = <span class="warning">2.21 GHz</span>
+                        Δf = 193.5×10¹² × (3020/3×10⁸) = <span class="warning">1.95 GHz</span>
                     </div>
                     <div class="equation">
                         <div class="label">Doppler Tolerance Assessment</div>
@@ -282,13 +282,13 @@
                         L_atm = 0.5 dB (30km altitude, 1550nm)<br>
                         L_margin = 6 dB
                         <br><br>
-                        P_rx = 0 + 103.5 + 97.5 - 248 - 0.5 - 6 = <span class="ok">-53.5 dBW = -23.5 dBm</span>
+                        P_rx = 0 + 103.5 + 97.5 - 248 - 0.5 - 3 (pointing) - 6 = <span class="ok">-56.5 dBW = -26.5 dBm</span>
                     </div>
                     <div class="equation">
                         <div class="label">Link Margin</div>
-                        PPLN receiver sensitivity @ 10 Gbps: ~-60 dBm<br>
-                        Received power: -23.5 dBm<br>
-                        Margin: <span class="ok">36.5 dB</span> — more than adequate
+                        PPLN receiver sensitivity @ 10 Gbps: ~−50 dBm class (photon-limited direct detection)<br>
+                        Received power: -26.5 dBm (incl. 3 dB pointing loss)<br>
+                        Margin: <span class="ok">23.5 dB</span> — more than adequate
                     </div>
 
                     <h4>Multi-Beam Multi-Face Operation</h4>
@@ -345,7 +345,7 @@ Net per-beam power: -29.5 dBm — still viable</div>
                 <div>
                     <h4>Scenario B Status</h4>
                     <div class="param-row"><span class="param-label">Active comm beams</span><span class="param-value" id="stat-beams">2</span></div>
-                    <div class="param-row"><span class="param-label">Doppler shift</span><span class="param-value warning" id="stat-doppler">+2.18 GHz</span></div>
+                    <div class="param-row"><span class="param-label">Doppler shift</span><span class="param-value warning" id="stat-doppler">+1.95 GHz</span></div>
                     <div class="param-row"><span class="param-label">Link margin</span><span class="param-value ok" id="stat-margin">+36 dB</span></div>
                 </div>
             </div>
@@ -372,7 +372,7 @@ Net per-beam power: -29.5 dBm — still viable</div>
                 <br>
                 f_p = (1/2π) × 5.64×10¹⁰ = <span class="ok">8.97 GHz ≈ 9 GHz</span>
             </div>
-            <p>Conventional RF (S-band 2 GHz, C-band 4 GHz, X-band 8 GHz) is <span class="warning">below plasma cutoff</span> → total reflection. Optical at 193.5 THz is <span class="ok">21,000× above cutoff</span> → full penetration.</p>
+            <p>Conventional RF (S-band 2 GHz, C-band 4 GHz, X-band 8 GHz) is <span class="warning">below plasma cutoff</span> → total reflection. Optical at 193.5 THz is <span class="ok">21,500× above cutoff</span> → full penetration.</p>
 
             <h3>4.2 Doppler Shift — Full Derivation</h3>
             <div class="equation">
@@ -381,9 +381,9 @@ Net per-beam power: -29.5 dBm — still viable</div>
                 <br><br>
                 Δf = f × v_r / c
                 <br><br>
-                For Mach 10: v = 3430 m/s, λ = 1550 nm → f = 193.5 THz
+                For Mach 10: v = 3020 m/s (a≈302 m/s at 25-42 km), λ = 1550 nm → f = 193.5 THz
                 <br>
-                Δf = 193.5×10¹² × 3430 / 3×10⁸ = <span class="warning">2.21×10⁹ Hz = 2.21 GHz</span>
+                Δf = 193.5×10¹² × 3020 / 3×10⁸ = <span class="warning">1.95×10⁹ Hz = 1.95 GHz</span>
                 <br><br>
                 Round-trip (radar): Δf_round = 2 × Δf = <span class="warning">4.42 GHz</span>
             </div>
@@ -413,7 +413,7 @@ Net per-beam power: -29.5 dBm — still viable</div>
                 <br>
                 = <span class="ok">-56.2 dBW = -26.2 dBm</span>
                 <br><br>
-                PPLN receiver sensitivity @ 10 Gbps, BER 10⁻⁹: -60 dBm
+                PPLN receiver sensitivity @ 10 Gbps, BER 10⁻⁹: ~−50 dBm class (photon-limited direct detection)
                 <br>
                 Link margin: <span class="ok">33.8 dB</span>
             </div>
@@ -547,7 +547,7 @@ Net per-beam power: -29.5 dBm — still viable</div>
                 <p><strong>Location:</strong> <code>vleo-constellation.html</code></p>
                 <p><strong>Issue:</strong> 300 km orbit requires continuous thrust for station-keeping. No propulsion budget or drag analysis.</p>
                 <p><strong>Cross-reference:</strong> SpaceX Starlink orbits at 550 km (reduced drag). GOCE flew at 260 km with ion propulsion (2013-2013).</p>
-                <p><strong>Assessment:</strong> ⚠️ MISSING — Add drag analysis. Consider 400-500 km orbit for longer lifetime.</p>
+                <p><strong>Assessment:</strong> ⚠️ MISSING — Add drag analysis. Consider a higher 400-450 km orbit for longer lifetime (drag trade-off vs the 300 km baseline).</p>
             </div>
 
             <div class="contradiction-item">
@@ -560,7 +560,7 @@ Net per-beam power: -29.5 dBm — still viable</div>
             <div class="contradiction-item">
                 <h4>🟢 C8: PPLN Sensitivity — PLAUSIBLE</h4>
                 <p><strong>Claim:</strong> −65/−70 dBm detection with PPLN cascaded χ⁽²⁾</p>
-                <p><strong>Verification:</strong> Stanford 2023 demonstrated −60 dBm @ 10 Gbps with PPLN. −70 dBm is achievable with: (a) longer crystal, (b) lower temperature, (c) higher pump power.</p>
+                <p><strong>Verification:</strong> Practical PPLN direct-detection receivers are ~−50 dBm class (photon-limited) @ 10 Gbps. Improvements are possible with: (a) longer crystal, (b) lower temperature, (c) higher pump power. −60 dBm would imply <1 photon/bit — below the quantum limit for direct detection.</p>
                 <p><strong>Assessment:</strong> ✅ PLAUSIBLE — Within reach of demonstrated technology with marginal improvements.</p>
             </div>
         </div>
