@@ -3,64 +3,152 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🗺️ 3D Orbital Mapper — Space Photonics</title>
+    <title>🗺️ 3D Orbital Operations Center — Space Photonics</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #050811; color: #e0e6ed; overflow: hidden; }
-        #canvas-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; }
-        nav { position: fixed; top: 10px; left: 10px; right: 10px; z-index: 100; background: rgba(27,38,59,0.9); backdrop-filter: blur(10px); padding: 8px; border-radius: 10px; display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
-        nav a { color: #e0e6ed; text-decoration: none; padding: 6px 10px; border-radius: 6px; font-size: 0.8em; background: rgba(13,27,42,0.8); }
-        nav a:hover, nav a.active { background: #00d4aa; color: #050811; }
+        body {
+            font-family: 'Segoe UI', Roboto, -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #050811;
+            color: #e0e6ed;
+            overflow: hidden;
+            width: 100vw; height: 100vh;
+        }
+        #canvas-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+        canvas { display: block; }
 
-        /* Telemetry HUD */
-        .hud { position: fixed; z-index: 50; background: rgba(5,8,17,0.85); backdrop-filter: blur(8px); border: 1px solid #415a77; border-radius: 10px; padding: 12px; font-size: 0.75em; }
-        .hud-left { top: 70px; left: 10px; width: 220px; }
-        .hud-right { top: 70px; right: 10px; width: 240px; }
-        .hud-bottom { bottom: 10px; left: 10px; right: 10px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
-        .hud h3 { color: #00d4aa; font-size: 0.9em; margin-bottom: 6px; border-bottom: 1px solid #415a77; padding-bottom: 4px; }
-        .hud-row { display: flex; justify-content: space-between; padding: 3px 0; }
-        .hud-label { color: #90e0ef; }
-        .hud-value { color: #ffd166; font-family: monospace; }
+        /* ─── Navigation ─── */
+        nav {
+            position: fixed; top: 8px; left: 8px; right: 8px; z-index: 200;
+            background: rgba(5,8,17,0.92); backdrop-filter: blur(12px);
+            border: 1px solid rgba(65,90,119,0.5); border-radius: 10px;
+            padding: 6px; display: flex; flex-wrap: wrap; gap: 4px; justify-content: center;
+        }
+        nav a {
+            color: #90e0ef; text-decoration: none; padding: 5px 10px; border-radius: 6px;
+            font-size: 0.78em; background: rgba(13,27,42,0.7); transition: all 0.2s;
+            border: 1px solid transparent; white-space: nowrap;
+        }
+        nav a:hover, nav a.active {
+            background: #00d4aa; color: #050811; border-color: #00d4aa;
+        }
+
+        /* ─── Telemetry HUD (Left) ─── */
+        .hud-left {
+            position: fixed; top: 65px; left: 8px; width: 260px; z-index: 100;
+            background: rgba(5,8,17,0.88); backdrop-filter: blur(10px);
+            border: 1px solid rgba(65,90,119,0.5); border-radius: 10px;
+            padding: 10px; font-size: 0.72em; max-height: calc(100vh - 180px);
+            overflow-y: auto;
+        }
+        .hud-left h3 {
+            color: #00d4aa; font-size: 0.95em; margin-bottom: 6px;
+            border-bottom: 1px solid rgba(65,90,119,0.5); padding-bottom: 4px;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .hud-row { display: flex; justify-content: space-between; padding: 2.5px 0; border-bottom: 1px solid rgba(65,90,119,0.15); }
+        .hud-row:last-child { border-bottom: none; }
+        .hud-label { color: #90e0ef; font-weight: 500; }
+        .hud-value { color: #ffd166; font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace; font-size: 0.95em; }
         .hud-value.ok { color: #2a9d8f; }
         .hud-value.warn { color: #ffd166; }
         .hud-value.danger { color: #e63946; }
+        .hud-value.cyan { color: #00d4aa; }
+        .hud-section { margin-top: 8px; padding-top: 6px; border-top: 1px solid rgba(65,90,119,0.3); }
+        .hud-section-title { color: #00d4aa; font-size: 0.85em; margin-bottom: 4px; font-weight: 600; }
 
-        /* Controls */
-        .controls { position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); z-index: 50; background: rgba(5,8,17,0.9); border: 1px solid #415a77; border-radius: 10px; padding: 10px 16px; display: flex; gap: 10px; align-items: center; }
-        .btn { background: #1b263b; color: #e0e6ed; border: 1px solid #415a77; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 0.8em; transition: all 0.2s; }
-        .btn:hover { background: #00d4aa; color: #050811; }
+        /* ─── Scenario Controls (Top Center) ─── */
+        .scenario-controls {
+            position: fixed; top: 65px; left: 50%; transform: translateX(-50%); z-index: 100;
+            display: flex; gap: 6px; flex-wrap: wrap; justify-content: center;
+        }
+        .scenario-btn {
+            background: rgba(5,8,17,0.88); backdrop-filter: blur(10px);
+            color: #e0e6ed; border: 1px solid rgba(65,90,119,0.5);
+            padding: 7px 14px; border-radius: 8px; cursor: pointer;
+            font-size: 0.8em; transition: all 0.2s; white-space: nowrap;
+        }
+        .scenario-btn:hover { border-color: #00d4aa; color: #00d4aa; }
+        .scenario-btn.active {
+            background: #00d4aa; color: #050811; border-color: #00d4aa; font-weight: 600;
+        }
+        .scenario-btn.enemy.active { background: #e63946; color: #fff; border-color: #e63946; }
+        .scenario-btn.friendly.active { background: #2a9d8f; color: #fff; border-color: #2a9d8f; }
+        .scenario-btn.rocket.active { background: #ffd166; color: #050811; border-color: #ffd166; }
+        .scenario-btn.constellation.active { background: #00d4aa; color: #050811; }
+
+        /* ─── Camera Mode (Top Left, below nav) ─── */
+        .cam-indicator {
+            position: fixed; top: 65px; left: 275px; z-index: 100;
+            background: rgba(5,8,17,0.88); backdrop-filter: blur(10px);
+            border: 1px solid rgba(65,90,119,0.5); border-radius: 6px;
+            padding: 6px 10px; font-size: 0.72em; color: #90e0ef;
+        }
+
+        /* ─── Time Controls (Bottom Center) ─── */
+        .time-controls {
+            position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); z-index: 100;
+            background: rgba(5,8,17,0.92); backdrop-filter: blur(10px);
+            border: 1px solid rgba(65,90,119,0.5); border-radius: 10px;
+            padding: 8px 14px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+        }
+        .btn {
+            background: rgba(13,27,42,0.9); color: #e0e6ed;
+            border: 1px solid rgba(65,90,119,0.5); padding: 5px 10px;
+            border-radius: 6px; cursor: pointer; font-size: 0.75em;
+            transition: all 0.2s; white-space: nowrap;
+        }
+        .btn:hover { background: #00d4aa; color: #050811; border-color: #00d4aa; }
         .btn.active { background: #00d4aa; color: #050811; }
-        .speed-slider { width: 100px; }
+        .speed-btn { padding: 4px 8px; font-size: 0.7em; min-width: 32px; text-align: center; }
+        .speed-btn.active { background: #00d4aa; color: #050811; }
+        .time-display {
+            color: #ffd166; font-family: 'SF Mono', monospace; font-size: 0.8em;
+            min-width: 120px; text-align: center;
+        }
 
-        /* Scenario buttons */
-        .scenario-btns { position: fixed; top: 70px; left: 50%; transform: translateX(-50%); z-index: 50; display: flex; gap: 8px; }
-        .scenario-btn { background: rgba(27,38,59,0.9); color: #e0e6ed; border: 1px solid #415a77; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 0.85em; backdrop-filter: blur(8px); }
-        .scenario-btn:hover { border-color: #00d4aa; }
-        .scenario-btn.active { background: #00d4aa; color: #050811; border-color: #00d4aa; }
-        .scenario-btn.enemy { border-color: #e63946; }
-        .scenario-btn.enemy.active { background: #e63946; color: #fff; }
-        .scenario-btn.friendly { border-color: #2a9d8f; }
-        .scenario-btn.friendly.active { background: #2a9d8f; color: #fff; }
-        .scenario-btn.rocket { border-color: #ffd166; }
-        .scenario-btn.rocket.active { background: #ffd166; color: #050811; }
+        /* ─── Mini-Map (Bottom Right) ─── */
+        .minimap-container {
+            position: fixed; bottom: 70px; right: 8px; z-index: 100;
+            background: rgba(5,8,17,0.9); backdrop-filter: blur(8px);
+            border: 1px solid rgba(65,90,119,0.5); border-radius: 10px;
+            padding: 4px;
+        }
+        #minimap-canvas { width: 180px; height: 180px; border-radius: 8px; display: block; }
+        .minimap-label {
+            text-align: center; font-size: 0.65em; color: #90e0ef;
+            padding: 2px 0; letter-spacing: 1px;
+        }
 
-        /* Link status panel */
-        .link-panel { position: fixed; top: 70px; right: 260px; width: 180px; z-index: 50; background: rgba(5,8,17,0.85); backdrop-filter: blur(8px); border: 1px solid #415a77; border-radius: 10px; padding: 10px; font-size: 0.7em; }
-        .link-panel h4 { color: #00d4aa; margin-bottom: 4px; font-size: 0.9em; }
-        .link-bar { height: 4px; background: #1b263b; border-radius: 2px; margin: 3px 0; overflow: hidden; }
-        .link-fill { height: 100%; border-radius: 2px; transition: width 0.3s; }
+        /* ─── Link Status Panel (Right Side) ─── */
+        .link-panel {
+            position: fixed; top: 65px; right: 8px; width: 200px; z-index: 100;
+            background: rgba(5,8,17,0.88); backdrop-filter: blur(10px);
+            border: 1px solid rgba(65,90,119,0.5); border-radius: 10px;
+            padding: 10px; font-size: 0.7em; max-height: calc(100vh - 180px);
+            overflow-y: auto;
+        }
+        .link-panel h4 { color: #00d4aa; margin-bottom: 6px; font-size: 0.9em; border-bottom: 1px solid rgba(65,90,119,0.3); padding-bottom: 4px; }
+        .link-entry { margin-bottom: 6px; }
+        .link-name { color: #90e0ef; font-size: 0.85em; margin-bottom: 2px; }
+        .link-bar { height: 5px; background: rgba(13,27,42,0.9); border-radius: 3px; overflow: hidden; margin-bottom: 2px; }
+        .link-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
         .link-fill.good { background: #2a9d8f; }
         .link-fill.medium { background: #ffd166; }
         .link-fill.bad { background: #e63946; }
+        .link-rate { color: #ffd166; font-family: monospace; font-size: 0.85em; }
 
-        /* Mini map */
-        .minimap { position: fixed; bottom: 80px; right: 10px; width: 160px; height: 160px; z-index: 50; background: rgba(5,8,17,0.85); border: 1px solid #415a77; border-radius: 10px; }
-        #minimap-canvas { width: 100%; height: 100%; border-radius: 10px; }
+        /* ─── Floating Labels ─── */
+        .floating-label {
+            position: absolute; z-index: 50; pointer-events: none;
+            background: rgba(5,8,17,0.85); border: 1px solid rgba(65,90,119,0.5);
+            border-radius: 4px; padding: 2px 6px; font-size: 0.65em;
+            color: #00d4aa; font-family: monospace; white-space: nowrap;
+        }
 
-        /* Camera mode indicator */
-        .cam-mode { position: fixed; top: 70px; left: 240px; z-index: 50; background: rgba(5,8,17,0.85); border: 1px solid #415a77; border-radius: 6px; padding: 6px 10px; font-size: 0.75em; color: #90e0ef; }
-
-        footer { display: none; }
+        /* ─── Scrollbar ─── */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(65,90,119,0.5); border-radius: 2px; }
     </style>
     <script type="importmap">
     {
@@ -84,6 +172,7 @@
             <a href="../pages/vleo-constellation.html">🌐 VLEO</a>
             <a href="../pages/mapper-3d.html">🗺️ Mapper</a>
             <a href="../pages/satellite-digital-twin.html">🛰️ Sat Twin</a>
+            <a href="../pages/interception-mission.html">🎯 Intercept</a>
             <a href="../pages/vehicle-terminal.html">🛰️ Terminal</a>
             <a href="../pages/ehf-optical-trade.html">📡 EHF vs Opt</a>
             <a href="../pages/ppln-calculator.html">🔢 PPLN</a>
@@ -91,561 +180,758 @@
             <a href="../pages/foundry.html">🏭 Foundry</a>
         </nav>
 
-    <div class="scenario-btns">
-        <button class="scenario-btn enemy active" onclick="setScenario('enemy')">🔴 Enemy Track</button>
-        <button class="scenario-btn friendly" onclick="setScenario('friendly')">🛡️ Friendly Control</button>
-        <button class="scenario-btn rocket" onclick="setScenario('rocket')">🚀 Rocket Swarm</button>
+    <!-- Scenario Controls -->
+    <div class="scenario-controls">
+        <button class="scenario-btn enemy active" data-scenario="enemy">🔴 Enemy Tracking</button>
+        <button class="scenario-btn friendly" data-scenario="friendly">🛡️ Friendly Control</button>
+        <button class="scenario-btn rocket" data-scenario="rocket">🚀 Rocket Swarm</button>
+        <button class="scenario-btn constellation" data-scenario="constellation">🛰️ Constellation Only</button>
     </div>
 
-    <div class="hud hud-left">
-        <h3>🎯 Vehicle Telemetry</h3>
-        <div class="hud-row"><span class="hud-label">Scenario</span><span class="hud-value" id="hud-scenario">Enemy Track</span></div>
-        <div class="hud-row"><span class="hud-label">Speed</span><span class="hud-value" id="hud-speed">Mach 10.0</span></div>
-        <div class="hud-row"><span class="hud-label">Velocity</span><span class="hud-value" id="hud-velocity">3,430 m/s</span></div>
-        <div class="hud-row"><span class="hud-label">Altitude</span><span class="hud-value" id="hud-altitude">30.0 km</span></div>
-        <div class="hud-row"><span class="hud-label">Lat/Lon</span><span class="hud-value" id="hud-latlon">0.0° / 0.0°</span></div>
-        <div class="hud-row"><span class="hud-label">Heading</span><span class="hud-value" id="hud-heading">45.0°</span></div>
-        <div class="hud-row"><span class="hud-label">Ang. Velocity</span><span class="hud-value" id="hud-angvel">0.65°/s</span></div>
-        <div class="hud-row"><span class="hud-label">G-Force</span><span class="hud-value" id="hud-gforce">2.1 g</span></div>
-        <div class="hud-row"><span class="hud-label">Plasma Freq</span><span class="hud-value" id="hud-plasma">9.0 GHz</span></div>
-        <div class="hud-row"><span class="hud-label">Doppler Shift</span><span class="hud-value" id="hud-doppler">+2.21 GHz</span></div>
-        <div class="hud-row"><span class="hud-label">Range to Sat</span><span class="hud-value" id="hud-range">278 km</span></div>
-        <div class="hud-row"><span class="hud-label">Link Margin</span><span class="hud-value ok" id="hud-margin">+33.8 dB</span></div>
-        <div class="hud-row"><span class="hud-label">Track Error</span><span class="hud-value ok" id="hud-track">0.18 m</span></div>
+    <!-- Camera Indicator -->
+    <div class="cam-indicator" id="cam-indicator">📷 Free Orbit</div>
+
+    <!-- Telemetry HUD (Left) -->
+    <div class="hud-left" id="hud-left">
+        <h3>🎯 <span id="hud-target-name">Enemy Vehicle</span></h3>
+        <div class="hud-row"><span class="hud-label">Scenario</span><span class="hud-value cyan" id="hud-scenario">Enemy Tracking</span></div>
+        <div class="hud-row"><span class="hud-label">Object Type</span><span class="hud-value" id="hud-type">Hypersonic Glide</span></div>
+
+        <div class="hud-section">
+            <div class="hud-section-title">📍 Position</div>
+            <div class="hud-row"><span class="hud-label">Latitude</span><span class="hud-value" id="hud-lat">0.000°</span></div>
+            <div class="hud-row"><span class="hud-label">Longitude</span><span class="hud-value" id="hud-lon">0.000°</span></div>
+            <div class="hud-row"><span class="hud-label">Altitude</span><span class="hud-value" id="hud-alt">30,000 m</span></div>
+        </div>
+
+        <div class="hud-section">
+            <div class="hud-section-title">⚡ Dynamics</div>
+            <div class="hud-row"><span class="hud-label">Velocity</span><span class="hud-value" id="hud-vel">3,430 m/s</span></div>
+            <div class="hud-row"><span class="hud-label">Mach</span><span class="hud-value" id="hud-mach">10.0</span></div>
+            <div class="hud-row"><span class="hud-label">Heading</span><span class="hud-value" id="hud-heading">90.0° T</span></div>
+            <div class="hud-row"><span class="hud-label">Ang. Velocity</span><span class="hud-value" id="hud-angvel">0.65 °/s</span></div>
+            <div class="hud-row"><span class="hud-label">Centripetal Accel</span><span class="hud-value" id="hud-gforce">2.1 g</span></div>
+            <div class="hud-row"><span class="hud-label">Dynamic Pressure</span><span class="hud-value" id="hud-q">45.2 kPa</span></div>
+        </div>
+
+        <div class="hud-section">
+            <div class="hud-section-title">🔥 Plasma Environment</div>
+            <div class="hud-row"><span class="hud-label">Electron Density</span><span class="hud-value" id="hud-ne">1.2e18 m⁻³</span></div>
+            <div class="hud-row"><span class="hud-label">Plasma Frequency</span><span class="hud-value" id="hud-fp">9.8 GHz</span></div>
+            <div class="hud-row"><span class="hud-label">Doppler Shift</span><span class="hud-value" id="hud-doppler">+2.21 GHz</span></div>
+        </div>
+
+        <div class="hud-section">
+            <div class="hud-section-title">📡 Link Status</div>
+            <div class="hud-row"><span class="hud-label">Range to Nearest Sat</span><span class="hud-value" id="hud-range">278 km</span></div>
+            <div class="hud-row"><span class="hud-label">Link Margin</span><span class="hud-value ok" id="hud-margin">+33.8 dB</span></div>
+            <div class="hud-row"><span class="hud-label">Track Error</span><span class="hud-value ok" id="hud-track">0.18 m</span></div>
+            <div class="hud-row"><span class="hud-label">Data Rate</span><span class="hud-value" id="hud-datarate">100 Gbps</span></div>
+        </div>
+
+        <div class="hud-section">
+            <div class="hud-section-title">🌡️ Thermal</div>
+            <div class="hud-row"><span class="hud-label">Surface Temp</span><span class="hud-value warn" id="hud-temp-surf">1,850 °C</span></div>
+            <div class="hud-row"><span class="hud-label">Internal Temp</span><span class="hud-value" id="hud-temp-int">65 °C</span></div>
+        </div>
     </div>
 
-    <div class="hud hud-right">
-        <h3>🛰️ Constellation Status</h3>
-        <div class="hud-row"><span class="hud-label">Active Sats</span><span class="hud-value" id="hud-sats">120</span></div>
-        <div class="hud-row"><span class="hud-label">Orbital Planes</span><span class="hud-value">6</span></div>
-        <div class="hud-row"><span class="hud-label">Altitude</span><span class="hud-value">300 km</span></div>
-        <div class="hud-row"><span class="hud-label">Period</span><span class="hud-value">90.4 min</span></div>
-        <div class="hud-row"><span class="hud-label">Inclination</span><span class="hud-value">53°</span></div>
-        <div class="hud-row"><span class="hud-label">Visible Sats</span><span class="hud-value" id="hud-visible">8</span></div>
-        <div class="hud-row"><span class="hud-label">Links Active</span><span class="hud-value" id="hud-links">3</span></div>
-        <div class="hud-row"><span class="hud-label">Mesh BW</span><span class="hud-value">400 Gbps</span></div>
-        <div class="hud-row"><span class="hud-label">OISL Status</span><span class="hud-value ok">Online</span></div>
-        <div class="hud-row"><span class="hud-label">Time Scale</span><span class="hud-value" id="hud-timescale">1.0×</span></div>
-        <div class="hud-row"><span class="hud-label">Sim Time</span><span class="hud-value" id="hud-simtime">T+0:00</span></div>
+    <!-- Link Status Panel (Right) -->
+    <div class="link-panel" id="link-panel">
+        <h4>🔗 Optical Links</h4>
+        <div id="link-list"></div>
     </div>
 
-    <div class="link-panel">
-        <h4>🔗 Active Links</h4>
-        <div>Link 1 (Sat-42 → Vehicle)</div>
-        <div class="link-bar"><div class="link-fill good" id="link1" style="width:95%"></div></div>
-        <div>Link 2 (Sat-67 → Vehicle)</div>
-        <div class="link-bar"><div class="link-fill good" id="link2" style="width:88%"></div></div>
-        <div>Link 3 (Sat-15 → Vehicle)</div>
-        <div class="link-bar"><div class="link-fill medium" id="link3" style="width:72%"></div></div>
+    <!-- Time Controls (Bottom Center) -->
+    <div class="time-controls">
+        <button class="btn" id="play-btn">⏸️ Pause</button>
+        <span style="color:#90e0ef;font-size:0.75em">Speed:</span>
+        <button class="btn speed-btn" data-speed="0.1">0.1×</button>
+        <button class="btn speed-btn" data-speed="0.5">0.5×</button>
+        <button class="btn speed-btn active" data-speed="1">1×</button>
+        <button class="btn speed-btn" data-speed="2">2×</button>
+        <button class="btn speed-btn" data-speed="5">5×</button>
+        <button class="btn speed-btn" data-speed="10">10×</button>
+        <button class="btn speed-btn" data-speed="50">50×</button>
+        <div class="time-display" id="time-display">UTC 00:00:00 | T+ 00:00:00</div>
     </div>
 
-    <div class="cam-mode" id="cam-mode">📷 Camera: Orbit</div>
-
-    <div class="minimap">
-        <canvas id="minimap-canvas"></canvas>
+    <!-- Camera Controls (Bottom Left) -->
+    <div style="position:fixed;bottom:10px;left:8px;z-index:100;display:flex;gap:4px;flex-wrap:wrap;max-width:300px;">
+        <button class="btn" data-cam="orbit">🌍 Free</button>
+        <button class="btn" data-cam="enemy">🔴 Enemy</button>
+        <button class="btn" data-cam="friendly">🔵 Friendly</button>
+        <button class="btn" data-cam="cinematic">🎬 Cinematic</button>
+        <button class="btn" data-cam="top">🗺️ Tactical</button>
+        <button class="btn" id="toggle-trails">✨ Trails</button>
+        <button class="btn" id="toggle-links">🔗 Beams</button>
+        <button class="btn" id="toggle-labels">🏷️ Labels</button>
     </div>
 
-    <div class="controls">
-        <button class="btn" onclick="togglePlay()" id="play-btn">⏸️ Pause</button>
-        <span style="color:#90e0ef;font-size:0.8em">Speed:</span>
-        <input type="range" class="speed-slider" id="speed-slider" min="0.1" max="10" value="1" step="0.1" oninput="setTimeScale(this.value)">
-        <button class="btn" onclick="setCamera('orbit')">🌍 Orbit</button>
-        <button class="btn" onclick="setCamera('vehicle')">🎯 Follow Vehicle</button>
-        <button class="btn" onclick="setCamera('satellite')">🛰️ Follow Satellite</button>
-        <button class="btn" onclick="setCamera('top')">🗺️ Top Down</button>
-        <button class="btn" onclick="toggleTrails()">✨ Trails</button>
-        <button class="btn" onclick="toggleLinks()">🔗 Beams</button>
+    <!-- Mini-Map -->
+    <div class="minimap-container">
+        <div class="minimap-label">ORBITAL VIEW (+Z)</div>
+        <canvas id="minimap-canvas" width="180" height="180"></canvas>
     </div>
 
-    <script type="module">
         import * as THREE from 'three';
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-        // ─── Scene Setup ───
+        // ═══════════════════════════════════════════════════════════════
+        //  GLOBAL CONSTANTS & CONFIG
+        // ═══════════════════════════════════════════════════════════════
+        const EARTH_R = 12;
+        const EARTH_ROT_SPEED = 2 * Math.PI / 86164; // sidereal day rad/s
+        const MU = 398600.4418; // km^3/s^2
+        const SAT_ALT_KM = 300;
+        const SAT_R = EARTH_R * (6371 + SAT_ALT_KM) / 6371;
+        const SAT_COUNT = 150;
+        const NUM_PLANES = 6;
+        const SATS_PER_PLANE = 25;
+        const INCLINATION = 53 * Math.PI / 180;
+        const ORBITAL_PERIOD = 2 * Math.PI * Math.sqrt(Math.pow(6371 + SAT_ALT_KM, 3) / MU); // seconds
+
+        const CAPE_LAT = 28.5 * Math.PI / 180;
+        const CAPE_LON = -80.5 * Math.PI / 180;
+
+        // Vehicle config
+        const ENEMY_CONFIG = { mach: 10, altKm: 30, heading: 90, color: 0xe63946, name: 'HGV-ALPHA' };
+        const FRIENDLY_CONFIG = { mach: 8, altKm: 25, heading: 45, color: 0x2a9d8f, name: 'HGV-BETA' };
+
+        // ═══════════════════════════════════════════════════════════════
+        //  SCENE SETUP
+        // ═══════════════════════════════════════════════════════════════
         const container = document.getElementById('canvas-container');
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0x050811);
-        scene.fog = new THREE.FogExp2(0x050811, 0.0005);
+        scene.fog = new THREE.FogExp2(0x050811, 0.0003);
 
-        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 2000);
-        camera.position.set(0, 15, 35);
+        const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 5000);
+        camera.position.set(35, 20, 35);
 
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.1;
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         container.appendChild(renderer.domElement);
 
         const controls = new OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.dampingFactor = 0.05;
-        controls.minDistance = 12;
-        controls.maxDistance = 100;
+        controls.minDistance = EARTH_R * 1.15;
+        controls.maxDistance = 300;
+        controls.enablePan = true;
 
-        // ─── Lighting ───
-        const ambient = new THREE.AmbientLight(0x404040, 0.5);
-        scene.add(ambient);
-        const sun = new THREE.DirectionalLight(0xffffff, 1.5);
-        sun.position.set(50, 30, 20);
-        scene.add(sun);
+        // ═══════════════════════════════════════════════════════════════
+        //  LIGHTING
+        // ═══════════════════════════════════════════════════════════════
+        scene.add(new THREE.AmbientLight(0x404060, 0.4));
 
-        // ─── Earth ───
-        const EARTH_R = 10;
+        const sunLight = new THREE.DirectionalLight(0xffffee, 2.0);
+        sunLight.position.set(80, 40, 30);
+        sunLight.castShadow = true;
+        sunLight.shadow.mapSize.width = 2048;
+        sunLight.shadow.mapSize.height = 2048;
+        scene.add(sunLight);
+
+        const moonLight = new THREE.DirectionalLight(0x4466aa, 0.3);
+        moonLight.position.set(-50, -20, -30);
+        scene.add(moonLight);
+
+        // ═══════════════════════════════════════════════════════════════
+        //  EARTH
+        // ═══════════════════════════════════════════════════════════════
         const earthGroup = new THREE.Group();
         scene.add(earthGroup);
 
-        const earthGeo = new THREE.SphereGeometry(EARTH_R, 64, 64);
+        // Procedural Earth texture (canvas-based)
+        function createEarthTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 2048; canvas.height = 1024;
+            const ctx = canvas.getContext('2d');
+            // Ocean
+            ctx.fillStyle = '#0a1a2e';
+            ctx.fillRect(0, 0, 2048, 1024);
+            // Continents (simplified shapes)
+            ctx.fillStyle = '#1a3a1a';
+            // North America
+            ctx.beginPath(); ctx.moveTo(300, 200); ctx.bezierCurveTo(350,150,450,180,500,250); ctx.bezierCurveTo(520,300,480,350,420,380); ctx.bezierCurveTo(350,400,300,350,280,300); ctx.closePath(); ctx.fill();
+            // South America
+            ctx.beginPath(); ctx.moveTo(520, 450); ctx.bezierCurveTo(560,430,580,500,570,600); ctx.bezierCurveTo(550,700,520,750,500,700); ctx.bezierCurveTo(480,650,490,550,520,450); ctx.closePath(); ctx.fill();
+            // Europe/Asia
+            ctx.beginPath(); ctx.moveTo(900, 180); ctx.bezierCurveTo(1000,150,1200,160,1400,200); ctx.bezierCurveTo(1500,220,1550,300,1500,350); ctx.bezierCurveTo(1450,400,1300,380,1200,360); ctx.bezierCurveTo(1100,340,1000,350,950,320); ctx.bezierCurveTo(900,280,880,220,900,180); ctx.closePath(); ctx.fill();
+            // Africa
+            ctx.beginPath(); ctx.moveTo(950, 400); ctx.bezierCurveTo(1050,380,1100,420,1120,500); ctx.bezierCurveTo(1140,580,1100,650,1050,680); ctx.bezierCurveTo(980,700,940,650,930,580); ctx.bezierCurveTo(920,500,930,440,950,400); ctx.closePath(); ctx.fill();
+            // Australia
+            ctx.beginPath(); ctx.moveTo(1450, 600); ctx.bezierCurveTo(1500,580,1580,600,1600,650); ctx.bezierCurveTo(1620,700,1580,740,1520,750); ctx.bezierCurveTo(1460,740,1430,700,1450,600); ctx.closePath(); ctx.fill();
+            // Add some noise/texture
+            for (let i = 0; i < 5000; i++) {
+                const x = Math.random() * 2048;
+                const y = Math.random() * 1024;
+                ctx.fillStyle = Math.random() > 0.5 ? '#0d2d0d' : '#0d1d2d';
+                ctx.fillRect(x, y, 2, 2);
+            }
+            const tex = new THREE.CanvasTexture(canvas);
+            tex.colorSpace = THREE.SRGBColorSpace;
+            return tex;
+        }
+
+        function createNightTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 2048; canvas.height = 1024;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#000000';
+            ctx.fillRect(0, 0, 2048, 1024);
+            // City lights (clusters)
+            const cities = [[400,250],[450,280],[1000,220],[1100,240],[1200,260],[1300,280],[950,450],[1450,620],[1500,640],[1600,660],[500,500],[520,650]];
+            cities.forEach(([cx, cy]) => {
+                const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 60);
+                grad.addColorStop(0, 'rgba(255,220,100,0.8)');
+                grad.addColorStop(0.3, 'rgba(255,180,50,0.4)');
+                grad.addColorStop(1, 'rgba(0,0,0,0)');
+                ctx.fillStyle = grad;
+                ctx.fillRect(cx - 60, cy - 60, 120, 120);
+            });
+            const tex = new THREE.CanvasTexture(canvas);
+            tex.colorSpace = THREE.SRGBColorSpace;
+            return tex;
+        }
+
+        function createBumpMap() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 1024; canvas.height = 512;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#404040';
+            ctx.fillRect(0, 0, 1024, 512);
+            // Simple elevation
+            ctx.fillStyle = '#808080';
+            for (let i = 0; i < 100; i++) {
+                const x = Math.random() * 1024, y = Math.random() * 512, r = 20 + Math.random() * 50;
+                ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+            }
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        const earthDayTex = createEarthTexture();
+        const earthNightTex = createNightTexture();
+        const earthBumpMap = createBumpMap();
+
+        const earthGeo = new THREE.SphereGeometry(EARTH_R, 128, 128);
         const earthMat = new THREE.MeshPhongMaterial({
-            color: 0x1a3a5c,
-            emissive: 0x0a1a2a,
-            shininess: 25,
-            specular: 0x223344
+            map: earthDayTex,
+            bumpMap: earthBumpMap,
+            bumpScale: 0.05,
+            specular: new THREE.Color(0x223344),
+            shininess: 20,
+            emissiveMap: earthNightTex,
+            emissive: new THREE.Color(0xffffff),
+            emissiveIntensity: 0.0
         });
         const earth = new THREE.Mesh(earthGeo, earthMat);
+        earth.receiveShadow = true;
         earthGroup.add(earth);
 
-        // Atmosphere glow
-        const atmGeo = new THREE.SphereGeometry(EARTH_R * 1.05, 32, 32);
-        const atmMat = new THREE.MeshBasicMaterial({
-            color: 0x4488cc,
+        // Atmosphere glow (Fresnel shader)
+        const atmVertexShader = `
+            varying vec3 vNormal;
+            varying vec3 vPosition;
+            void main() {
+                vNormal = normalize(normalMatrix * normal);
+                vPosition = (modelViewMatrix * vec4(position, 1.0)).xyz;
+                gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            }
+        `;
+        const atmFragmentShader = `
+            varying vec3 vNormal;
+            varying vec3 vPosition;
+            void main() {
+                float fresnel = 1.0 - abs(dot(normalize(vNormal), normalize(-vPosition)));
+                fresnel = pow(fresnel, 2.5);
+                vec3 color = vec3(0.0, 0.83, 0.67); // cyan
+                gl_FragColor = vec4(color, fresnel * 0.6);
+            }
+        `;
+        const atmGeo = new THREE.SphereGeometry(EARTH_R * 1.08, 64, 64);
+        const atmMat = new THREE.ShaderMaterial({
+            vertexShader: atmVertexShader,
+            fragmentShader: atmFragmentShader,
             transparent: true,
-            opacity: 0.08,
-            side: THREE.BackSide
+            side: THREE.BackSide,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false
         });
         earthGroup.add(new THREE.Mesh(atmGeo, atmMat));
 
-        // Grid lines on Earth
-        const gridHelper = new THREE.PolarGridHelper(EARTH_R * 1.01, 16, 8, 64, 0x00d4aa, 0x00d4aa);
-        gridHelper.material.transparent = true;
-        gridHelper.material.opacity = 0.15;
-        earthGroup.add(gridHelper);
+        // Secondary glow shell
+        const glowGeo = new THREE.SphereGeometry(EARTH_R * 1.15, 32, 32);
+        const glowMat = new THREE.MeshBasicMaterial({
+            color: 0x00d4aa, transparent: true, opacity: 0.03, side: THREE.BackSide
+        });
+        earthGroup.add(new THREE.Mesh(glowGeo, glowMat));
 
-        // ─── Stars ───
+        // Wireframe overlay (continents)
+        const wireGeo = new THREE.WireframeGeometry(new THREE.SphereGeometry(EARTH_R * 1.005, 48, 48));
+        const wireMat = new THREE.LineBasicMaterial({ color: 0x00d4aa, transparent: true, opacity: 0.08 });
+        earthGroup.add(new THREE.LineSegments(wireGeo, wireMat));
+
+        // Lat/lon grid
+        const gridGroup = new THREE.Group();
+        for (let i = 0; i <= 12; i++) {
+            const lat = (i / 12 - 0.5) * Math.PI;
+            const r = EARTH_R * Math.cos(lat);
+            const y = EARTH_R * Math.sin(lat);
+            const ringGeo = new THREE.RingGeometry(r - 0.02, r + 0.02, 64);
+            ringGeo.rotateX(Math.PI / 2);
+            const ringMat = new THREE.MeshBasicMaterial({ color: 0x00d4aa, transparent: true, opacity: 0.06, side: THREE.DoubleSide });
+            const ring = new THREE.Mesh(ringGeo, ringMat);
+            ring.position.y = y;
+            gridGroup.add(ring);
+        }
+        for (let i = 0; i < 24; i++) {
+            const lon = (i / 24) * Math.PI * 2;
+            const points = [];
+            for (let j = 0; j <= 64; j++) {
+                const lat = (j / 64 - 0.5) * Math.PI;
+                points.push(new THREE.Vector3(
+                    EARTH_R * 1.003 * Math.cos(lat) * Math.cos(lon),
+                    EARTH_R * 1.003 * Math.sin(lat),
+                    EARTH_R * 1.003 * Math.cos(lat) * Math.sin(lon)
+                ));
+            }
+            const lineGeo = new THREE.BufferGeometry().setFromPoints(points);
+            const lineMat = new THREE.LineBasicMaterial({ color: 0x00d4aa, transparent: true, opacity: 0.04 });
+            gridGroup.add(new THREE.Line(lineGeo, lineMat));
+        }
+        earthGroup.add(gridGroup);
+
+        // ═══════════════════════════════════════════════════════════════
+        //  STARS
+        // ═══════════════════════════════════════════════════════════════
         const starGeo = new THREE.BufferGeometry();
-        const starCount = 3000;
-        const starPos = new Float32Array(starCount * 3);
-        for (let i = 0; i < starCount * 3; i++) starPos[i] = (Math.random() - 0.5) * 400;
-        starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
-        const starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.15, transparent: true, opacity: 0.7 });
+        const starCount = 8000;
+        const starPositions = new Float32Array(starCount * 3);
+        const starColors = new Float32Array(starCount * 3);
+        for (let i = 0; i < starCount; i++) {
+            const theta = Math.random() * Math.PI * 2;
+            const phi = Math.acos(2 * Math.random() - 1);
+            const r = 400 + Math.random() * 400;
+            starPositions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+            starPositions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+            starPositions[i * 3 + 2] = r * Math.cos(phi);
+            const temp = Math.random();
+            if (temp < 0.3) { starColors[i*3]=1; starColors[i*3+1]=0.8; starColors[i*3+2]=0.6; }
+            else if (temp < 0.7) { starColors[i*3]=1; starColors[i*3+1]=1; starColors[i*3+2]=1; }
+            else { starColors[i*3]=0.7; starColors[i*3+1]=0.8; starColors[i*3+2]=1; }
+        }
+        starGeo.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+        starGeo.setAttribute('color', new THREE.BufferAttribute(starColors, 3));
+        const starMat = new THREE.PointsMaterial({ size: 0.3, vertexColors: true, transparent: true, opacity: 0.9 });
         scene.add(new THREE.Points(starGeo, starMat));
 
-        // ─── Constellation ───
-        const SAT_R = EARTH_R * 1.125; // ~300 km scale
+        // ═══════════════════════════════════════════════════════════════
+        //  SATELLITE CONSTELLATION (150 sats, 6 planes, 53°)
+        // ═══════════════════════════════════════════════════════════════
         const satellites = [];
-        const satCount = 120;
-        const planes = 6;
-        const satsPerPlane = satCount / planes;
+        const satModels = [];
+        const orbitalTracks = [];
 
-        const satGeo = new THREE.BoxGeometry(0.25, 0.15, 0.35);
-        const satMat = new THREE.MeshPhongMaterial({ color: 0xcccccc, shininess: 80 });
-        const satActiveMat = new THREE.MeshPhongMaterial({ color: 0x00d4aa, emissive: 0x004433, shininess: 80 });
-
-        for (let p = 0; p < planes; p++) {
-            const inclination = (53 * Math.PI / 180);
-            const raan = (p / planes) * Math.PI * 2;
-            for (let s = 0; s < satsPerPlane; s++) {
-                const meanAnomaly = (s / satsPerPlane) * Math.PI * 2;
-                const sat = new THREE.Mesh(satGeo, satMat.clone());
-                sat.userData = { plane: p, index: s, inclination, raan, meanAnomaly, angle: meanAnomaly };
-                earthGroup.add(sat);
-                satellites.push(sat);
-            }
-        }
-
-        // ─── Hypersonic Vehicles ───
-        const vehicleAltitude = EARTH_R * 1.0125; // ~30 km scale
-        const vehicleData = {
-            enemy: { color: 0xe63946, trailColor: 0xff3333, speed: 0.003, heading: 0.8, lat: 0 },
-            friendly: { color: 0x2a9d8f, trailColor: 0x00ffaa, speed: 0.003, heading: -0.5, lat: 0.3 }
-        };
-
-        function createVehicle(type) {
+        function createSatelliteModel(color) {
             const group = new THREE.Group();
-            const vd = vehicleData[type];
 
-            // Body
-            const bodyGeo = new THREE.ConeGeometry(0.08, 0.35, 8);
-            bodyGeo.rotateX(Math.PI / 2);
-            const bodyMat = new THREE.MeshPhongMaterial({ color: vd.color, emissive: vd.color, emissiveIntensity: 0.3 });
+            // Main body
+            const bodyGeo = new THREE.BoxGeometry(0.35, 0.25, 0.45);
+            const bodyMat = new THREE.MeshPhongMaterial({ color: 0xaaaaaa, shininess: 60 });
             const body = new THREE.Mesh(bodyGeo, bodyMat);
+            body.castShadow = true;
             group.add(body);
 
-            // Wings
-            const wingGeo = new THREE.BoxGeometry(0.25, 0.02, 0.12);
-            const wing = new THREE.Mesh(wingGeo, bodyMat);
-            wing.position.z = -0.08;
-            group.add(wing);
+            // Solar panels
+            const panelGeo = new THREE.BoxGeometry(1.2, 0.03, 0.6);
+            const panelMat = new THREE.MeshPhongMaterial({ color: 0x1a1a3a, emissive: 0x000022, shininess: 80 });
+            const panel = new THREE.Mesh(panelGeo, panelMat);
+            panel.position.y = 0.15;
+            group.add(panel);
 
-            // Plasma glow
-            const glowGeo = new THREE.SphereGeometry(0.15, 16, 16);
-            const glowMat = new THREE.MeshBasicMaterial({ color: 0xff6600, transparent: true, opacity: 0.25 });
+            // Panel cells
+            const cellGeo = new THREE.BoxGeometry(0.15, 0.035, 0.5);
+            const cellMat = new THREE.MeshPhongMaterial({ color: 0x000055, emissive: 0x000033, shininess: 90 });
+            for (let i = -5; i <= 5; i++) {
+                const cell = new THREE.Mesh(cellGeo, cellMat);
+                cell.position.set(i * 0.18, 0.15, 0);
+                group.add(cell);
+            }
+
+            // Antenna
+            const antGeo = new THREE.CylinderGeometry(0.02, 0.02, 0.4, 8);
+            const antMat = new THREE.MeshPhongMaterial({ color: 0xcccccc });
+            const antenna = new THREE.Mesh(antGeo, antMat);
+            antenna.position.y = -0.35;
+            group.add(antenna);
+
+            // Dish
+            const dishGeo = new THREE.ConeGeometry(0.15, 0.08, 16, 1, true);
+            const dishMat = new THREE.MeshPhongMaterial({ color: 0xdddddd, side: THREE.DoubleSide });
+            const dish = new THREE.Mesh(dishGeo, dishMat);
+            dish.position.y = -0.55;
+            dish.rotation.x = Math.PI;
+            group.add(dish);
+
+            // Status glow
+            const glowGeo = new THREE.SphereGeometry(0.08, 8, 8);
+            const glowMat = new THREE.MeshBasicMaterial({ color: color, transparent: true, opacity: 0.6 });
             const glow = new THREE.Mesh(glowGeo, glowMat);
-            glow.position.y = -0.05;
-            glow.scale.y = 0.6;
+            glow.position.y = 0.35;
             group.add(glow);
 
-            // Engine trail
-            const trailGeo = new THREE.CylinderGeometry(0.02, 0.06, 0.8, 8);
-            trailGeo.rotateX(Math.PI / 2);
-            const trailMat = new THREE.MeshBasicMaterial({ color: 0xffaa44, transparent: true, opacity: 0.4 });
-            const trail = new THREE.Mesh(trailGeo, trailMat);
-            trail.position.z = -0.5;
-            group.add(trail);
+            // Point light for glow
+            const light = new THREE.PointLight(color, 0.5, 2);
+            light.position.y = 0.35;
+            group.add(light);
 
-            return group;
+            return { group, glow, light };
         }
 
-        const enemyVehicle = createVehicle('enemy');
-        const friendlyVehicle = createVehicle('friendly');
-        earthGroup.add(enemyVehicle);
-        earthGroup.add(friendlyVehicle);
+        // Generate constellation
+        for (let p = 0; p < NUM_PLANES; p++) {
+            const raan = (p / NUM_PLANES) * Math.PI * 2;
+            for (let s = 0; s < SATS_PER_PLANE; s++) {
+                const meanAnomaly = (s / SATS_PER_PLANE) * Math.PI * 2 + (p / NUM_PLANES) * (Math.PI / SATS_PER_PLANE); // Walker delta phasing
+                const sat = {
+                    plane: p, index: s,
+                    raan: raan,
+                    inclination: INCLINATION,
+                    meanAnomaly: meanAnomaly,
+                    meanMotion: 2 * Math.PI / ORBITAL_PERIOD,
+                    active: Math.random() > 0.05, // 95% active
+                    color: 0x00d4aa,
+                    idleColor: 0x555555,
+                    dataRate: 0,
+                    linkQuality: 0
+                };
 
-        // Trajectory trails
-        const trailLength = 200;
-        const enemyTrail = new THREE.BufferGeometry();
-        const friendlyTrail = new THREE.BufferGeometry();
-        const enemyTrailPos = new Float32Array(trailLength * 3);
-        const friendlyTrailPos = new Float32Array(trailLength * 3);
-        enemyTrail.setAttribute('position', new THREE.BufferAttribute(enemyTrailPos, 3));
-        friendlyTrail.setAttribute('position', new THREE.BufferAttribute(friendlyTrailPos, 3));
-        const enemyTrailMat = new THREE.LineBasicMaterial({ color: 0xe63946, transparent: true, opacity: 0.6 });
-        const friendlyTrailMat = new THREE.LineBasicMaterial({ color: 0x2a9d8f, transparent: true, opacity: 0.6 });
-        const enemyTrailLine = new THREE.Line(enemyTrail, enemyTrailMat);
-        const friendlyTrailLine = new THREE.Line(friendlyTrail, friendlyTrailMat);
-        earthGroup.add(enemyTrailLine);
-        earthGroup.add(friendlyTrailLine);
+                const model = createSatelliteModel(sat.active ? sat.color : sat.idleColor);
+                model.group.userData = sat;
+                earthGroup.add(model.group);
+                sat.mesh = model.group;
+                sat.glow = model.glow;
+                sat.light = model.light;
+                satellites.push(sat);
+                satModels.push(model.group);
 
-        let trailIndex = 0;
-        let showTrails = true;
+                // Orbital track line for this plane
+                if (s === 0) {
+                    const trackPoints = [];
+                    for (let a = 0; a <= 128; a++) {
+                        const angle = (a / 128) * Math.PI * 2;
+                        const r = SAT_R;
+                        const x = r * (Math.cos(raan) * Math.cos(angle) - Math.sin(raan) * Math.cos(INCLINATION) * Math.sin(angle));
+                        const y = r * Math.sin(INCLINATION) * Math.sin(angle);
+                        const z = r * (Math.sin(raan) * Math.cos(angle) + Math.cos(raan) * Math.cos(INCLINATION) * Math.sin(angle));
+                        trackPoints.push(new THREE.Vector3(x, y, z));
+                    }
+                    const trackGeo = new THREE.BufferGeometry().setFromPoints(trackPoints);
+                    const trackMat = new THREE.LineBasicMaterial({ color: 0x00d4aa, transparent: true, opacity: 0.12 });
+                    const trackLine = new THREE.Line(trackGeo, trackMat);
+                    earthGroup.add(trackLine);
+                    orbitalTracks.push(trackLine);
+                }
+            }
+        }
 
-        // ─── Rockets ───
-        const rockets = [];
-        const rocketGeo = new THREE.CylinderGeometry(0.06, 0.08, 0.5, 8);
-        rocketGeo.rotateX(Math.PI / 2);
+        // ═══════════════════════════════════════════════════════════════
+        //  KEPLERIAN PROPAGATION
+        // ═══════════════════════════════════════════════════════════════
+        function propagateSatellite(sat, t) {
+            const M = sat.meanAnomaly + sat.meanMotion * t;
+            // Solve Kepler's equation (approximate)
+            let E = M;
+            for (let i = 0; i < 5; i++) {
+                E = M + 0.0 * Math.sin(E); // circular orbit approximation (e≈0)
+            }
+            const theta = E; // true anomaly ≈ eccentric anomaly for e≈0
+            const r = SAT_R;
 
-        function createRocket(startLat, startLon, targetOrbit) {
+            // Position in orbital plane
+            const xOrb = r * Math.cos(theta);
+            const yOrb = r * Math.sin(theta);
+
+            // Rotate by inclination and RAAN
+            const x = xOrb * Math.cos(sat.raan) - yOrb * Math.cos(sat.inclination) * Math.sin(sat.raan);
+            const y = yOrb * Math.sin(sat.inclination);
+            const z = xOrb * Math.sin(sat.raan) + yOrb * Math.cos(sat.inclination) * Math.cos(sat.raan);
+
+            sat.mesh.position.set(x, y, z);
+            sat.mesh.lookAt(0, 0, 0);
+
+            // Update glow based on activity
+            if (sat.active) {
+                sat.glow.material.opacity = 0.4 + Math.sin(t * 3 + sat.index) * 0.2;
+                sat.light.intensity = 0.3 + Math.sin(t * 3 + sat.index) * 0.2;
+            } else {
+                sat.glow.material.opacity = 0.1;
+                sat.light.intensity = 0;
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        //  HYPERSONIC VEHICLES
+        // ═══════════════════════════════════════════════════════════════
+        function createHypersonicVehicle(config) {
             const group = new THREE.Group();
-            const mat = new THREE.MeshPhongMaterial({ color: 0xffd166, emissive: 0x664400 });
-            const body = new THREE.Mesh(rocketGeo, mat);
+            const color = config.color;
+
+            // Cone body
+            const bodyGeo = new THREE.ConeGeometry(0.15, 0.6, 12);
+            bodyGeo.rotateX(Math.PI / 2);
+            const bodyMat = new THREE.MeshPhongMaterial({ color: color, shininess: 40, emissive: color, emissiveIntensity: 0.2 });
+            const body = new THREE.Mesh(bodyGeo, bodyMat);
+            body.castShadow = true;
             group.add(body);
 
-            // Flame
-            const flameGeo = new THREE.ConeGeometry(0.05, 0.3, 8);
+            // Delta wings
+            const wingShape = new THREE.Shape();
+            wingShape.moveTo(0, 0);
+            wingShape.lineTo(0.5, -0.15);
+            wingShape.lineTo(0.5, -0.35);
+            wingShape.lineTo(0, -0.25);
+            wingShape.closePath();
+            const wingGeo = new THREE.ExtrudeGeometry(wingShape, { depth: 0.02, bevelEnabled: false });
+            const wingMat = new THREE.MeshPhongMaterial({ color: color, emissive: color, emissiveIntensity: 0.1 });
+
+            const wingL = new THREE.Mesh(wingGeo, wingMat);
+            wingL.position.set(0, 0, -0.1);
+            wingL.rotation.y = Math.PI;
+            wingL.rotation.x = Math.PI / 2;
+            group.add(wingL);
+
+            const wingR = new THREE.Mesh(wingGeo, wingMat);
+            wingR.position.set(0, 0, -0.1);
+            wingR.rotation.x = Math.PI / 2;
+            group.add(wingR);
+
+            // Tail fins
+            const finGeo = new THREE.BoxGeometry(0.02, 0.2, 0.15);
+            const finMat = new THREE.MeshPhongMaterial({ color: color });
+            for (let i = 0; i < 4; i++) {
+                const fin = new THREE.Mesh(finGeo, finMat);
+                fin.position.z = -0.25;
+                fin.rotation.y = (i / 4) * Math.PI * 2;
+                fin.translateX(0.1);
+                group.add(fin);
+            }
+
+            // Plasma sheath (animated particle shell)
+            const plasmaGeo = new THREE.SphereGeometry(0.35, 16, 16);
+            const plasmaMat = new THREE.MeshBasicMaterial({
+                color: 0xff6600, transparent: true, opacity: 0.15,
+                side: THREE.BackSide, blending: THREE.AdditiveBlending
+            });
+            const plasma = new THREE.Mesh(plasmaGeo, plasmaMat);
+            plasma.scale.set(1, 0.7, 1.3);
+            group.add(plasma);
+
+            // Secondary plasma layer
+            const plasma2Geo = new THREE.SphereGeometry(0.5, 12, 12);
+            const plasma2Mat = new THREE.MeshBasicMaterial({
+                color: 0xffaa00, transparent: true, opacity: 0.08,
+                side: THREE.BackSide, blending: THREE.AdditiveBlending
+            });
+            const plasma2 = new THREE.Mesh(plasma2Geo, plasma2Mat);
+            plasma2.scale.set(1, 0.6, 1.4);
+            group.add(plasma2);
+
+            // Engine trail particle system
+            const trailCount = 250;
+            const trailGeo = new THREE.BufferGeometry();
+            const trailPos = new Float32Array(trailCount * 3);
+            const trailAlpha = new Float32Array(trailCount);
+            const trailSize = new Float32Array(trailCount);
+            for (let i = 0; i < trailCount; i++) {
+                trailPos[i*3] = 0; trailPos[i*3+1] = 0; trailPos[i*3+2] = 0;
+                trailAlpha[i] = 0;
+                trailSize[i] = 0.05 + Math.random() * 0.1;
+            }
+            trailGeo.setAttribute('position', new THREE.BufferAttribute(trailPos, 3));
+            const trailMat = new THREE.PointsMaterial({
+                color: 0xff8844, size: 0.15, transparent: true, opacity: 0.7,
+                blending: THREE.AdditiveBlending, depthWrite: false
+            });
+            const trailParticles = new THREE.Points(trailGeo, trailMat);
+            group.add(trailParticles);
+
+            // Shock cone
+            const shockGeo = new THREE.ConeGeometry(0.4, 1.2, 16, 1, true);
+            shockGeo.rotateX(-Math.PI / 2);
+            const shockMat = new THREE.MeshBasicMaterial({
+                color: color, transparent: true, opacity: 0.06,
+                side: THREE.DoubleSide, blending: THREE.AdditiveBlending
+            });
+            const shockCone = new THREE.Mesh(shockGeo, shockMat);
+            shockCone.position.z = -0.8;
+            group.add(shockCone);
+
+            return {
+                group, body, plasma, plasma2, trailParticles, trailPos, trailAlpha, trailSize,
+                shockCone, config,
+                trailIndex: 0,
+                history: [], // position history for trajectory
+                lat: 0, lon: 0, alt: config.altKm * 1000,
+                velocity: config.mach * 343, // m/s
+                heading: config.heading,
+                angularVel: 0
+            };
+        }
+
+        const enemyVehicle = createHypersonicVehicle(ENEMY_CONFIG);
+        const friendlyVehicle = createHypersonicVehicle(FRIENDLY_CONFIG);
+        earthGroup.add(enemyVehicle.group);
+        earthGroup.add(friendlyVehicle.group);
+
+        // Trajectory curves (3D)
+        function createTrajectoryCurve(color) {
+            const points = [];
+            for (let i = 0; i < 500; i++) points.push(new THREE.Vector3(0, 0, 0));
+            const geo = new THREE.BufferGeometry().setFromPoints(points);
+            const mat = new THREE.LineBasicMaterial({ color: color, transparent: true, opacity: 0.5 });
+            return { line: new THREE.Line(geo, mat), points, geo };
+        }
+
+        const enemyTraj = createTrajectoryCurve(0xe63946);
+        const friendlyTraj = createTrajectoryCurve(0x2a9d8f);
+        earthGroup.add(enemyTraj.line);
+        earthGroup.add(friendlyTraj.line);
+
+        // Projected future paths
+        const enemyFuture = createTrajectoryCurve(0xe63946);
+        const friendlyFuture = createTrajectoryCurve(0x2a9d8f);
+        enemyFuture.line.material.opacity = 0.2;
+        friendlyFuture.line.material.opacity = 0.2;
+        enemyFuture.line.material.linewidth = 1;
+        friendlyFuture.line.material.linewidth = 1;
+        earthGroup.add(enemyFuture.line);
+        earthGroup.add(friendlyFuture.line);
+
+        // Ground tracks on Earth surface
+        function createGroundTrack(color) {
+            const points = [];
+            for (let i = 0; i < 300; i++) points.push(new THREE.Vector3(0, 0, 0));
+            const geo = new THREE.BufferGeometry().setFromPoints(points);
+            const mat = new THREE.LineBasicMaterial({ color: color, transparent: true, opacity: 0.6 });
+            return { line: new THREE.Line(geo, mat), points, geo };
+        }
+        const enemyGround = createGroundTrack(0xe63946);
+        const friendlyGround = createGroundTrack(0x2a9d8f);
+        earthGroup.add(enemyGround.line);
+        earthGroup.add(friendlyGround.line);
+
+        // ═══════════════════════════════════════════════════════════════
+        //  ROCKET SWARM (8 vehicles)
+        // ═══════════════════════════════════════════════════════════════
+        const rockets = [];
+        const ROCKET_TYPES = [
+            { type: 'heavy', count: 2, color: 0xffd166, size: 1.5 },
+            { type: 'medium', count: 4, color: 0xffaa44, size: 1.0 },
+            { type: 'smallsat', count: 2, color: 0x88ccff, size: 0.6 }
+        ];
+
+        function createRocket(config, index) {
+            const group = new THREE.Group();
+            const s = config.size;
+
+            // Main body
+            const bodyGeo = new THREE.CylinderGeometry(0.08 * s, 0.1 * s, 1.0 * s, 12);
+            bodyGeo.rotateX(Math.PI / 2);
+            const bodyMat = new THREE.MeshPhongMaterial({ color: config.color, shininess: 50 });
+            const body = new THREE.Mesh(bodyGeo, bodyMat);
+            body.castShadow = true;
+            group.add(body);
+
+            // Nose cone
+            const noseGeo = new THREE.ConeGeometry(0.08 * s, 0.3 * s, 12);
+            noseGeo.rotateX(Math.PI / 2);
+            const noseMat = new THREE.MeshPhongMaterial({ color: 0xdddddd, shininess: 80 });
+            const nose = new THREE.Mesh(noseGeo, noseMat);
+            nose.position.z = 0.65 * s;
+            group.add(nose);
+
+            // Boosters (heavy only)
+            if (config.type === 'heavy') {
+                for (let i = 0; i < 2; i++) {
+                    const boosterGeo = new THREE.CylinderGeometry(0.05 * s, 0.06 * s, 0.8 * s, 8);
+                    boosterGeo.rotateX(Math.PI / 2);
+                    const booster = new THREE.Mesh(boosterGeo, bodyMat);
+                    booster.position.x = (i === 0 ? -1 : 1) * 0.2 * s;
+                    booster.position.z = -0.1 * s;
+                    booster.name = 'booster' + i;
+                    group.add(booster);
+                }
+            }
+
+            // Main engine flame
+            const flameGeo = new THREE.ConeGeometry(0.1 * s, 0.5 * s, 12);
             flameGeo.rotateX(-Math.PI / 2);
-            const flameMat = new THREE.MeshBasicMaterial({ color: 0xff4400, transparent: true, opacity: 0.7 });
+            const flameMat = new THREE.MeshBasicMaterial({
+                color: 0xff4400, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending
+            });
             const flame = new THREE.Mesh(flameGeo, flameMat);
-            flame.position.z = -0.35;
+            flame.position.z = -0.7 * s;
             group.add(flame);
 
-            group.userData = {
-                startLat, startLon, targetOrbit,
-                phase: 'launch', progress: 0,
-                flame: flame
+            // Secondary flame (smaller, hotter)
+            const flame2Geo = new THREE.ConeGeometry(0.05 * s, 0.3 * s, 8);
+            flame2Geo.rotateX(-Math.PI / 2);
+            const flame2Mat = new THREE.MeshBasicMaterial({
+                color: 0xffaa00, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending
+            });
+            const flame2 = new THREE.Mesh(flame2Geo, flame2Mat);
+            flame2.position.z = -0.6 * s;
+            group.add(flame2);
+
+            // Particle trail
+            const trailCount = 150;
+            const trailGeo = new THREE.BufferGeometry();
+            const trailPos = new Float32Array(trailCount * 3);
+            for (let i = 0; i < trailCount; i++) { trailPos[i*3]=0; trailPos[i*3+1]=0; trailPos[i*3+2]=0; }
+            trailGeo.setAttribute('position', new THREE.BufferAttribute(trailPos, 3));
+            const trailMat = new THREE.PointsMaterial({
+                color: 0xff6600, size: 0.2 * s, transparent: true, opacity: 0.6,
+                blending: THREE.AdditiveBlending, depthWrite: false
+            });
+            const trail = new THREE.Points(trailGeo, trailMat);
+            group.add(trail);
+
+            return {
+                group, body, nose, flame, flame2, trail, trailPos,
+                type: config.type,
+                phase: 'pad', // pad, ascent, staging, coast, insertion
+                progress: 0,
+                stage1Sep: false,
+                fairingSep: false,
+                index: index,
+                history: [],
+                label: config.type === 'heavy' ? `H-${index+1}` : config.type === 'medium' ? `M-${index-1}` : `S-${index-5}`
             };
-            return group;
         }
 
-        // Create rocket swarm
-        for (let i = 0; i < 4; i++) {
-            const rocket = createRocket(-0.5 + i * 0.3, -1.0 + i * 0.2, SAT_R);
-            earthGroup.add(rocket);
-            rockets.push(rocket);
-        }
-
-        // ─── Optical Beams ───
-        const beams = [];
-        const beamGeo = new THREE.CylinderGeometry(0.01, 0.01, 1, 4);
-        beamGeo.rotateX(Math.PI / 2);
-        const beamMat = new THREE.MeshBasicMaterial({ color: 0x00d4aa, transparent: true, opacity: 0.3 });
-
-        function createBeam() {
-            const beam = new THREE.Mesh(beamGeo, beamMat.clone());
-            beam.visible = false;
-            earthGroup.add(beam);
-            beams.push(beam);
-            return beam;
-        }
-
-        for (let i = 0; i < 12; i++) createBeam();
-        let showLinks = true;
-
-        // ─── Physics & Animation ───
-        let simTime = 0;
-        let timeScale = 1.0;
-        let isPlaying = true;
-        let scenario = 'enemy';
-        let cameraMode = 'orbit';
-        let followTarget = null;
-
-        function latLonAltToVector3(lat, lon, alt) {
-            const r = EARTH_R + alt;
-            return new THREE.Vector3(
-                r * Math.cos(lat) * Math.cos(lon),
-                r * Math.sin(lat),
-                r * Math.cos(lat) * Math.sin(lon)
-            );
-        }
-
-        function updateSatellites(dt) {
-            const omega = 2 * Math.PI / (90.4 * 60); // rad/s real, scaled by time
-            satellites.forEach(sat => {
-                const ud = sat.userData;
-                ud.angle += omega * dt * timeScale * 20;
-
-                const r = SAT_R;
-                // Inclined orbit
-                const x = r * (Math.cos(ud.raan) * Math.cos(ud.angle) - Math.sin(ud.raan) * Math.cos(ud.inclination) * Math.sin(ud.angle));
-                const y = r * Math.sin(ud.inclination) * Math.sin(ud.angle);
-                const z = r * (Math.sin(ud.raan) * Math.cos(ud.angle) + Math.cos(ud.raan) * Math.cos(ud.inclination) * Math.sin(ud.angle));
-                sat.position.set(x, y, z);
-                sat.lookAt(0, 0, 0);
-            });
-        }
-
-        function updateVehicles(dt) {
-            const vSpeed = 0.003 * timeScale;
-            ['enemy', 'friendly'].forEach(type => {
-                const vd = vehicleData[type];
-                vd.heading += vd.speed * timeScale * 0.1;
-                vd.lat += Math.sin(vd.heading) * vd.speed * timeScale * 0.05;
-            });
-
-            // Enemy position
-            const ePos = latLonAltToVector3(vehicleData.enemy.lat, vehicleData.enemy.heading, vehicleAltitude - EARTH_R);
-            enemyVehicle.position.copy(ePos);
-            enemyVehicle.lookAt(ePos.clone().add(ePos.clone().normalize().cross(new THREE.Vector3(0,1,0))));
-
-            // Friendly position
-            const fPos = latLonAltToVector3(vehicleData.friendly.lat, vehicleData.friendly.heading, vehicleAltitude - EARTH_R);
-            friendlyVehicle.position.copy(fPos);
-            friendlyVehicle.lookAt(fPos.clone().add(fPos.clone().normalize().cross(new THREE.Vector3(0,1,0))));
-
-            // Update trails
-            if (showTrails) {
-                enemyTrailPos[trailIndex * 3] = ePos.x;
-                enemyTrailPos[trailIndex * 3 + 1] = ePos.y;
-                enemyTrailPos[trailIndex * 3 + 2] = ePos.z;
-                friendlyTrailPos[trailIndex * 3] = fPos.x;
-                friendlyTrailPos[trailIndex * 3 + 1] = fPos.y;
-                friendlyTrailPos[trailIndex * 3 + 2] = fPos.z;
-                trailIndex = (trailIndex + 1) % trailLength;
-                enemyTrail.attributes.position.needsUpdate = true;
-                friendlyTrail.attributes.position.needsUpdate = true;
+        let rocketIdx = 0;
+        ROCKET_TYPES.forEach(rt => {
+            for (let i = 0; i < rt.count; i++) {
+                const rocket = createRocket(rt, rocketIdx++);
+                earthGroup.add(rocket.group);
+                rockets.push(rocket);
             }
-        }
-
-        function updateRockets(dt) {
-            rockets.forEach(rocket => {
-                const ud = rocket.userData;
-                ud.progress += dt * timeScale * 0.15;
-                if (ud.progress > 1) ud.progress = 0;
-
-                const startR = EARTH_R * 1.005;
-                const endR = ud.targetOrbit;
-                const currentR = startR + (endR - startR) * ud.progress;
-                const lat = ud.startLat + ud.progress * 0.5;
-                const lon = ud.startLon + ud.progress * 2.0;
-
-                const x = currentR * Math.cos(lat) * Math.cos(lon);
-                const y = currentR * Math.sin(lat);
-                const z = currentR * Math.cos(lat) * Math.sin(lon);
-                rocket.position.set(x, y, z);
-                rocket.lookAt(x * 1.1, y * 1.1 + 1, z * 1.1);
-
-                // Fade flame as it reaches orbit
-                ud.flame.material.opacity = ud.progress > 0.8 ? 0.3 : 0.7;
-            });
-        }
-
-        function updateBeams() {
-            if (!showLinks) {
-                beams.forEach(b => b.visible = false);
-                return;
-            }
-
-            const activeVehicle = scenario === 'enemy' ? enemyVehicle : friendlyVehicle;
-            const vehiclePos = activeVehicle.position;
-
-            // Find closest satellites
-            const dists = satellites.map(sat => ({
-                sat,
-                dist: sat.position.distanceTo(vehiclePos)
-            })).sort((a, b) => a.dist - b.dist);
-
-            const top3 = dists.slice(0, 3);
-            let beamIdx = 0;
-
-            top3.forEach(({ sat, dist }) => {
-                if (beamIdx >= beams.length) return;
-                const beam = beams[beamIdx++];
-                const dir = new THREE.Vector3().subVectors(sat.position, vehiclePos);
-                const len = dir.length();
-                beam.position.copy(vehiclePos).add(dir.multiplyScalar(0.5));
-                beam.scale.set(1, 1, len);
-                beam.lookAt(sat.position);
-                beam.visible = true;
-
-                // Color based on link quality
-                const quality = Math.max(0, 1 - dist / 15);
-                if (quality > 0.7) beam.material.color.setHex(0x00d4aa);
-                else if (quality > 0.4) beam.material.color.setHex(0xffd166);
-                else beam.material.color.setHex(0xe63946);
-                beam.material.opacity = quality * 0.4;
-            });
-
-            while (beamIdx < beams.length) beams[beamIdx++].visible = false;
-
-            // Update link bars
-            document.getElementById('link1').style.width = Math.min(100, Math.max(30, 100 - top3[0].dist * 5)) + '%';
-            document.getElementById('link2').style.width = Math.min(100, Math.max(20, 100 - top3[1].dist * 5)) + '%';
-            if (top3[2]) document.getElementById('link3').style.width = Math.min(100, Math.max(10, 100 - top3[2].dist * 5)) + '%';
-
-            // Update HUD
-            document.getElementById('hud-visible').textContent = satellites.filter(s => s.position.distanceTo(vehiclePos) < 12).length;
-            document.getElementById('hud-links').textContent = top3.length;
-            document.getElementById('hud-range').textContent = (top3[0].dist * 30).toFixed(0) + ' km';
-        }
-
-        function updateHUD() {
-            const vd = scenario === 'enemy' ? vehicleData.enemy : vehicleData.friendly;
-            document.getElementById('hud-speed').textContent = 'Mach 10.0';
-            document.getElementById('hud-velocity').textContent = '3,430 m/s';
-            document.getElementById('hud-altitude').textContent = '30.0 km';
-            document.getElementById('hud-latlon').textContent = (vd.lat * 57.3).toFixed(1) + '° / ' + (vd.heading * 57.3).toFixed(1) + '°';
-            document.getElementById('hud-heading').textContent = (vd.heading * 57.3).toFixed(1) + '°';
-
-            const minutes = Math.floor(simTime / 60);
-            const seconds = Math.floor(simTime % 60);
-            document.getElementById('hud-simtime').textContent = `T+${minutes}:${seconds.toString().padStart(2, '0')}`;
-        }
-
-        function updateCamera() {
-            if (cameraMode === 'orbit') {
-                controls.enabled = true;
-            } else if (cameraMode === 'vehicle') {
-                controls.enabled = false;
-                const target = scenario === 'enemy' ? enemyVehicle : friendlyVehicle;
-                const offset = new THREE.Vector3(2, 1, 2);
-                camera.position.lerp(target.position.clone().add(offset), 0.05);
-                camera.lookAt(target.position);
-            } else if (cameraMode === 'satellite') {
-                controls.enabled = false;
-                const target = satellites[42];
-                const offset = new THREE.Vector3(1, 0.5, 1);
-                camera.position.lerp(target.position.clone().add(offset), 0.05);
-                camera.lookAt(target.position);
-            } else if (cameraMode === 'top') {
-                controls.enabled = false;
-                camera.position.lerp(new THREE.Vector3(0, 40, 0), 0.05);
-                camera.lookAt(0, 0, 0);
-            }
-        }
-
-        // ─── Mini Map ───
-        const miniCanvas = document.getElementById('minimap-canvas');
-        const miniCtx = miniCanvas.getContext('2d');
-        miniCanvas.width = 160;
-        miniCanvas.height = 160;
-
-        function drawMinimap() {
-            miniCtx.fillStyle = '#050811';
-            miniCtx.fillRect(0, 0, 160, 160);
-
-            // Earth
-            miniCtx.beginPath();
-            miniCtx.arc(80, 80, 50, 0, Math.PI * 2);
-            miniCtx.strokeStyle = '#1a3a5c';
-            miniCtx.lineWidth = 2;
-            miniCtx.stroke();
-
-            // Satellites
-            satellites.forEach(sat => {
-                const x = 80 + sat.position.x * 4;
-                const y = 80 - sat.position.z * 4;
-                if (x > 5 && x < 155 && y > 5 && y < 155) {
-                    miniCtx.fillStyle = '#00d4aa';
-                    miniCtx.fillRect(x - 1, y - 1, 2, 2);
-                }
-            });
-
-            // Vehicles
-            const ePos = enemyVehicle.position;
-            miniCtx.fillStyle = '#e63946';
-            miniCtx.beginPath();
-            miniCtx.arc(80 + ePos.x * 4, 80 - ePos.z * 4, 3, 0, Math.PI * 2);
-            miniCtx.fill();
-
-            const fPos = friendlyVehicle.position;
-            miniCtx.fillStyle = '#2a9d8f';
-            miniCtx.beginPath();
-            miniCtx.arc(80 + fPos.x * 4, 80 - fPos.z * 4, 3, 0, Math.PI * 2);
-            miniCtx.fill();
-        }
-
-        // ─── Animation Loop ───
-        const clock = new THREE.Clock();
-
-        function animate() {
-            requestAnimationFrame(animate);
-            const dt = Math.min(clock.getDelta(), 0.1);
-
-            if (isPlaying) {
-                simTime += dt * timeScale;
-                updateSatellites(dt);
-                updateVehicles(dt);
-                updateRockets(dt);
-                updateBeams();
-                updateHUD();
-            }
-
-            updateCamera();
-            drawMinimap();
-            controls.update();
-            renderer.render(scene, camera);
-        }
-
-        animate();
-
-        // ─── Window Resize ───
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
         });
 
-        // ─── Global functions ───
-        window.setScenario = (s) => {
-            scenario = s;
-            document.querySelectorAll('.scenario-btn').forEach(b => b.classList.remove('active'));
-            document.querySelector('.scenario-btn.' + s).classList.add('active');
-            document.getElementById('hud-scenario').textContent = s === 'enemy' ? 'Enemy Track' : s === 'friendly' ? 'Friendly Control' : 'Rocket Swarm';
-        };
-
-        window.togglePlay = () => {
-            isPlaying = !isPlaying;
-            document.getElementById('play-btn').textContent = isPlaying ? '⏸️ Pause' : '▶️ Play';
-        };
-
-        window.setTimeScale = (v) => {
-            timeScale = parseFloat(v);
-            document.getElementById('hud-timescale').textContent = timeScale.toFixed(1) + '×';
-        };
-
-        window.setCamera = (mode) => {
-            cameraMode = mode;
-            const labels = { orbit: '🌍 Orbit', vehicle: '🎯 Follow Vehicle', satellite: '🛰️ Follow Satellite', top: '🗺️ Top Down' };
-            document.getElementById('cam-mode').textContent = '📷 Camera: ' + labels[mode];
-        };
-
-        window.toggleTrails = () => {
-            showTrails = !showTrails;
-            enemyTrailLine.visible = showTrails;
-            friendlyTrailLine.visible = showTrails;
-        };
-
-        window.toggleLinks = () => {
-            showLinks = !showLinks;
-        };
-    </script>
-</body>
-</html>
+        // Rocket trajectories
+        const rocketTrajs = rockets.map(() => {
+            const pts = [];
+            for (let i = 0; i < 200; i++) pts.push(new THREE.Vector3(0, 0, 0));
+            const geo = new THREE.BufferGeometry().setFromPoints(pts);
+            const mat = new THREE.LineBasicMaterial({ color: 0xffd166, transparent: true, opacity: 0.4 });
+            const line = new THREE.Line(geo, mat);
+            earthGroup.add(line);
+            return { line, points: pts, geo };
+        });

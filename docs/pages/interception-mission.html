@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎯 Interception Mission — Space Photonics</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Roboto, -apple-system, BlinkMacSystemFont, sans-serif; background: #050811; color: #e0e6ed; overflow: hidden; width: 100vw; height: 100vh; }
+        #canvas-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+
+        nav { position: fixed; top: 8px; left: 8px; right: 8px; z-index: 200; background: rgba(5,8,17,0.92); backdrop-filter: blur(12px); border: 1px solid rgba(65,90,119,0.5); border-radius: 10px; padding: 6px; display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; }
+        nav a { color: #90e0ef; text-decoration: none; padding: 5px 10px; border-radius: 6px; font-size: 0.78em; background: rgba(13,27,42,0.7); transition: all 0.2s; border: 1px solid transparent; }
+        nav a:hover, nav a.active { background: #00d4aa; color: #050811; border-color: #00d4aa; }
+
+        /* HUD Panels */
+        .hud { position: fixed; z-index: 100; background: rgba(5,8,17,0.88); backdrop-filter: blur(10px); border: 1px solid rgba(65,90,119,0.5); border-radius: 10px; padding: 10px; font-size: 0.72em; }
+        .hud h3 { color: #00d4aa; font-size: 0.95em; margin-bottom: 6px; border-bottom: 1px solid rgba(65,90,119,0.5); padding-bottom: 4px; }
+        .hud h4 { color: #90e0ef; font-size: 0.85em; margin: 8px 0 4px; }
+        .hud-row { display: flex; justify-content: space-between; padding: 2.5px 0; border-bottom: 1px solid rgba(65,90,119,0.15); }
+        .hud-label { color: #90e0ef; font-weight: 500; }
+        .hud-value { color: #ffd166; font-family: monospace; font-size: 0.95em; }
+        .hud-value.ok { color: #2a9d8f; }
+        .hud-value.warn { color: #ffd166; }
+        .hud-value.danger { color: #e63946; }
+
+        .hud-left { top: 65px; left: 8px; width: 250px; max-height: calc(100vh - 180px); overflow-y: auto; }
+        .hud-right { top: 65px; right: 8px; width: 260px; max-height: calc(100vh - 180px); overflow-y: auto; }
+        .hud-bottom-left { bottom: 60px; left: 8px; width: 300px; }
+        .hud-bottom-right { bottom: 60px; right: 8px; width: 280px; }
+
+        /* Scenario controls */
+        .scenario-controls { position: fixed; top: 65px; left: 50%; transform: translateX(-50%); z-index: 100; display: flex; gap: 6px; }
+        .scenario-btn { background: rgba(5,8,17,0.88); backdrop-filter: blur(10px); color: #e0e6ed; border: 1px solid rgba(65,90,119,0.5); padding: 7px 14px; border-radius: 8px; cursor: pointer; font-size: 0.8em; transition: all 0.2s; }
+        .scenario-btn:hover { border-color: #00d4aa; }
+        .scenario-btn.active { background: #00d4aa; color: #050811; font-weight: 600; }
+
+        /* Camera feed overlay */
+        .camera-feed { position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); z-index: 100; width: 320px; height: 200px; background: rgba(5,8,17,0.9); border: 2px solid #e63946; border-radius: 8px; overflow: hidden; }
+        .camera-feed-header { background: #e63946; color: #fff; padding: 4px 8px; font-size: 0.75em; font-weight: 600; display: flex; justify-content: space-between; }
+        .camera-feed-content { padding: 8px; font-size: 0.7em; color: #e0e6ed; }
+        .camera-feed canvas { width: 100%; height: 120px; background: #000; border-radius: 4px; }
+
+        /* Time controls */
+        .time-controls { position: fixed; bottom: 10px; left: 8px; z-index: 100; background: rgba(5,8,17,0.92); border: 1px solid rgba(65,90,119,0.5); border-radius: 10px; padding: 8px 14px; display: flex; gap: 8px; align-items: center; }
+        .btn { background: rgba(13,27,42,0.9); color: #e0e6ed; border: 1px solid rgba(65,90,119,0.5); padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 0.75em; transition: all 0.2s; }
+        .btn:hover { background: #00d4aa; color: #050811; }
+        .btn.active { background: #00d4aa; color: #050811; }
+        .time-display { color: #ffd166; font-family: monospace; font-size: 0.8em; min-width: 120px; text-align: center; }
+
+        /* Status indicator */
+        .status-bar { position: fixed; top: 65px; left: 265px; z-index: 100; background: rgba(5,8,17,0.88); border: 1px solid rgba(65,90,119,0.5); border-radius: 6px; padding: 6px 10px; font-size: 0.72em; }
+        .status-item { display: inline-block; margin: 0 6px; }
+        .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; }
+
+        /* Event log */
+        .event-log { max-height: 120px; overflow-y: auto; font-size: 0.8em; }
+        .event-item { padding: 2px 0; border-bottom: 1px solid rgba(65,90,119,0.2); }
+        .event-time { color: #90e0ef; font-family: monospace; font-size: 0.85em; }
+        .event-text { color: #e0e6ed; }
+        .event-critical { color: #e63946; font-weight: 600; }
+        .event-success { color: #2a9d8f; font-weight: 600; }
+
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: #415a77; border-radius: 2px; }
+    </style>
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        }
+    }
+    </script>
+</head>
+<body>
+    <div id="canvas-container"></div>
+
+    <nav>
+            <a href="../index.html">🏠 Dashboard</a>
+            <a href="../pages/architecture.html">🏛️ Architecture</a>
+            <a href="../pages/digital-twin.html">🎮 3D Twin</a>
+            <a href="../pages/opa-analysis.html">📡 OPA</a>
+            <a href="../pages/link-budget.html">📊 Link Budget</a>
+            <a href="../pages/hypersonic.html">🚀 Hypersonic</a>
+            <a href="../pages/vleo-constellation.html">🌐 VLEO</a>
+            <a href="../pages/mapper-3d.html">🗺️ Mapper</a>
+            <a href="../pages/satellite-digital-twin.html">🛰️ Sat Twin</a>
+            <a href="../pages/interception-mission.html">🎯 Intercept</a>
+            <a href="../pages/vehicle-terminal.html">🛰️ Terminal</a>
+            <a href="../pages/ehf-optical-trade.html">📡 EHF vs Opt</a>
+            <a href="../pages/ppln-calculator.html">🔢 PPLN</a>
+            <a href="../pages/research-gaps.html">🔬 Gaps</a>
+            <a href="../pages/foundry.html">🏭 Foundry</a>
+        </nav>
+
+    <div class="scenario-controls">
+        <button class="scenario-btn active" data-phase="launch">🚀 Launch Phase</button>
+        <button class="scenario-btn" data-phase="cruise">✈️ Cruise Phase</button>
+        <button class="scenario-btn" data-phase="terminal">🎯 Terminal Phase</button>
+        <button class="scenario-btn" data-phase="impact">💥 Impact</button>
+    </div>
+
+    <!-- Enemy Vehicle HUD -->
+    <div class="hud hud-left">
+        <h3>🔴 Enemy HGV — <span id="enemy-name">HGV-ALPHA</span></h3>
+        <div class="hud-row"><span class="hud-label">Status</span><span class="hud-value" id="enemy-status">IN FLIGHT</span></div>
+        <div class="hud-row"><span class="hud-label">Phase</span><span class="hud-value" id="enemy-phase">Boost</span></div>
+        <div class="hud-row"><span class="hud-label">Mach</span><span class="hud-value" id="enemy-mach">5.2</span></div>
+        <div class="hud-row"><span class="hud-label">Velocity</span><span class="hud-value" id="enemy-vel">1,780 m/s</span></div>
+        <div class="hud-row"><span class="hud-label">Altitude</span><span class="hud-value" id="enemy-alt">42.0 km</span></div>
+        <div class="hud-row"><span class="hud-label">Lat / Lon</span><span class="hud-value" id="enemy-latlon">28.5°N / 80.5°W</span></div>
+        <div class="hud-row"><span class="hud-label">Heading</span><span class="hud-value" id="enemy-hdg">78.0°</span></div>
+        <div class="hud-row"><span class="hud-label">Ang. Velocity</span><span class="hud-value" id="enemy-angvel">0.12°/s</span></div>
+        <div class="hud-row"><span class="hud-label">G-Force</span><span class="hud-value" id="enemy-g">2.4 g</span></div>
+        <div class="hud-row"><span class="hud-label">Dynamic Pressure</span><span class="hud-value" id="enemy-q">45.2 kPa</span></div>
+        <div class="hud-row"><span class="hud-label">Plasma Freq</span><span class="hud-value" id="enemy-plasma">4.8 GHz</span></div>
+        <div class="hud-row"><span class="hud-label">Surface Temp</span><span class="hud-value" id="enemy-temp">1,850°C</span></div>
+        <div class="hud-row"><span class="hud-label">Range to Target</span><span class="hud-value" id="enemy-range">1,247 km</span></div>
+        <div class="hud-row"><span class="hud-label">Time to Impact</span><span class="hud-value danger" id="enemy-tti">T+ 6:23</span></div>
+
+        <h4>📡 Optical Downlink</h4>
+        <div class="hud-row"><span class="hud-label">TX Power</span><span class="hud-value">500 mW</span></div>
+        <div class="hud-row"><span class="hud-label">Data Rate</span><span class="hud-value">2.4 Gbps</span></div>
+        <div class="hud-row"><span class="hud-label">Video Stream</span><span class="hud-value">1080p60 HDR</span></div>
+        <div class="hud-row"><span class="hud-label">Bandwidth</span><span class="hud-value">50 Mbps</span></div>
+        <div class="hud-row"><span class="hud-label">Link Margin</span><span class="hud-value ok">+28.4 dB</span></div>
+        <div class="hud-row"><span class="hud-label">Doppler</span><span class="hud-value">+1.14 GHz</span></div>
+    </div>
+
+    <!-- Interceptor HUD -->
+    <div class="hud hud-right">
+        <h3>🛡️ Interceptor — <span id="int-name">GMD-E1</span></h3>
+        <div class="hud-row"><span class="hud-label">Status</span><span class="hud-value ok" id="int-status">TRACKING</span></div>
+        <div class="hud-row"><span class="hud-label">Phase</span><span class="hud-value" id="int-phase">KV Deploy</span></div>
+        <div class="hud-row"><span class="hud-label">Mach</span><span class="hud-value" id="int-mach">14.2</span></div>
+        <div class="hud-row"><span class="hud-label">Velocity</span><span class="hud-value" id="int-vel">4,870 m/s</span></div>
+        <div class="hud-row"><span class="hud-label">Altitude</span><span class="hud-value" id="int-alt">220.0 km</span></div>
+        <div class="hud-row"><span class="hud-label">Lat / Lon</span><span class="hud-value" id="int-latlon">33.0°N / 106.5°W</span></div>
+        <div class="hud-row"><span class="hud-label">Heading</span><span class="hud-value" id="int-hdg">258.0°</span></div>
+        <div class="hud-row"><span class="hud-label">Ang. Velocity</span><span class="hud-value" id="int-angvel">1.85°/s</span></div>
+        <div class="hud-row"><span class="hud-label">G-Force</span><span class="hud-value" id="int-g">8.2 g</span></div>
+        <div class="hud-row"><span class="hud-label">Cross-Range</span><span class="hud-value" id="int-cross">12.4 km</span></div>
+        <div class="hud-row"><span class="hud-label">Range to Target</span><span class="hud-value" id="int-range">45.2 km</span></div>
+        <div class="hud-row"><span class="hud-label">Closing Velocity</span><span class="hud-value ok" id="int-closing">6,650 m/s</span></div>
+        <div class="hud-row"><span class="hud-label">Time to Intercept</span><span class="hud-value ok" id="int-tti">T+ 0:06.8</span></div>
+        <div class="hud-row"><span class="hud-label">P_kill</span><span class="hud-value ok" id="int-pkill">92%</span></div>
+
+        <h4>📡 Command Uplink</h4>
+        <div class="hud-row"><span class="hud-label">Command Rate</span><span class="hud-value">100 kbps</span></div>
+        <div class="hud-row"><span class="hud-label">Update Rate</span><span class="hud-value">50 Hz</span></div>
+        <div class="hud-row"><span class="hud-label">Latency</span><span class="hud-value">12 ms</span></div>
+        <div class="hud-row"><span class="hud-label">Link Margin</span><span class="hud-value ok">+18.2 dB</span></div>
+    </div>
+
+    <!-- Target Info -->
+    <div class="hud hud-bottom-left">
+        <h3>🎯 Target — Washington D.C.</h3>
+        <div class="hud-row"><span class="hud-label">Coordinates</span><span class="hud-value">38.9°N / 77.0°W</span></div>
+        <div class="hud-row"><span class="hud-label">Type</span><span class="hud-value">Hardened Command</span></div>
+        <div class="hud-row"><span class="hud-label">CEP Threat</span><span class="hud-value danger">&lt; 10 m</span></div>
+        <div class="hud-row"><span class="hud-label">Defense Status</span><span class="hud-value ok">INTERCEPTOR ALERT</span></div>
+        <h4 style="margin-top:8px">📊 System Bandwidth</h4>
+        <div class="hud-row"><span class="hud-label">Sat→Ground</span><span class="hud-value">10 Gbps</span></div>
+        <div class="hud-row"><span class="hud-label">Sat→Interceptor</span><span class="hud-value">100 kbps CMD</span></div>
+        <div class="hud-row"><span class="hud-label">Enemy→Sat</span><span class="hud-value">2.4 Gbps</span></div>
+        <div class="hud-row"><span class="hud-label">Total Mesh</span><span class="hud-value">400 Gbps</span></div>
+    </div>
+
+    <!-- Event Log -->
+    <div class="hud hud-bottom-right">
+        <h3>📋 Mission Events</h3>
+        <div class="event-log" id="event-log">
+            <div class="event-item"><span class="event-time">T+0:00</span> <span class="event-text">Enemy HGV launched from silo</span></div>
+            <div class="event-item"><span class="event-time">T+0:45</span> <span class="event-text">Boost phase complete, M=5.2</span></div>
+            <div class="event-item"><span class="event-time">T+2:30</span> <span class="event-text">Constellation acquires track</span></div>
+            <div class="event-item"><span class="event-time">T+4:15</span> <span class="event-critical">Interceptor GMD-E1 launched</span></div>
+            <div class="event-item"><span class="event-time">T+5:00</span> <span class="event-text">KV separation, EKV active</span></div>
+            <div class="event-item"><span class="event-time">T+5:45</span> <span class="event-text">Terminal guidance engaged</span></div>
+        </div>
+    </div>
+
+    <!-- Camera Feed -->
+    <div class="camera-feed" id="camera-feed">
+        <div class="camera-feed-header">
+            <span>📹 LIVE — Enemy HGV Camera</span>
+            <span id="cam-status">● LIVE</span>
+        </div>
+        <canvas id="cam-canvas" width="320" height="120"></canvas>
+        <div class="camera-feed-content">
+            <div>Bitrate: <span id="cam-bitrate">48.2 Mbps</span> | FPS: <span id="cam-fps">59.8</span></div>
+            <div>Resolution: 1920×1080 | Latency: <span id="cam-latency">23 ms</span></div>
+        </div>
+    </div>
+
+    <!-- Time Controls -->
+    <div class="time-controls">
+        <button class="btn" id="play-btn" onclick="togglePlay()">⏸️ Pause</button>
+        <span style="color:#90e0ef;font-size:0.8em">Speed:</span>
+        <button class="btn speed-btn" onclick="setSpeed(0.5)">0.5×</button>
+        <button class="btn speed-btn active" onclick="setSpeed(1)">1×</button>
+        <button class="btn speed-btn" onclick="setSpeed(2)">2×</button>
+        <button class="btn speed-btn" onclick="setSpeed(5)">5×</button>
+        <span class="time-display" id="time-display">T+5:45.200</span>
+    </div>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        // ─── Scene ───
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x050811);
+        scene.fog = new THREE.FogExp2(0x050811, 0.0003);
+
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 2000);
+        camera.position.set(0, 25, 40);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        container.appendChild(renderer.domElement);
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.minDistance = 12;
+        controls.maxDistance = 200;
+
+        // ─── Lights ───
+        scene.add(new THREE.AmbientLight(0x404040, 0.4));
+        const sun = new THREE.DirectionalLight(0xffffff, 1.2);
+        sun.position.set(50, 30, 20);
+        scene.add(sun);
+
+        // ─── Earth ───
+        const EARTH_R = 10;
+        const earthGroup = new THREE.Group();
+        scene.add(earthGroup);
+
+        const earthGeo = new THREE.SphereGeometry(EARTH_R, 64, 64);
+        const earthMat = new THREE.MeshPhongMaterial({ color: 0x1a3a5c, emissive: 0x0a1a2a, shininess: 25, specular: 0x223344 });
+        const earth = new THREE.Mesh(earthGeo, earthMat);
+        earthGroup.add(earth);
+
+        // Atmosphere
+        const atmGeo = new THREE.SphereGeometry(EARTH_R * 1.08, 32, 32);
+        const atmMat = new THREE.MeshBasicMaterial({ color: 0x4488cc, transparent: true, opacity: 0.06, side: THREE.BackSide });
+        earthGroup.add(new THREE.Mesh(atmGeo, atmMat));
+
+        // Grid
+        const grid = new THREE.PolarGridHelper(EARTH_R * 1.01, 16, 8, 64, 0x00d4aa, 0x00d4aa);
+        grid.material.transparent = true; grid.material.opacity = 0.1;
+        earthGroup.add(grid);
+
+        // Target marker (Washington D.C.)
+        const targetLat = 38.9 * Math.PI / 180;
+        const targetLon = -77.0 * Math.PI / 180;
+        const targetPos = new THREE.Vector3(
+            EARTH_R * 1.02 * Math.cos(targetLat) * Math.cos(targetLon),
+            EARTH_R * 1.02 * Math.sin(targetLat),
+            EARTH_R * 1.02 * Math.cos(targetLat) * Math.sin(targetLon)
+        );
+        const targetMarker = new THREE.Mesh(
+            new THREE.SphereGeometry(0.15, 16, 16),
+            new THREE.MeshBasicMaterial({ color: 0xff0000, emissive: 0xff0000 })
+        );
+        targetMarker.position.copy(targetPos);
+        earthGroup.add(targetMarker);
+
+        // Target ring
+        const targetRing = new THREE.Mesh(
+            new THREE.RingGeometry(0.3, 0.35, 32),
+            new THREE.MeshBasicMaterial({ color: 0xff0000, transparent: true, opacity: 0.5, side: THREE.DoubleSide })
+        );
+        targetRing.position.copy(targetPos);
+        targetRing.lookAt(0, 0, 0);
+        earthGroup.add(targetRing);
+
+        // Launch site marker
+        const launchLat = 28.5 * Math.PI / 180;
+        const launchLon = -80.5 * Math.PI / 180;
+        const launchPos = new THREE.Vector3(
+            EARTH_R * 1.02 * Math.cos(launchLat) * Math.cos(launchLon),
+            EARTH_R * 1.02 * Math.sin(launchLat),
+            EARTH_R * 1.02 * Math.cos(launchLat) * Math.sin(launchLon)
+        );
+        const launchMarker = new THREE.Mesh(
+            new THREE.ConeGeometry(0.1, 0.3, 8),
+            new THREE.MeshBasicMaterial({ color: 0xe63946 })
+        );
+        launchMarker.position.copy(launchPos);
+        launchMarker.lookAt(targetPos);
+        earthGroup.add(launchMarker);
+
+        // Interceptor launch site
+        const intLaunchLat = 33.0 * Math.PI / 180;
+        const intLaunchLon = -106.5 * Math.PI / 180;
+        const intLaunchPos = new THREE.Vector3(
+            EARTH_R * 1.02 * Math.cos(intLaunchLat) * Math.cos(intLaunchLon),
+            EARTH_R * 1.02 * Math.sin(intLaunchLat),
+            EARTH_R * 1.02 * Math.cos(intLaunchLat) * Math.sin(intLaunchLon)
+        );
+        const intMarker = new THREE.Mesh(
+            new THREE.ConeGeometry(0.1, 0.3, 8),
+            new THREE.MeshBasicMaterial({ color: 0x2a9d8f })
+        );
+        intMarker.position.copy(intLaunchPos);
+        earthGroup.add(intMarker);
+
+        // ─── Constellation ───
+        const SAT_R = EARTH_R * 1.125;
+        const satellites = [];
+        for (let p = 0; p < 6; p++) {
+            for (let s = 0; s < 20; s++) {
+                const sat = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.2, 0.12, 0.3),
+                    new THREE.MeshPhongMaterial({ color: 0x888888, shininess: 60 })
+                );
+                sat.userData = { plane: p, idx: s, angle: (s / 20) * Math.PI * 2 + (p / 6) * Math.PI };
+                earthGroup.add(sat);
+                satellites.push(sat);
+            }
+        }
+
+        function updateSats(dt) {
+            const omega = 0.0012;
+            satellites.forEach(sat => {
+                sat.userData.angle += omega * dt;
+                const a = sat.userData.angle;
+                const inc = 53 * Math.PI / 180;
+                const raan = (sat.userData.plane / 6) * Math.PI * 2;
+                sat.position.set(
+                    SAT_R * (Math.cos(raan) * Math.cos(a) - Math.sin(raan) * Math.cos(inc) * Math.sin(a)),
+                    SAT_R * Math.sin(inc) * Math.sin(a),
+                    SAT_R * (Math.sin(raan) * Math.cos(a) + Math.cos(raan) * Math.cos(inc) * Math.sin(a))
+                );
+                sat.lookAt(0, 0, 0);
+            });
+        }
+
+        // ─── Enemy HGV ───
+        const enemyGroup = new THREE.Group();
+        earthGroup.add(enemyGroup);
+
+        // Body
+        const hBodyGeo = new THREE.ConeGeometry(0.1, 0.5, 8);
+        hBodyGeo.rotateX(Math.PI / 2);
+        const hBody = new THREE.Mesh(hBodyGeo, new THREE.MeshPhongMaterial({ color: 0xe63946, emissive: 0x440000, emissiveIntensity: 0.4 }));
+        enemyGroup.add(hBody);
+
+        // Wings
+        const hWing = new THREE.Mesh(
+            new THREE.BoxGeometry(0.3, 0.015, 0.15),
+            new THREE.MeshPhongMaterial({ color: 0xcc3333 })
+        );
+        hWing.position.z = -0.1;
+        enemyGroup.add(hWing);
+
+        // Plasma
+        const plasmaGeo = new THREE.SphereGeometry(0.2, 16, 16);
+        const plasmaMat = new THREE.MeshBasicMaterial({ color: 0xff6600, transparent: true, opacity: 0.2 });
+        const plasma = new THREE.Mesh(plasmaGeo, plasmaMat);
+        plasma.position.y = -0.05;
+        enemyGroup.add(plasma);
+
+        // Engine
+        const hFlame = new THREE.Mesh(
+            new THREE.ConeGeometry(0.04, 0.4, 8),
+            new THREE.MeshBasicMaterial({ color: 0xffaa00, transparent: true, opacity: 0.6 })
+        );
+        hFlame.rotateX(-Math.PI / 2);
+        hFlame.position.z = -0.4;
+        enemyGroup.add(hFlame);
+
+        // ─── Interceptor ───
+        const intGroup = new THREE.Group();
+        earthGroup.add(intGroup);
+
+        const iBody = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.06, 0.08, 0.5, 8),
+            new THREE.MeshPhongMaterial({ color: 0x2a9d8f, emissive: 0x004433, emissiveIntensity: 0.3 })
+        );
+        iBody.rotateX(Math.PI / 2);
+        intGroup.add(iBody);
+
+        const iFlame = new THREE.Mesh(
+            new THREE.ConeGeometry(0.05, 0.5, 8),
+            new THREE.MeshBasicMaterial({ color: 0x00ffaa, transparent: true, opacity: 0.5 })
+        );
+        iFlame.rotateX(-Math.PI / 2);
+        iFlame.position.z = -0.45;
+        intGroup.add(iFlame);
+
+        // ─── Trajectory Lines ───
+        function createTrajectory(color) {
+            const geo = new THREE.BufferGeometry();
+            const pos = new Float32Array(300 * 3);
+            geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+            const mat = new THREE.LineBasicMaterial({ color, transparent: true, opacity: 0.6 });
+            const line = new THREE.Line(geo, mat);
+            return { line, pos, idx: 0 };
+        }
+
+        const enemyTraj = createTrajectory(0xe63946);
+        const intTraj = createTrajectory(0x2a9d8f);
+        earthGroup.add(enemyTraj.line);
+        earthGroup.add(intTraj.line);
+
+        // ─── Beams ───
+        const beams = [];
+        for (let i = 0; i < 6; i++) {
+            const b = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.008, 0.008, 1, 4),
+                new THREE.MeshBasicMaterial({ color: 0x00d4aa, transparent: true, opacity: 0.25 })
+            );
+            b.geometry.rotateX(Math.PI / 2);
+            b.visible = false;
+            earthGroup.add(b);
+            beams.push(b);
+        }
+
+        // ─── Mission State ───
+        let simTime = 345; // Start at T+5:45
+        let timeScale = 1;
+        let isPlaying = true;
+        let missionPhase = 'terminal';
+
+        // Mission profile: enemy trajectory (simplified)
+        function getEnemyState(t) {
+            // t in seconds, total flight ~420s
+            const progress = Math.min(t / 420, 1);
+            const lat = launchLat + (targetLat - launchLat) * progress;
+            const lon = launchLon + (targetLon - launchLon) * progress;
+            const alt = 30 + 20 * Math.sin(progress * Math.PI); // Arc profile
+            const r = EARTH_R + alt * 0.001;
+            return {
+                pos: new THREE.Vector3(
+                    r * Math.cos(lat) * Math.cos(lon),
+                    r * Math.sin(lat),
+                    r * Math.cos(lat) * Math.sin(lon)
+                ),
+                lat, lon, alt,
+                mach: 5 + 5 * Math.sin(progress * Math.PI),
+                phase: progress < 0.1 ? 'Boost' : progress < 0.3 ? 'Accel' : progress < 0.7 ? 'Cruise' : 'Terminal'
+            };
+        }
+
+        // Interceptor trajectory (launched at T+255, intercepts at ~T+350)
+        function getIntState(t) {
+            if (t < 255) return null;
+            const flightTime = t - 255;
+            const progress = Math.min(flightTime / 95, 1);
+            const enemyNow = getEnemyState(t);
+            const start = intLaunchPos.clone().normalize().multiplyScalar(EARTH_R + 0.05);
+            const end = enemyNow ? enemyNow.pos : targetPos;
+            return {
+                pos: start.clone().lerp(end, progress),
+                phase: progress < 0.2 ? 'Boost' : progress < 0.5 ? 'Midcourse' : progress < 0.8 ? 'KV Deploy' : 'Terminal',
+                mach: 3 + 12 * Math.sin(progress * Math.PI * 0.8)
+            };
+        }
+
+        // ─── Update ───
+        function updateEnemy(dt) {
+            const state = getEnemyState(simTime);
+            enemyGroup.position.copy(state.pos);
+            enemyGroup.lookAt(targetPos);
+
+            // Update flame
+            const flameScale = state.phase === 'Terminal' ? 0.3 : 1.0;
+            hFlame.scale.set(1, flameScale, 1);
+
+            // Plasma opacity based on speed
+            plasmaMat.opacity = 0.1 + 0.2 * (state.mach / 10);
+
+            // Trajectory
+            const i = enemyTraj.idx % 300;
+            enemyTraj.pos[i * 3] = state.pos.x;
+            enemyTraj.pos[i * 3 + 1] = state.pos.y;
+            enemyTraj.pos[i * 3 + 2] = state.pos.z;
+            enemyTraj.idx++;
+            enemyTraj.line.geometry.attributes.position.needsUpdate = true;
+
+            // HUD
+            document.getElementById('enemy-mach').textContent = state.mach.toFixed(1);
+            document.getElementById('enemy-vel').textContent = (state.mach * 343).toFixed(0) + ' m/s';
+            document.getElementById('enemy-alt').textContent = state.alt.toFixed(1) + ' km';
+            document.getElementById('enemy-latlon').textContent = (state.lat * 57.3).toFixed(1) + '°N / ' + (state.lon * 57.3).toFixed(1) + '°W';
+            document.getElementById('enemy-phase').textContent = state.phase;
+            document.getElementById('enemy-plasma').textContent = (state.mach * 0.9).toFixed(1) + ' GHz';
+            document.getElementById('enemy-temp').textContent = (1000 + state.mach * 80).toFixed(0) + '°C';
+            document.getElementById('enemy-range').textContent = (state.pos.distanceTo(targetPos) * 637).toFixed(0) + ' km';
+            const tti = Math.max(0, 420 - simTime);
+            document.getElementById('enemy-tti').textContent = 'T+ ' + Math.floor(tti / 60) + ':' + Math.floor(tti % 60).toString().padStart(2, '0');
+
+            return state.pos;
+        }
+
+        function updateInterceptor(dt) {
+            const state = getIntState(simTime);
+            if (!state) {
+                intGroup.visible = false;
+                return null;
+            }
+            intGroup.visible = true;
+            intGroup.position.copy(state.pos);
+            intGroup.lookAt(getEnemyState(simTime).pos);
+
+            // Trajectory
+            const i = intTraj.idx % 300;
+            intTraj.pos[i * 3] = state.pos.x;
+            intTraj.pos[i * 3 + 1] = state.pos.y;
+            intTraj.pos[i * 3 + 2] = state.pos.z;
+            intTraj.idx++;
+            intTraj.line.geometry.attributes.position.needsUpdate = true;
+
+            // HUD
+            document.getElementById('int-mach').textContent = state.mach.toFixed(1);
+            document.getElementById('int-vel').textContent = (state.mach * 343).toFixed(0) + ' m/s';
+            document.getElementById('int-phase').textContent = state.phase;
+            const enemyPos = getEnemyState(simTime).pos;
+            const range = state.pos.distanceTo(enemyPos) * 637;
+            document.getElementById('int-range').textContent = range.toFixed(1) + ' km';
+            const closing = (state.mach + getEnemyState(simTime).mach) * 343;
+            document.getElementById('int-closing').textContent = closing.toFixed(0) + ' m/s';
+            const tti = range * 1000 / closing;
+            document.getElementById('int-tti').textContent = 'T+ ' + tti.toFixed(1) + 's';
+            const pkill = Math.min(99, 50 + (1 - range / 100) * 50);
+            document.getElementById('int-pkill').textContent = pkill.toFixed(0) + '%';
+
+            return state.pos;
+        }
+
+        function updateBeams(enemyPos, intPos) {
+            if (!enemyPos) return;
+            // Find closest satellites to enemy
+            const sorted = satellites.map(s => ({
+                sat: s,
+                dist: s.position.distanceTo(enemyPos)
+            })).sort((a, b) => a.dist - b.dist);
+
+            const closest = sorted.slice(0, 3);
+            closest.forEach((c, i) => {
+                const beam = beams[i];
+                const dir = c.sat.position.clone().sub(enemyPos);
+                const len = dir.length();
+                beam.position.copy(enemyPos).add(dir.multiplyScalar(0.5));
+                beam.scale.set(1, 1, len);
+                beam.lookAt(c.sat.position);
+                beam.visible = true;
+                const quality = Math.max(0.1, 1 - c.dist / 15);
+                beam.material.opacity = quality * 0.3;
+                beam.material.color.setHex(quality > 0.6 ? 0x00d4aa : quality > 0.3 ? 0xffd166 : 0xe63946);
+            });
+
+            // Interceptor to satellite link
+            if (intPos) {
+                const intSats = satellites.map(s => ({
+                    sat: s,
+                    dist: s.position.distanceTo(intPos)
+                })).sort((a, b) => a.dist - b.dist);
+                if (intSats.length > 0) {
+                    const beam = beams[3];
+                    const dir = intSats[0].sat.position.clone().sub(intPos);
+                    beam.position.copy(intPos).add(dir.multiplyScalar(0.5));
+                    beam.scale.set(1, 1, dir.length());
+                    beam.lookAt(intSats[0].sat.position);
+                    beam.visible = true;
+                    beam.material.color.setHex(0x2a9d8f);
+                    beam.material.opacity = 0.25;
+                }
+            }
+        }
+
+        // ─── Camera Feed Simulation ───
+        const camCanvas = document.getElementById('cam-canvas');
+        const camCtx = camCanvas.getContext('2d');
+
+        function drawCameraFeed() {
+            camCtx.fillStyle = '#000';
+            camCtx.fillRect(0, 0, 320, 120);
+
+            const enemyState = getEnemyState(simTime);
+            const progress = simTime / 420;
+
+            // Simulated terrain below
+            camCtx.fillStyle = `hsl(${200 + progress * 40}, 30%, ${10 + progress * 15}%)`;
+            camCtx.fillRect(0, 60, 320, 60);
+
+            // Horizon line
+            camCtx.strokeStyle = '#334455';
+            camCtx.beginPath();
+            camCtx.moveTo(0, 60);
+            camCtx.lineTo(320, 60);
+            camCtx.stroke();
+
+            // Target in view (when close)
+            if (progress > 0.85) {
+                const targetSize = (progress - 0.85) * 800;
+                camCtx.strokeStyle = '#ff0000';
+                camCtx.lineWidth = 2;
+                camCtx.strokeRect(160 - targetSize / 2, 60 - targetSize / 2, targetSize, targetSize);
+                camCtx.fillStyle = '#ff0000';
+                camCtx.font = '10px monospace';
+                camCtx.fillText('TARGET', 160 - 20, 60 - targetSize / 2 - 5);
+            }
+
+            // Crosshair
+            camCtx.strokeStyle = '#00d4aa';
+            camCtx.lineWidth = 1;
+            camCtx.beginPath();
+            camCtx.moveTo(160, 50); camCtx.lineTo(160, 70);
+            camCtx.moveTo(150, 60); camCtx.lineTo(170, 60);
+            camCtx.stroke();
+
+            // HUD overlay
+            camCtx.fillStyle = '#00d4aa';
+            camCtx.font = '9px monospace';
+            camCtx.fillText(`MACH ${enemyState.mach.toFixed(1)}`, 5, 12);
+            camCtx.fillText(`ALT ${enemyState.alt.toFixed(0)}km`, 5, 24);
+            camCtx.fillText(`HDG ${(78).toFixed(0)}°`, 5, 36);
+            camCtx.fillText(`RNG ${(enemyState.pos.distanceTo(targetPos) * 637).toFixed(0)}km`, 200, 12);
+
+            // Data overlay noise
+            if (Math.random() > 0.95) {
+                camCtx.fillStyle = 'rgba(255,0,0,0.3)';
+                camCtx.fillRect(Math.random() * 320, Math.random() * 120, 20, 2);
+            }
+        }
+
+        // ─── Animation ───
+        const clock = new THREE.Clock();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const dt = Math.min(clock.getDelta(), 0.1);
+
+            if (isPlaying) {
+                simTime += dt * timeScale;
+                if (simTime > 430) simTime = 0; // Loop
+            }
+
+            updateSats(dt);
+            const enemyPos = updateEnemy(dt);
+            const intPos = updateInterceptor(dt);
+            updateBeams(enemyPos, intPos);
+            drawCameraFeed();
+
+            // Update time display
+            const mins = Math.floor(simTime / 60);
+            const secs = Math.floor(simTime % 60);
+            const ms = Math.floor((simTime % 1) * 1000);
+            document.getElementById('time-display').textContent = `T+${mins}:${secs.toString().padStart(2, '0')}.${ms.toString().padStart(3, '0')}`;
+
+            // Target ring pulse
+            targetRing.scale.setScalar(1 + Math.sin(Date.now() * 0.003) * 0.1);
+
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        animate();
+
+        // ─── Controls ───
+        window.togglePlay = () => {
+            isPlaying = !isPlaying;
+            document.getElementById('play-btn').textContent = isPlaying ? '⏸️ Pause' : '▶️ Play';
+        };
+
+        window.setSpeed = (s) => {
+            timeScale = s;
+            document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+        };
+
+        // Phase buttons
+        document.querySelectorAll('.scenario-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.scenario-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                const phase = btn.dataset.phase;
+                if (phase === 'launch') simTime = 30;
+                else if (phase === 'cruise') simTime = 180;
+                else if (phase === 'terminal') simTime = 345;
+                else if (phase === 'impact') simTime = 415;
+            });
+        });
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
