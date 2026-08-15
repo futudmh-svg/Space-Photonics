@@ -231,6 +231,14 @@
         </div>
 
         <div class="hud-section">
+            <div class="hud-section-title">🌀 Aerodynamics</div>
+            <div class="hud-row"><span class="hud-label">Reynolds Number</span><span class="hud-value" id="hud-re">1.2e7</span></div>
+            <div class="hud-row"><span class="hud-label">Knudsen Number</span><span class="hud-value" id="hud-kn">0.002</span></div>
+            <div class="hud-row"><span class="hud-label">Hoop Stress</span><span class="hud-value" id="hud-hoop">0.85 MPa</span></div>
+            <div class="hud-row"><span class="hud-label">Skin Depth</span><span class="hud-value" id="hud-skin">0.18 mm</span></div>
+        </div>
+
+        <div class="hud-section">
             <div class="hud-section-title">🌡️ Thermal</div>
             <div class="hud-row"><span class="hud-label">Surface Temp</span><span class="hud-value warn" id="hud-temp-surf">1,850 °C</span></div>
             <div class="hud-row"><span class="hud-label">Internal Temp</span><span class="hud-value" id="hud-temp-int">65 °C</span></div>
@@ -788,7 +796,18 @@
         }
 
         const enemyVehicle = createHypersonicVehicle(ENEMY_CONFIG);
+        // Velocity vector arrow
+        const enemyArrow = new THREE.ArrowHelper(
+            new THREE.Vector3(1, 0, 0), new THREE.Vector3(0, 0, 0), 2, 0xe63946, 0.5, 0.3
+        );
+        enemyVehicle.group.add(enemyArrow);
+        enemyVehicle.velocityArrow = enemyArrow;
         const friendlyVehicle = createHypersonicVehicle(FRIENDLY_CONFIG);
+        const friendlyArrow = new THREE.ArrowHelper(
+            new THREE.Vector3(1, 0, 0), new THREE.Vector3(0, 0, 0), 2, 0x2a9d8f, 0.5, 0.3
+        );
+        friendlyVehicle.group.add(friendlyArrow);
+        friendlyVehicle.velocityArrow = friendlyArrow;
         earthGroup.add(enemyVehicle.group);
         earthGroup.add(friendlyVehicle.group);
 
@@ -806,13 +825,19 @@
         earthGroup.add(enemyTraj.line);
         earthGroup.add(friendlyTraj.line);
 
-        // Projected future paths
-        const enemyFuture = createTrajectoryCurve(0xe63946);
-        const friendlyFuture = createTrajectoryCurve(0x2a9d8f);
-        enemyFuture.line.material.opacity = 0.2;
-        friendlyFuture.line.material.opacity = 0.2;
-        enemyFuture.line.material.linewidth = 1;
-        friendlyFuture.line.material.linewidth = 1;
+        // Projected future paths (dashed)
+        function createDashedFuturePath(color) {
+            const pts = [];
+            for (let i = 0; i < 200; i++) pts.push(new THREE.Vector3(0,0,0));
+            const geo = new THREE.BufferGeometry().setFromPoints(pts);
+            const mat = new THREE.LineDashedMaterial({
+                color: color, transparent: true, opacity: 0.35,
+                dashSize: 0.4, gapSize: 0.2, scale: 1
+            });
+            return { line: new THREE.Line(geo, mat), pts };
+        }
+        const enemyFuture = createDashedFuturePath(0xe63946);
+        const friendlyFuture = createDashedFuturePath(0x2a9d8f);
         earthGroup.add(enemyFuture.line);
         earthGroup.add(friendlyFuture.line);
 
@@ -876,7 +901,7 @@
             const flameGeo = new THREE.ConeGeometry(0.1 * s, 0.5 * s, 12);
             flameGeo.rotateX(-Math.PI / 2);
             const flameMat = new THREE.MeshBasicMaterial({
-                color: 0xff4400, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending
+                color: 0xff6600, transparent: true, opacity: 0.95, blending: THREE.AdditiveBlending
             });
             const flame = new THREE.Mesh(flameGeo, flameMat);
             flame.position.z = -0.7 * s;
@@ -899,14 +924,33 @@
             for (let i = 0; i < trailCount; i++) { trailPos[i*3]=0; trailPos[i*3+1]=0; trailPos[i*3+2]=0; }
             trailGeo.setAttribute('position', new THREE.BufferAttribute(trailPos, 3));
             const trailMat = new THREE.PointsMaterial({
-                color: 0xff6600, size: 0.2 * s, transparent: true, opacity: 0.6,
+                color: 0xffaa00, size: 0.35 * s, transparent: true, opacity: 0.85,
                 blending: THREE.AdditiveBlending, depthWrite: false
             });
             const trail = new THREE.Points(trailGeo, trailMat);
             group.add(trail);
 
+            // Label sprite
+            const labelCanvas = document.createElement('canvas');
+            labelCanvas.width = 128; labelCanvas.height = 32;
+            const lctx = labelCanvas.getContext('2d');
+            lctx.fillStyle = 'rgba(5,8,17,0.85)';
+            lctx.fillRect(0, 0, 128, 32);
+            lctx.strokeStyle = '#ffd166'; lctx.lineWidth = 1;
+            lctx.strokeRect(0, 0, 128, 32);
+            lctx.fillStyle = '#ffd166';
+            lctx.font = 'bold 14px monospace';
+            lctx.textAlign = 'center';
+            const labelText = config.type === 'heavy' ? 'HEAVY-' + (index+1) : config.type === 'medium' ? 'MED-' + (index-1) : 'SS-' + (index-5);
+            lctx.fillText(labelText, 64, 22);
+            const labelTex = new THREE.CanvasTexture(labelCanvas);
+            const labelSprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: labelTex, transparent: true }));
+            labelSprite.scale.set(2, 0.5, 1);
+            labelSprite.position.y = 1.2 * s;
+            group.add(labelSprite);
+
             return {
-                group, body, nose, flame, flame2, trail, trailPos,
+                group, body, nose, flame, flame2, trail, trailPos, labelSprite,
                 type: config.type,
                 phase: 'pad', // pad, ascent, staging, coast, insertion
                 progress: 0,
@@ -1008,6 +1052,12 @@
                 enemyState.pos.y,
                 enemyState.pos.z + Math.sin(enemyState.heading) * 100
             );
+            // Update velocity arrow
+            const eVelDir = new THREE.Vector3(
+                Math.cos(enemyState.heading * Math.PI / 180), 0, Math.sin(enemyState.heading * Math.PI / 180)
+            ).normalize();
+            enemyVehicle.velocityArrow.setDirection(eVelDir);
+            enemyVehicle.velocityArrow.setLength(Math.max(1, enemyState.mach * 0.2), 0.5, 0.3);
 
             // Shock cone
             enemyShock.visible = enemyState.mach > 1;
@@ -1113,6 +1163,7 @@
                 ));
             }
             future.line.geometry.setFromPoints(pts);
+            future.line.computeLineDistances();
         }
 
         function getEnemyState(t) {
@@ -1307,6 +1358,10 @@
             document.getElementById('enemy-q').textContent = (ePhys.q / 1000).toFixed(1) + ' kPa';
             document.getElementById('enemy-plasma').textContent = ePhys.plasmaFreq.toFixed(1) + ' GHz';
             document.getElementById('enemy-doppler').textContent = '+' + (enemy.mach * 0.214).toFixed(2) + ' GHz';
+            document.getElementById('hud-re').textContent = ePhys.Re.toExponential(1);
+            document.getElementById('hud-kn').textContent = ePhys.Kn.toFixed(3);
+            document.getElementById('hud-hoop').textContent = ePhys.hoop.toFixed(2) + ' MPa';
+            document.getElementById('hud-skin').textContent = (ePhys.skinDepth * 1000).toFixed(2) + ' mm';
             document.getElementById('enemy-range').textContent = (satellites[0].position.distanceTo(enemy.pos) * 637).toFixed(0) + ' km';
             document.getElementById('enemy-margin').textContent = '+' + (38 - enemy.altKm * 0.3).toFixed(1) + ' dB';
             document.getElementById('enemy-error').textContent = (0.1 + Math.random() * 0.05).toFixed(2) + ' m';

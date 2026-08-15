@@ -346,6 +346,12 @@
         const enemyGroup = new THREE.Group();
         earthGroup.add(enemyGroup);
 
+        // Velocity arrow
+        const enemyVelArrow = new THREE.ArrowHelper(
+            new THREE.Vector3(0,0,1), new THREE.Vector3(0,0,0), 1.5, 0xe63946, 0.4, 0.25
+        );
+        enemyGroup.add(enemyVelArrow);
+
         // Body
         const hBodyGeo = new THREE.ConeGeometry(0.1, 0.5, 8);
         hBodyGeo.rotateX(Math.PI / 2);
@@ -379,6 +385,12 @@
         // ─── Interceptor ───
         const intGroup = new THREE.Group();
         earthGroup.add(intGroup);
+
+        // Velocity arrow
+        const intVelArrow = new THREE.ArrowHelper(
+            new THREE.Vector3(0,0,1), new THREE.Vector3(0,0,0), 1.5, 0x2a9d8f, 0.4, 0.25
+        );
+        intGroup.add(intVelArrow);
 
         const iBody = new THREE.Mesh(
             new THREE.CylinderGeometry(0.06, 0.08, 0.5, 8),
@@ -495,6 +507,11 @@
             enemyGroup.position.copy(state.pos);
             enemyGroup.lookAt(targetPos);
 
+            // Update velocity arrow
+            const eDir = targetPos.clone().sub(enemyPos).normalize();
+            enemyVelArrow.setDirection(eDir);
+            enemyVelArrow.setLength(Math.max(0.5, state.mach * 0.15), 0.4, 0.25);
+
             // Update flame
             const flameScale = state.phase === 'Terminal' ? 0.3 : 1.0;
             hFlame.scale.set(1, flameScale, 1);
@@ -535,6 +552,11 @@
             intGroup.position.copy(state.pos);
             intGroup.lookAt(getEnemyState(simTime).pos);
 
+            // Update velocity arrow
+            const iDir = getEnemyState(simTime).pos.clone().sub(intPos).normalize();
+            intVelArrow.setDirection(iDir);
+            intVelArrow.setLength(Math.max(0.5, state.mach * 0.1), 0.4, 0.25);
+
             // Trajectory
             const i = intTraj.idx % 300;
             intTraj.pos[i * 3] = state.pos.x;
@@ -556,6 +578,8 @@
             document.getElementById('int-tti').textContent = 'T+ ' + tti.toFixed(1) + 's';
             const pkill = Math.min(99, 50 + (1 - range / 100) * 50);
             document.getElementById('int-pkill').textContent = pkill.toFixed(0) + '%';
+            const missDist = range * Math.sin(0.01); // approximate
+            document.getElementById('int-miss').textContent = missDist < 0.1 ? '< 100 m' : missDist.toFixed(1) + ' km';
 
             return state.pos;
         }
@@ -672,6 +696,26 @@
             updateSats(dt);
             const enemyPos = updateEnemy(dt);
             const intPos = updateInterceptor(dt);
+
+            // Future trajectory prediction
+            if (enemyPos) {
+                const eState = getEnemyState(simTime);
+                const eVel = new THREE.Vector3(
+                    Math.cos(eState.lon) * Math.cos(eState.lat),
+                    Math.sin(eState.lat),
+                    Math.sin(eState.lon) * Math.cos(eState.lat)
+                ).normalize().multiplyScalar(eState.mach * 343);
+                updateFuturePath(enemyFuture, enemyPos, eVel, 80);
+                enemyFuture.line.computeLineDistances();
+            }
+            if (intPos) {
+                const iState = getIntState(simTime);
+                const enemyNow = getEnemyState(simTime).pos;
+                const iVel = enemyNow.clone().sub(intPos).normalize().multiplyScalar(iState.mach * 343);
+                updateFuturePath(intFuture, intPos, iVel, 60);
+                intFuture.line.computeLineDistances();
+            }
+
             updateBeams(enemyPos, intPos);
             drawCameraFeed();
 
