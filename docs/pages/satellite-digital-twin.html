@@ -303,8 +303,8 @@
         // Solar panels (folded, on +Y and -Y faces)
         const panelGeo = new THREE.BoxGeometry(2.2, 0.04, 2.8);
         const panelMat = new THREE.MeshPhongMaterial({ color: 0x1a237e, shininess: 60 });
-        const panelTop = addComponent(panelGeo, panelMat, [0, 0.82, 0], 'Solar Panel (+Y)', 'Triple-junction GaAs, 45 W peak', 'electrical');
-        const panelBot = addComponent(panelGeo, panelMat, [0, -0.82, 0], 'Solar Panel (-Y)', 'Triple-junction GaAs, 45 W peak', 'electrical');
+        const panelTop = addComponent(panelGeo, panelMat, [0, 0.82, 0], 'Solar Panel (+Y)', 'Triple-junction GaAs, 22.5 W peak (45 W total)', 'electrical');
+        const panelBot = addComponent(panelGeo, panelMat, [0, -0.82, 0], 'Solar Panel (-Y)', 'Triple-junction GaAs, 22.5 W peak (45 W total)', 'electrical');
 
         // PPLN Receiver Module (nadir face, -Z) — with waveguide detail
         const pplnGroup = new THREE.Group();
@@ -315,7 +315,7 @@
         const pplnBodyGeo = new THREE.BoxGeometry(0.6, 0.4, 0.15);
         const pplnBodyMat = new THREE.MeshPhongMaterial({ color: 0xcc9966, emissive: 0x332200 });
         const pplnBody = new THREE.Mesh(pplnBodyGeo, pplnBodyMat);
-        pplnBody.userData = { name: 'PPLN Receiver', description: 'Periodically-Poled LiNbO₃, 1550→777 nm conversion, sensitivity -60 dBm', layer: 'optical' };
+        pplnBody.userData = { name: 'PPLN Receiver', description: 'Periodically-Poled LiNbO₃, 1550→777 nm conversion, sensitivity ~−50 dBm class (photon-limited direct detection)', layer: 'optical' };
         pplnGroup.add(pplnBody);
         components.push(pplnBody);
 
@@ -355,7 +355,7 @@
             const substrateGeo = new THREE.BoxGeometry(0.5, 0.35, 0.08);
             const substrateMat = new THREE.MeshPhongMaterial({ color: 0x00d4aa, emissive: 0x004433, emissiveIntensity: 0.3 });
             const substrate = new THREE.Mesh(substrateGeo, substrateMat);
-            substrate.userData = { name, description: `TFLN 64-element, 1550 nm TX, ±15° steering`, layer: 'optical' };
+            substrate.userData = { name, description: `TFLN 64×64-element at λ/2 pitch (~2×2 mm chip), 1550 nm TX, ±15° steering`, layer: 'optical' };
             group.add(substrate);
             components.push(substrate);
 
@@ -403,7 +403,7 @@
         // Si3N4 Router (central board)
         const routerGeo = new THREE.BoxGeometry(1.2, 0.05, 1.5);
         const routerMat = new THREE.MeshPhongMaterial({ color: 0x4444aa, emissive: 0x111144 });
-        addComponent(routerGeo, routerMat, [0, -0.1, 0], 'Si₃N₄ Photonic Router', 'Low-loss routing, 0.1 dB/m, thermally stable', 'optical');
+        addComponent(routerGeo, routerMat, [0, -0.1, 0], 'Si₃N₄ Photonic Router', 'Low-loss routing, <0.1 dB/cm, thermally stable', 'optical');
 
         // FPGA Control (electronics board)
         const fpgaGeo = new THREE.BoxGeometry(1.0, 0.08, 0.8);
