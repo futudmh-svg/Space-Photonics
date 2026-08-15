@@ -38,7 +38,7 @@
         .status-item { text-align: center; }
         .status-value { color: #00d4aa; font-family: monospace; font-size: 1.1em; }
         .status-label { color: #778da9; font-size: 0.85em; }
-
+    
         /* ─── Responsive & Mobile ─── */
         @media (max-width: 900px) {
             nav { flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start; padding: 4px; gap: 2px; }
@@ -60,7 +60,7 @@
             .camera-feed { width: 200px; height: 120px; right: 4px; left: auto; transform: none; bottom: 50px; }
             .time-controls { left: 4px; transform: none; }
         }
-
+        
         /* Collapsible HUD */
         .hud-toggle {
             position: fixed; top: 55px; z-index: 150;
@@ -74,7 +74,7 @@
         }
         #toggle-left { left: 4px; }
         #toggle-right { right: 4px; }
-
+        
         /* Fullscreen mode */
         body.fullscreen nav,
         body.fullscreen .hud-left,
@@ -97,7 +97,7 @@
         }
         body.fullscreen #fs-toggle { display: block !important; top: 8px; right: 8px; transform: none; }
 
-
+    
         /* ─── Hamburger Navigation ─── */
         .nav-hamburger {
             display: none;
@@ -164,6 +164,7 @@
             <a href="../pages/ehf-optical-trade.html">📡 EHF vs Opt</a>
             <a href="../pages/ppln-calculator.html">🔢 PPLN</a>
             <a href="../pages/research-gaps.html">🔬 Gaps</a>
+            <a href="../pages/specifications.html">📐 Specs</a>
             <a href="../pages/foundry.html">🏭 Foundry</a>
             <a href="../pages/foundry-cleanroom.html">🏭 Clean Room</a>
         </nav>
@@ -184,6 +185,8 @@
         <div class="spec-row"><span class="spec-label">Wavelength</span><span class="spec-value">1550 nm</span></div>
         <div class="spec-row"><span class="spec-label">Laser Power</span><span class="spec-value">1 W EDFA</span></div>
         <div class="spec-row"><span class="spec-label">Data Rate</span><span class="spec-value">10 Gbps</span></div>
+        <div class="spec-row"><span class="spec-label">Acquisition Time</span><span class="spec-value">&lt;30 s (target)</span></div>
+        <div class="spec-row"><span class="spec-label">Modem</span><span class="spec-value">SDA OISL 3.1 (OOK+LDPC, 100 Mbps–100 Gbps)</span></div>
 
         <h4>🌡️ Thermal Zones</h4>
         <p><span style="color:#e63946">■</span> Hot: Laser + TEC (40°C)<br>
@@ -578,7 +581,7 @@
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
-
+    
         // Hamburger nav
         const hamBtn = document.getElementById('nav-hamburger');
         const navOverlay = document.getElementById('nav-overlay');
