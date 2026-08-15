@@ -171,7 +171,7 @@
                     <div style="color:#00d4aa;font-weight:600;margin-bottom:4px">📡 Tracking Geometry</div>
                     <div style="display:flex;justify-content:space-between;margin:2px 0"><span style="color:#90e0ef">Range:</span><span id="s3d-range" style="color:#ffd166;font-family:monospace">350 km</span></div>
                     <div style="display:flex;justify-content:space-between;margin:2px 0"><span style="color:#90e0ef">Elev:</span><span id="s3d-elev" style="color:#ffd166;font-family:monospace">45°</span></div>
-                    <div style="display:flex;justify-content:space-between;margin:2px 0"><span style="color:#90e0ef">Doppler:</span><span id="s3d-doppler" style="color:#ffd166;font-family:monospace">+2.14 GHz</span></div>
+                    <div style="display:flex;justify-content:space-between;margin:2px 0"><span style="color:#90e0ef">Doppler:</span><span id="s3d-doppler" style="color:#ffd166;font-family:monospace">+1.95 GHz</span></div>
                     <div style="display:flex;justify-content:space-between;margin:2px 0"><span style="color:#90e0ef">Plasma:</span><span id="s3d-plasma" style="color:#ffd166;font-family:monospace">9.0 GHz</span></div>
                     <div style="display:flex;justify-content:space-between;margin:2px 0"><span style="color:#90e0ef">Face:</span><span id="s3d-face" style="color:#ffd166;font-family:monospace">Forward</span></div>
                 </div>
@@ -245,7 +245,7 @@
             const mach = parseFloat(document.getElementById('mach').value);
             const alt = parseFloat(document.getElementById('altitude').value) * 1000;
             const fpa = parseFloat(document.getElementById('fpa').value) * Math.PI / 180;
-            const v = mach * 343;
+            const v = mach * 302; // sound speed ~302 m/s at 25-42 km (T~226 K), not sea-level 343
             
             vehiclePos.vx = v * Math.cos(fpa);
             vehiclePos.vy = v * Math.sin(fpa);
@@ -544,7 +544,7 @@
             const elev = Math.atan2(slant, 350) * 57.3;
             document.getElementById('s3d-range').textContent = Math.floor(350 + 50 * Math.sin(t)) + ' km';
             document.getElementById('s3d-elev').textContent = elev.toFixed(1) + '°';
-            document.getElementById('s3d-doppler').textContent = '+' + (mach * 0.214).toFixed(2) + ' GHz';
+            document.getElementById('s3d-doppler').textContent = '+' + (mach * 0.195).toFixed(2) + ' GHz';
             document.getElementById('s3d-plasma').textContent = (9 * Math.sqrt(mach * 1e17 / 1e18)).toFixed(1) + ' GHz';
             const az = ((lon % 360) + 360) % 360;
             document.getElementById('s3d-face').textContent = az < 45 || az > 315 ? 'Forward' : az < 135 ? 'Starboard' : az < 225 ? 'Aft' : 'Port';

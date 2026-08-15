@@ -147,10 +147,10 @@
             const txGain = 10 * Math.log10((Math.PI * txAperture / lambda) ** 2);
             const rxGain = 10 * Math.log10((Math.PI * rxAperture / lambda) ** 2);
             const fsl = 20 * Math.log10(4 * Math.PI * distance / lambda);
-            const atmLoss = 0.1 + 0.05 * (90 - elevation) / 85;
+            const atmLoss = 0.4 / Math.sin(Math.max(elevation, 5) * Math.PI / 180); // ~0.4 dB zenith clear-air @1550 nm, scales ~1/sin(el)
             const pointLoss = 3;
             const scintLoss = 2;
-            const rxSens = -60;
+            const rxSens = -50; // photon-limited direct-detection class @ 10 Gbps
             
             const rxPower = txDbm + txGain + rxGain - fsl - atmLoss - pointLoss - scintLoss;
             const margin = rxPower - rxSens;
