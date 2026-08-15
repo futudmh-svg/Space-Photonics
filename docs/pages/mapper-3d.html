@@ -925,13 +925,531 @@
             }
         });
 
-        // Rocket trajectories
-        const rocketTrajs = rockets.map(() => {
+        // ═══════════════════════════════════════════════════════════════
+        //  SHOCK CONE VISUALIZATION
+        // ═══════════════════════════════════════════════════════════════
+        function createShockCone(color) {
+            const geo = new THREE.ConeGeometry(0.5, 2, 32, 1, true);
+            geo.rotateX(-Math.PI / 2);
+            const mat = new THREE.MeshBasicMaterial({
+                color: color, transparent: true, opacity: 0.1,
+                side: THREE.DoubleSide, blending: THREE.AdditiveBlending,
+                depthWrite: false
+            });
+            const mesh = new THREE.Mesh(geo, mat);
+            mesh.visible = false;
+            return mesh;
+        }
+        const enemyShock = createShockCone(0xe63946);
+        const friendlyShock = createShockCone(0x2a9d8f);
+        enemyVehicle.group.add(enemyShock);
+        friendlyVehicle.group.add(friendlyShock);
+
+        // ═══════════════════════════════════════════════════════════════
+        //  DATA RATE LABELS ON BEAMS
+        // ═══════════════════════════════════════════════════════════════
+        function createBeamLabel(text, color) {
+            const div = document.createElement('div');
+            div.className = 'floating-label';
+            div.style.cssText = `position:absolute;z-index:50;pointer-events:none;background:rgba(5,8,17,0.85);border:1px solid ${color};border-radius:4px;padding:2px 6px;font-size:0.65em;color:${color};font-family:monospace;white-space:nowrap;`;
+            div.textContent = text;
+            document.body.appendChild(div);
+            return div;
+        }
+        const beamLabels = [];
+        for (let i = 0; i < 8; i++) {
+            beamLabels.push(createBeamLabel('0 Gbps', '#00d4aa'));
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        //  ENHANCED PHYSICS CALCULATIONS
+        // ═══════════════════════════════════════════════════════════════
+        function calculatePhysics(state, dt) {
+            const v = state.mach * 343; // m/s
+            const h = state.altKm * 1000; // m
+            const rho = 1.225 * Math.exp(-h / 8500); // kg/m³ (exponential atmosphere)
+            const q = 0.5 * rho * v * v; // dynamic pressure Pa
+            const Re = rho * v * 2.0 / (1.81e-5 * Math.pow(288.15 / (288.15 - 0.0065 * h), 0.7)); // Reynolds
+            const Kn = 1.38e-23 * 220 / (Math.sqrt(2) * Math.PI * 3.7e-10 * 3.7e-10 * rho * 2.0); // Knudsen
+            const g = 9.81 * Math.pow(6371000 / (6371000 + h), 2); // local gravity
+            const centripetal = v * v / (6371000 + h); // m/s²
+            const ng = centripetal / g; // G-force from turning
+            const hoop = rho * v * v / 2 / 1e6; // MPa equivalent hoop stress
+            const plasmaFreq = 9 * Math.sqrt(state.ne); // GHz
+            const skinDepth = 1 / (2 * Math.PI * plasmaFreq * 1e9 * 8.85e-12 * 10); // rough
+            return { v, rho, q, Re, Kn, g, centripetal, ng, hoop, plasmaFreq, skinDepth };
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        //  ANIMATION LOOP
+        // ═══════════════════════════════════════════════════════════════
+        const clock = new THREE.Clock();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const dt = Math.min(clock.getDelta(), 0.1);
+
+            if (isPlaying) {
+                simTime += dt * timeScale;
+            }
+
+            const t = simTime;
+
+            // Update satellites
+            updateSats(dt);
+
+            // ─── Enemy Vehicle ───
+            const enemyState = getEnemyState(t);
+            enemyVehicle.group.position.copy(enemyState.pos);
+            enemyVehicle.group.lookAt(
+                enemyState.pos.x + Math.cos(enemyState.heading) * 100,
+                enemyState.pos.y,
+                enemyState.pos.z + Math.sin(enemyState.heading) * 100
+            );
+
+            // Shock cone
+            enemyShock.visible = enemyState.mach > 1;
+            enemyShock.scale.setScalar(Math.max(0.5, enemyState.mach * 0.15));
+            enemyShock.material.opacity = Math.min(0.15, (enemyState.mach - 1) * 0.03);
+
+            // Plasma
+            enemyVehicle.userData.plasma.material.opacity = 0.1 + 0.2 * (enemyState.mach / 12);
+            enemyVehicle.userData.plasma2.material.opacity = 0.05 + 0.15 * (enemyState.mach / 12);
+
+            // Trail
+            updateTrail(enemyVehicle.userData.trail, enemyVehicle.userData.trailPos, enemyState.pos, 250, 0.15);
+
+            // Trajectory
+            updateTrajectory(enemyTraj, enemyState.pos);
+            updateGroundTrack(enemyGround, enemyState.pos);
+
+            // Future path
+            updateFuturePath(enemyFuture, enemyState.pos, enemyState.heading, enemyState.mach, 200);
+
+            // Physics
+            const enemyPhys = calculatePhysics(enemyState, dt);
+
+            // ─── Friendly Vehicle ───
+            const friendlyState = getFriendlyState(t);
+            friendlyVehicle.group.position.copy(friendlyState.pos);
+            friendlyVehicle.group.lookAt(
+                friendlyState.pos.x + Math.cos(friendlyState.heading) * 100,
+                friendlyState.pos.y,
+                friendlyState.pos.z + Math.sin(friendlyState.heading) * 100
+            );
+            friendlyShock.visible = friendlyState.mach > 1;
+            friendlyShock.scale.setScalar(Math.max(0.5, friendlyState.mach * 0.15));
+            updateTrail(friendlyVehicle.userData.trail, friendlyVehicle.userData.trailPos, friendlyState.pos, 250, 0.12);
+            updateTrajectory(friendlyTraj, friendlyState.pos);
+            updateGroundTrack(friendlyGround, friendlyState.pos);
+            updateFuturePath(friendlyFuture, friendlyState.pos, friendlyState.heading, friendlyState.mach, 200);
+            const friendlyPhys = calculatePhysics(friendlyState, dt);
+
+            // ─── Rockets ───
+            updateRockets(t, dt);
+
+            // ─── Optical Links ───
+            updateLinks(enemyState.pos, friendlyState.pos, t);
+
+            // ─── Update HUD ───
+            updateHUD(enemyState, friendlyState, enemyPhys, friendlyPhys, t);
+
+            // ─── Update Mini-Map ───
+            updateMinimap();
+
+            // ─── Update Camera ───
+            updateCamera(enemyState.pos, friendlyState.pos);
+
+            // ─── Update Beam Labels ───
+            updateBeamLabels();
+
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        //  UPDATE FUNCTIONS
+        // ═══════════════════════════════════════════════════════════════
+        function updateTrail(trail, trailPos, pos, count, size) {
+            for (let i = count - 1; i > 0; i--) {
+                trailPos[i * 3] = trailPos[(i - 1) * 3];
+                trailPos[i * 3 + 1] = trailPos[(i - 1) * 3 + 1];
+                trailPos[i * 3 + 2] = trailPos[(i - 1) * 3 + 2];
+            }
+            trailPos[0] = pos.x + (Math.random() - 0.5) * size;
+            trailPos[1] = pos.y + (Math.random() - 0.5) * size;
+            trailPos[2] = pos.z + (Math.random() - 0.5) * size;
+            trail.geometry.attributes.position.needsUpdate = true;
+        }
+
+        function updateTrajectory(traj, pos) {
+            traj.pos[traj.idx % 300 * 3] = pos.x;
+            traj.pos[traj.idx % 300 * 3 + 1] = pos.y;
+            traj.pos[traj.idx % 300 * 3 + 2] = pos.z;
+            traj.idx++;
+            traj.line.geometry.attributes.position.needsUpdate = true;
+        }
+
+        function updateGroundTrack(gt, pos) {
+            const surfacePos = pos.clone().normalize().multiplyScalar(EARTH_R);
+            gt.points[gt.idx % 300] = surfacePos;
+            gt.idx++;
+            gt.geo.setFromPoints(gt.points);
+        }
+
+        function updateFuturePath(future, pos, heading, mach, steps) {
             const pts = [];
-            for (let i = 0; i < 200; i++) pts.push(new THREE.Vector3(0, 0, 0));
-            const geo = new THREE.BufferGeometry().setFromPoints(pts);
-            const mat = new THREE.LineBasicMaterial({ color: 0xffd166, transparent: true, opacity: 0.4 });
-            const line = new THREE.Line(geo, mat);
-            earthGroup.add(line);
-            return { line, points: pts, geo };
+            for (let i = 0; i < steps; i++) {
+                const dist = i * mach * 343 * 0.5;
+                const lat = Math.asin(pos.y / pos.length()) + Math.cos(heading) * dist / EARTH_R;
+                const lon = Math.atan2(pos.z, pos.x) + Math.sin(heading) * dist / EARTH_R;
+                const r = EARTH_R + pos.length() - EARTH_R;
+                pts.push(new THREE.Vector3(
+                    r * Math.cos(lat) * Math.cos(lon),
+                    r * Math.sin(lat),
+                    r * Math.cos(lat) * Math.sin(lon)
+                ));
+            }
+            future.line.geometry.setFromPoints(pts);
+        }
+
+        function getEnemyState(t) {
+            const period = 180;
+            const progress = (t % period) / period;
+            const lat = 30 + 20 * Math.sin(progress * Math.PI * 2);
+            const lon = progress * 360;
+            const altKm = 25 + 15 * Math.sin(progress * Math.PI);
+            const mach = 5 + 7 * Math.sin(progress * Math.PI);
+            const heading = 90 + 30 * Math.sin(progress * Math.PI * 2);
+            const ne = 1e18 * Math.pow(mach / 10, 2);
+            const r = EARTH_R + altKm * 0.001;
+            const latRad = lat * Math.PI / 180;
+            const lonRad = lon * Math.PI / 180;
+            return {
+                pos: new THREE.Vector3(
+                    r * Math.cos(latRad) * Math.cos(lonRad),
+                    r * Math.sin(latRad),
+                    r * Math.cos(latRad) * Math.sin(lonRad)
+                ),
+                lat, lon, altKm, mach, heading, ne, progress
+            };
+        }
+
+        function getFriendlyState(t) {
+            const period = 240;
+            const progress = (t % period) / period;
+            const lat = 40 + 15 * Math.cos(progress * Math.PI * 2);
+            const lon = -100 + 40 * progress;
+            const altKm = 20 + 10 * Math.sin(progress * Math.PI * 3);
+            const mach = 6 + 4 * Math.sin(progress * Math.PI);
+            const heading = 45 + 20 * Math.sin(progress * Math.PI * 2);
+            const ne = 1e18 * Math.pow(mach / 10, 2);
+            const r = EARTH_R + altKm * 0.001;
+            const latRad = lat * Math.PI / 180;
+            const lonRad = lon * Math.PI / 180;
+            return {
+                pos: new THREE.Vector3(
+                    r * Math.cos(latRad) * Math.cos(lonRad),
+                    r * Math.sin(latRad),
+                    r * Math.cos(latRad) * Math.sin(lonRad)
+                ),
+                lat, lon, altKm, mach, heading, ne, progress
+            };
+        }
+
+        function updateRockets(t, dt) {
+            rockets.forEach((rocket, i) => {
+                if (t < i * 5) return; // stagger launches
+                const flightTime = t - i * 5;
+                if (flightTime > 300) { rocket.group.visible = false; return; }
+                rocket.group.visible = true;
+
+                // Trajectory
+                const launchLat = 28.5 * Math.PI / 180;
+                const launchLon = -80.5 * Math.PI / 180;
+                const progress = Math.min(flightTime / 300, 1);
+                const alt = progress < 0.3 ? progress / 0.3 * 70 : 70 + (progress - 0.3) / 0.7 * 230;
+                const r = EARTH_R + alt * 0.001;
+                const lat = launchLat + (51.6 * Math.PI / 180 - launchLat) * progress;
+                const lon = launchLon + progress * Math.PI;
+                rocket.group.position.set(
+                    r * Math.cos(lat) * Math.cos(lon),
+                    r * Math.sin(lat),
+                    r * Math.cos(lat) * Math.sin(lon)
+                );
+                rocket.group.lookAt(0, 0, 0);
+
+                // Phase
+                if (progress < 0.05) rocket.phase = 'pad';
+                else if (progress < 0.2) rocket.phase = 'ascent';
+                else if (progress < 0.25 && !rocket.stage1Sep) {
+                    rocket.phase = 'staging';
+                    rocket.stage1Sep = true;
+                } else if (progress < 0.3) rocket.phase = 'coast';
+                else if (progress < 0.35 && !rocket.fairingSep) {
+                    rocket.phase = 'fairing';
+                    rocket.fairingSep = true;
+                } else if (progress < 0.7) rocket.phase = 'coast';
+                else rocket.phase = 'insertion';
+
+                // Flame
+                const thrust = rocket.phase === 'ascent' || rocket.phase === 'insertion' ? 1 : 0.3;
+                rocket.flame.scale.set(1, thrust, 1);
+                rocket.flame2.scale.set(1, thrust * 0.8, 1);
+
+                // Booster separation
+                if (rocket.stage1Sep && rocket.type === 'heavy') {
+                    rocket.group.children.forEach(child => {
+                        if (child.name && child.name.startsWith('booster')) {
+                            child.position.y -= dt * 2;
+                            child.rotation.x += dt;
+                        }
+                    });
+                }
+
+                // Trajectory line
+                const idx = Math.floor(progress * 200);
+                if (idx < 200) {
+                    rocketTrajs[i].points[idx] = rocket.group.position.clone();
+                    rocketTrajs[i].geo.setFromPoints(rocketTrajs[i].points);
+                }
+            });
+        }
+
+        function updateLinks(enemyPos, friendlyPos, t) {
+            // Enemy links
+            const sorted = satellites.map(s => ({ sat: s, dist: s.position.distanceTo(enemyPos) }))
+                .sort((a, b) => a.dist - b.dist);
+
+            sorted.slice(0, 4).forEach((c, i) => {
+                const beam = beams[i];
+                const dir = c.sat.position.clone().sub(enemyPos);
+                const len = dir.length();
+                beam.position.copy(enemyPos).add(dir.multiplyScalar(0.5));
+                beam.scale.set(1, 1, len);
+                beam.lookAt(c.sat.position);
+                beam.visible = true;
+
+                const quality = Math.max(0.1, 1 - c.dist / 15);
+                beam.material.opacity = quality * 0.3;
+                beam.material.color.setHex(quality > 0.6 ? 0x00d4aa : quality > 0.3 ? 0xffd166 : 0xe63946);
+
+                // Data rate label
+                const dr = quality > 0.6 ? '10.0' : quality > 0.3 ? '4.2' : '0.8';
+                beamLabels[i].textContent = `↓${dr} Gbps`;
+                beamLabels[i].style.color = quality > 0.6 ? '#00d4aa' : quality > 0.3 ? '#ffd166' : '#e63946';
+            });
+
+            // Friendly links
+            const fSorted = satellites.map(s => ({ sat: s, dist: s.position.distanceTo(friendlyPos) }))
+                .sort((a, b) => a.dist - b.dist);
+
+            fSorted.slice(0, 2).forEach((c, i) => {
+                const beam = beams[4 + i];
+                const dir = c.sat.position.clone().sub(friendlyPos);
+                beam.position.copy(friendlyPos).add(dir.multiplyScalar(0.5));
+                beam.scale.set(1, 1, dir.length());
+                beam.lookAt(c.sat.position);
+                beam.visible = true;
+                beam.material.color.setHex(0x2a9d8f);
+                beam.material.opacity = 0.25;
+
+                beamLabels[4 + i].textContent = i === 0 ? '↑CMD 100kbps' : '↓TLM 2.4Gbps';
+                beamLabels[4 + i].style.color = '#2a9d8f';
+            });
+
+            // Sat-to-sat links
+            for (let i = 0; i < 6; i++) {
+                const s1 = satellites[i * 20];
+                const s2 = satellites[i * 20 + 1];
+                const beam = beams[6 + i];
+                const dir = s2.position.clone().sub(s1.position);
+                beam.position.copy(s1.position).add(dir.multiplyScalar(0.5));
+                beam.scale.set(1, 1, dir.length());
+                beam.lookAt(s2.position);
+                beam.visible = currentScenario !== 'constellation';
+                beam.material.color.setHex(0x00d4aa);
+                beam.material.opacity = 0.1;
+                beamLabels[6 + i].textContent = '40 Gbps';
+                beamLabels[6 + i].style.color = '#00d4aa';
+            }
+        }
+
+        function updateBeamLabels() {
+            beams.forEach((beam, i) => {
+                if (!beam.visible) {
+                    beamLabels[i].style.display = 'none';
+                    return;
+                }
+                beamLabels[i].style.display = 'block';
+                const vec = beam.position.clone();
+                vec.project(camera);
+                const x = (vec.x * 0.5 + 0.5) * window.innerWidth;
+                const y = (-vec.y * 0.5 + 0.5) * window.innerHeight;
+                beamLabels[i].style.left = x + 'px';
+                beamLabels[i].style.top = y + 'px';
+            });
+        }
+
+        function updateHUD(enemy, friendly, ePhys, fPhys, t) {
+            document.getElementById('hud-scenario').textContent = currentScenario === 'enemy' ? 'Enemy Tracking' : currentScenario === 'friendly' ? 'Friendly Control' : 'Rocket Swarm';
+
+            document.getElementById('enemy-mach').textContent = enemy.mach.toFixed(1);
+            document.getElementById('enemy-vel').textContent = (enemy.mach * 343).toFixed(0) + ' m/s';
+            document.getElementById('enemy-alt').textContent = enemy.altKm.toFixed(1) + ' km';
+            document.getElementById('enemy-lat').textContent = enemy.lat.toFixed(1) + '°N';
+            document.getElementById('enemy-lon').textContent = ((enemy.lon + 180) % 360 - 180).toFixed(1) + '°';
+            document.getElementById('enemy-hdg').textContent = enemy.heading.toFixed(1) + '°';
+            document.getElementById('enemy-angvel').textContent = (Math.sin(t) * 0.5 + 0.2).toFixed(2) + '°/s';
+            document.getElementById('enemy-g').textContent = ePhys.ng.toFixed(1) + ' g';
+            document.getElementById('enemy-q').textContent = (ePhys.q / 1000).toFixed(1) + ' kPa';
+            document.getElementById('enemy-plasma').textContent = ePhys.plasmaFreq.toFixed(1) + ' GHz';
+            document.getElementById('enemy-doppler').textContent = '+' + (enemy.mach * 0.214).toFixed(2) + ' GHz';
+            document.getElementById('enemy-range').textContent = (satellites[0].position.distanceTo(enemy.pos) * 637).toFixed(0) + ' km';
+            document.getElementById('enemy-margin').textContent = '+' + (38 - enemy.altKm * 0.3).toFixed(1) + ' dB';
+            document.getElementById('enemy-error').textContent = (0.1 + Math.random() * 0.05).toFixed(2) + ' m';
+
+            document.getElementById('friendly-mach').textContent = friendly.mach.toFixed(1);
+            document.getElementById('friendly-vel').textContent = (friendly.mach * 343).toFixed(0) + ' m/s';
+            document.getElementById('friendly-alt').textContent = friendly.altKm.toFixed(1) + ' km';
+            document.getElementById('friendly-hdg').textContent = friendly.heading.toFixed(1) + '°';
+            document.getElementById('friendly-angvel').textContent = (Math.cos(t) * 0.3 + 0.15).toFixed(2) + '°/s';
+            document.getElementById('friendly-g').textContent = fPhys.ng.toFixed(1) + ' g';
+            document.getElementById('friendly-q').textContent = (fPhys.q / 1000).toFixed(1) + ' kPa';
+            document.getElementById('friendly-plasma').textContent = fPhys.plasmaFreq.toFixed(1) + ' GHz';
+            document.getElementById('friendly-doppler').textContent = '+' + (friendly.mach * 0.214).toFixed(2) + ' GHz';
+            document.getElementById('friendly-range').textContent = (satellites[0].position.distanceTo(friendly.pos) * 637).toFixed(0) + ' km';
+
+            // Link bars
+            const el1 = Math.max(0.1, 1 - satellites[0].position.distanceTo(enemy.pos) / 15);
+            document.getElementById('link1').style.width = (el1 * 100) + '%';
+            document.getElementById('link1').className = 'link-fill ' + (el1 > 0.6 ? 'good' : el1 > 0.3 ? 'medium' : 'bad');
+
+            const fl1 = Math.max(0.1, 1 - satellites[0].position.distanceTo(friendly.pos) / 15);
+            document.getElementById('link3').style.width = (fl1 * 100) + '%';
+            document.getElementById('link3').className = 'link-fill ' + (fl1 > 0.6 ? 'good' : fl1 > 0.3 ? 'medium' : 'bad');
+
+            // Constellation status
+            const activeSats = Math.floor(120 * (0.85 + 0.15 * Math.sin(t * 0.1)));
+            document.getElementById('sats-active').textContent = activeSats + ' / 120';
+            document.getElementById('cross-links').textContent = '480';
+            document.getElementById('mesh-tput').textContent = (activeSats * 3.33).toFixed(0) + ' Tbps';
+            document.getElementById('reconfig-time').textContent = (120 - activeSats + 50).toFixed(0) + ' ms';
+
+            // Clock
+            const mins = Math.floor(t / 60);
+            const secs = Math.floor(t % 60);
+            const ms = Math.floor((t % 1) * 1000);
+            document.getElementById('time-display').textContent = `T+${mins}:${secs.toString().padStart(2,'0')}.${ms.toString().padStart(3,'0')}`;
+        }
+
+        function updateMinimap() {
+            const ctx = minimapCtx;
+            const w = minimapCanvas.width;
+            const h = minimapCanvas.height;
+            ctx.fillStyle = '#0a0f1a';
+            ctx.fillRect(0, 0, w, h);
+
+            // Earth
+            ctx.beginPath();
+            ctx.arc(w / 2, h / 2, w / 2 - 4, 0, Math.PI * 2);
+            ctx.strokeStyle = '#1a3a5c';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            ctx.fillStyle = '#0d1b2a';
+            ctx.fill();
+
+            // Satellites
+            satellites.forEach(sat => {
+                const x = w / 2 + (sat.position.x / SAT_R) * (w / 2 - 6);
+                const y = h / 2 - (sat.position.z / SAT_R) * (h / 2 - 6);
+                ctx.fillStyle = '#00d4aa';
+                ctx.fillRect(x - 1, y - 1, 2, 2);
+            });
+
+            // Enemy
+            const eState = getEnemyState(simTime);
+            const ex = w / 2 + (eState.pos.x / EARTH_R) * (w / 2 - 6);
+            const ey = h / 2 - (eState.pos.z / EARTH_R) * (h / 2 - 6);
+            ctx.fillStyle = '#e63946';
+            ctx.beginPath();
+            ctx.moveTo(ex, ey - 4);
+            ctx.lineTo(ex - 3, ey + 3);
+            ctx.lineTo(ex + 3, ey + 3);
+            ctx.fill();
+
+            // Friendly
+            const fState = getFriendlyState(simTime);
+            const fx = w / 2 + (fState.pos.x / EARTH_R) * (w / 2 - 6);
+            const fy = h / 2 - (fState.pos.z / EARTH_R) * (h / 2 - 6);
+            ctx.fillStyle = '#2a9d8f';
+            ctx.beginPath();
+            ctx.moveTo(fx, fy - 4);
+            ctx.lineTo(fx - 3, fy + 3);
+            ctx.lineTo(fx + 3, fy + 3);
+            ctx.fill();
+
+            // View frustum
+            ctx.strokeStyle = 'rgba(0,212,170,0.3)';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(w / 2 - 20, h / 2 - 15, 40, 30);
+        }
+
+        function updateCamera(enemyPos, friendlyPos) {
+            if (currentCam === 'enemy') {
+                camera.position.lerp(enemyPos.clone().add(new THREE.Vector3(2, 1, 2)), 0.05);
+                controls.target.lerp(enemyPos, 0.1);
+            } else if (currentCam === 'friendly') {
+                camera.position.lerp(friendlyPos.clone().add(new THREE.Vector3(2, 1, 2)), 0.05);
+                controls.target.lerp(friendlyPos, 0.1);
+            } else if (currentCam === 'top') {
+                camera.position.lerp(new THREE.Vector3(0, 50, 0), 0.05);
+                controls.target.lerp(new THREE.Vector3(0, 0, 0), 0.1);
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        //  CONTROLS
+        // ═══════════════════════════════════════════════════════════════
+        let isPlaying = true;
+        let timeScale = 1;
+        let currentScenario = 'enemy';
+        let currentCam = 'orbit';
+
+        window.togglePlay = () => {
+            isPlaying = !isPlaying;
+            document.getElementById('play-btn').textContent = isPlaying ? '⏸️ Pause' : '▶️ Play';
+        };
+
+        window.setSpeed = (s) => {
+            timeScale = s;
+            document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+        };
+
+        document.querySelectorAll('.scenario-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.scenario-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentScenario = btn.dataset.scenario;
+            });
         });
+
+        document.querySelectorAll('[data-cam]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                currentCam = btn.dataset.cam;
+                document.getElementById('cam-indicator').textContent = currentCam === 'enemy' ? '🔴 Enemy Vehicle' : currentCam === 'friendly' ? '🛡️ Friendly Vehicle' : currentCam === 'top' ? '🗺️ Top Down' : '📷 Free Orbit';
+            });
+        });
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Start
+        animate();
+    </script>
+</body>
+</html>
