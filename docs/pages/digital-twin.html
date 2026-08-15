@@ -7,7 +7,7 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #050811; color: #e0e6ed; line-height: 1.6; }
-        .container { max-width: 1200px; margin: 0 auto; padding: 16px; }
+        .container { max-width: 1000px; margin: 0 auto; padding: 16px; }
         nav { background: #1b263b; padding: 12px; border-radius: 10px; margin-bottom: 16px; display: flex; flex-wrap: wrap; gap: 8px; }
         nav a { color: #e0e6ed; text-decoration: none; padding: 8px 14px; border-radius: 6px; font-size: 0.9em; background: #0d1b2a; }
         nav a:hover, nav a.active { background: #00d4aa; color: #050811; }
@@ -15,34 +15,21 @@
         .subtitle { color: #778da9; font-size: 0.9em; margin-bottom: 16px; }
         .card { background: #1b263b; border-radius: 12px; padding: 18px; margin-bottom: 16px; border: 1px solid #415a77; }
         .card h2 { font-size: 1.15em; color: #00d4aa; margin-bottom: 12px; }
-        
-        .three-canvas { width: 100%; height: 500px; border-radius: 12px; overflow: hidden; background: #0a0e1a; }
-        .scene-controls { display: flex; gap: 8px; margin: 12px 0; flex-wrap: wrap; }
-        .scene-btn { padding: 8px 16px; background: #1b4d6e; color: #e0e6ed; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85em; }
-        .scene-btn:hover { background: #2a6f97; }
-        .scene-btn.active { background: #00d4aa; color: #050811; }
-        
-        .info-panel { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 12px 0; }
-        .info-item { background: #0d1b2a; padding: 12px; border-radius: 8px; text-align: center; }
-        .info-label { font-size: 0.75em; color: #778da9; }
-        .info-value { font-size: 1.2em; color: #00d4aa; font-weight: bold; }
-        
-        .detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin: 12px 0; }
-        .detail-card { background: #0d1b2a; border-radius: 10px; padding: 16px; border: 1px solid #415a77; }
-        .detail-card h3 { font-size: 1em; color: #e0e1dd; margin-bottom: 8px; }
-        .detail-card .param { font-size: 0.8em; color: #778da9; }
-        .detail-card .value { font-size: 1em; color: #00d4aa; font-weight: bold; }
-        
+        svg { width: 100%; background: #0d1b2a; border-radius: 8px; }
+        .controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin: 12px 0; }
+        .control-group label { display: block; font-size: 0.85em; color: #778da9; margin-bottom: 4px; }
+        input[type="range"] { width: 100%; -webkit-appearance: none; height: 6px; border-radius: 3px; background: #415a77; }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: #00d4aa; cursor: pointer; }
+        .btn { padding: 10px 20px; background: #2d6a4f; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9em; margin: 4px; }
+        .btn:hover { background: #40916c; }
+        .btn-danger { background: #6c2e2e; }
+        .btn-danger:hover { background: #9e3a3a; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 12px 0; }
+        .stat-box { background: #0d1b2a; padding: 14px; border-radius: 8px; text-align: center; }
+        .stat-value { font-size: 1.5em; font-weight: bold; color: #00d4aa; }
+        .stat-label { font-size: 0.8em; color: #778da9; }
         footer { text-align: center; padding: 30px; color: #778da9; font-size: 0.8em; }
     </style>
-    <script type="importmap">
-    {
-        "imports": {
-            "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-            "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
-        }
-    }
-    </script>
 </head>
 <body>
     <div class="container">
@@ -66,612 +53,216 @@
         </nav>
 
         <h1>🎮 3D Digital Twin</h1>
-        <p class="subtitle">Interactive WebGL photonic system models — drag to rotate, scroll to zoom</p>
+        <p class="subtitle">Interactive photonic integrated circuit visualization</p>
 
-        <!-- Scene 1: Satellite with PPLN Receiver -->
         <div class="card">
-            <h2>🛰️ Photonic Satellite — PPLN Receiver v2.0</h2>
-            <p style="font-size: 0.85em; color: #778da9; margin-bottom: 12px;">
-                Real-time 3D model showing the satellite bus with 6-face OPA array and integrated PPLN receiver. 
-                Blue beams = transmit, red glow = PPLN nonlinear interaction zone.
-            </p>
-            <div id="satellite-3d" class="three-canvas"></div>
-            <div class="scene-controls">
-                <button class="scene-btn active" onclick="showSatView('external')">🛰️ External</button>
-                <button class="scene-btn" onclick="showSatView('cutaway')">✂️ Cutaway</button>
-                <button class="scene-btn" onclick="showSatView('opa')">🎯 OPA Detail</button>
-                <button class="scene-btn" onclick="showSatView('ppln')">🔷 PPLN Detail</button>
-            </div>
-            <div class="info-panel">
-                <div class="info-item"><div class="info-label">OPA Faces</div><div class="info-value">6</div></div>
-                <div class="info-item"><div class="info-label">Elements/Face</div><div class="info-value">64</div></div>
-                <div class="info-item"><div class="info-label">PPLN Length</div><div class="info-value">40 mm</div></div>
-                <div class="info-item"><div class="info-label">Total Mass</div><div class="info-value">~150 kg</div></div>
-            </div>
+            <h2>Photonic Integrated Circuit (PIC)</h2>
+            <svg id="pic-svg" viewBox="0 0 600 400" preserveAspectRatio="xMidYMid meet">
+                <rect width="600" height="400" fill="#0d1b2a"/>
+                
+                <!-- Si3N4 Waveguides -->
+                <path d="M 50 200 Q 150 200 200 150 T 350 150" fill="none" stroke="#00d4aa" stroke-width="4" id="wg1"/>
+                <path d="M 50 200 Q 150 200 200 250 T 350 250" fill="none" stroke="#90e0ef" stroke-width="4" id="wg2"/>
+                <path d="M 350 150 L 500 150" fill="none" stroke="#00d4aa" stroke-width="4"/>
+                <path d="M 350 250 L 500 250" fill="none" stroke="#90e0ef" stroke-width="4"/>
+                
+                <!-- MZI -->
+                <rect x="200" y="130" width="150" height="140" rx="10" fill="none" stroke="#ffd166" stroke-width="2" stroke-dasharray="5,3"/>
+                <text x="275" y="205" text-anchor="middle" fill="#ffd166" font-size="12">MZI</text>
+                
+                <!-- Phase Shifters -->
+                <rect x="220" y="140" width="60" height="20" rx="5" fill="#e63946" opacity="0.8" id="ps1"/>
+                <rect x="220" y="240" width="60" height="20" rx="5" fill="#e63946" opacity="0.8" id="ps2"/>
+                <text x="250" y="155" text-anchor="middle" fill="white" font-size="10">Δφ</text>
+                <text x="250" y="255" text-anchor="middle" fill="white" font-size="10">Δφ</text>
+                
+                <!-- Photodetectors -->
+                <circle cx="500" cy="150" r="15" fill="#95d5b2" id="pd1"/>
+                <circle cx="500" cy="250" r="15" fill="#95d5b2" id="pd2"/>
+                <text x="500" y="155" text-anchor="middle" fill="#050811" font-size="10">PD</text>
+                <text x="500" y="255" text-anchor="middle" fill="#050811" font-size="10">PD</text>
+                
+                <!-- Labels -->
+                <text x="50" y="190" fill="#e0e6ed" font-size="12">Input</text>
+                <text x="540" y="155" fill="#e0e6ed" font-size="12">Out 1</text>
+                <text x="540" y="255" fill="#e0e6ed" font-size="12">Out 2</text>
+                
+                <!-- Photon animation -->
+                <circle r="4" fill="#ffd166" id="photon">
+                    <animateMotion dur="2s" repeatCount="indefinite" path="M 50 200 Q 150 200 200 150 T 350 150 L 500 150"/>
+                </circle>
+            </svg>
         </div>
 
-        <!-- Scene 2: PPLN Waveguide Internal -->
         <div class="card">
-            <h2>🔷 PPLN Waveguide — Cascaded χ⁽²⁾ Visualization</h2>
-            <p style="font-size: 0.85em; color: #778da9; margin-bottom: 12px;">
-                Cross-section through the periodically-poled lithium niobate waveguide. 
-                Watch signal (blue) and pump (red) photons interact to generate idler (yellow) via SFG.
-            </p>
-            <div id="ppln-3d" class="three-canvas"></div>
-            <div class="info-panel">
-                <div class="info-item"><div class="info-label">Poling Period</div><div class="info-value">6.4 μm</div></div>
-                <div class="info-item"><div class="info-label">Waveguide Length</div><div class="info-value">40 mm</div></div>
-                <div class="info-item"><div class="info-label">Eff. n₂</div><div class="info-value">6×10⁻¹²</div></div>
-                <div class="info-item"><div class="info-label">Conversion</div><div class="info-value">2000 %/W</div></div>
-            </div>
-        </div>
-
-        <!-- Scene 3: OPA Beam Steering -->
-        <div class="card">
-            <h2>🎯 OPA Beam Steering — Multi-Target</h2>
-            <p style="font-size: 0.85em; color: #778da9; margin-bottom: 12px;">
-                Phased array beam steering simulation. Array elements phase-shift to steer beam. 
-                Multiple beams for simultaneous multi-target tracking.
-            </p>
-            <div id="opa-3d" class="three-canvas"></div>
-            <div class="info-panel">
-                <div class="info-item"><div class="info-label">Beamwidth</div><div class="info-value">0.41°</div></div>
-                <div class="info-item"><div class="info-label">Steering Range</div><div class="info-value">±30°</div></div>
-                <div class="info-item"><div class="info-label">Switch Speed</div><div class="info-value">&lt;1 μs</div></div>
-                <div class="info-item"><div class="info-label">Simultaneous</div><div class="info-value">3 beams</div></div>
-            </div>
-        </div>
-
-        <!-- Scene 4: Full Constellation -->
-        <div class="card">
-            <h2>🌐 Constellation View</h2>
-            <p style="font-size: 0.85em; color: #778da9; margin-bottom: 12px;">
-                Live Three.js orbital simulation. See the VLEO constellation page for full detail.
-            </p>
-            <a href="vleo-constellation.html" style="display:inline-block; padding:10px 20px; background:#2d6a4f; color:white; text-decoration:none; border-radius:8px; margin-bottom:12px;">🎬 Launch Full Constellation</a>
-        </div>
-
-        <!-- Component Details -->
-        <div class="card">
-            <h2>⚡ Photonic Component Stack v2.0</h2>
-            <div class="detail-grid">
-                <div class="detail-card">
-                    <h3>🔴 Laser Source</h3>
-                    <div class="param">Wavelength</div><div class="value">1550 nm</div>
-                    <div class="param">Power</div><div class="value">10 mW</div>
-                    <div class="param">Linewidth</div><div class="value">&lt; 100 kHz</div>
+            <h2>Simulation Controls</h2>
+            <div class="controls">
+                <div class="control-group">
+                    <label>Phase Shift (rad): <span id="phase-val">0</span></label>
+                    <input type="range" id="phase" min="0" max="6.28" value="0" step="0.01">
                 </div>
-                <div class="detail-card">
-                    <h3>⚡ EO Comb</h3>
-                    <div class="param">Spacing</div><div class="value">100 GHz</div>
-                    <div class="param">Lines</div><div class="value">64</div>
-                    <div class="param">Platform</div><div class="value">Si₃N₄</div>
+                <div class="control-group">
+                    <label>Wavelength (nm): <span id="wl-val">1550</span></label>
+                    <input type="range" id="wavelength" min="1500" max="1600" value="1550">
                 </div>
-                <div class="detail-card" style="border-color: #00d4aa;">
-                    <h3>🔷 PPLN Receiver (NEW)</h3>
-                    <div class="param">Nonlinearity</div><div class="value">6×10⁻¹² cm²/W</div>
-                    <div class="param">Efficiency</div><div class="value">2000 %/W</div>
-                    <div class="param">Poling</div><div class="value">Λ = 6.4 μm</div>
+                <div class="control-group">
+                    <label>Temperature (°C): <span id="temp-val">25</span></label>
+                    <input type="range" id="temperature" min="0" max="100" value="25">
                 </div>
-                <div class="detail-card">
-                    <h3>🔲 MZI Mesh</h3>
-                    <div class="param">Matrix</div><div class="value">4×4</div>
-                    <div class="param">Vπ</div><div class="value">4.7 V</div>
-                    <div class="param">Speed</div><div class="value">158 ps</div>
-                </div>
-                <div class="detail-card">
-                    <h3>🎯 OPA Array</h3>
-                    <div class="param">Elements</div><div class="value">64 × 6 faces</div>
-                    <div class="param">FOV</div><div class="value">62° × 11°</div>
-                    <div class="param">Steering</div><div class="value">&lt; 1 μs</div>
-                </div>
-                <div class="detail-card">
-                    <h3>🧠 E-CoPilot</h3>
-                    <div class="param">Update</div><div class="value">1 kHz</div>
-                    <div class="param">Error</div><div class="value">&lt; 10 μrad</div>
-                    <div class="param">Filter</div><div class="value">Kalman</div>
+                <div class="control-group">
+                    <label>Input Power (mW): <span id="power-val">1</span></label>
+                    <input type="range" id="power" min="0.1" max="10" value="1" step="0.1">
                 </div>
             </div>
+            
+            <div class="stats-grid">
+                <div class="stat-box"><div class="stat-value" id="output1">-</div><div class="stat-label">Output 1 (mW)</div></div>
+                <div class="stat-box"><div class="stat-value" id="output2">-</div><div class="stat-label">Output 2 (mW)</div></div>
+                <div class="stat-box"><div class="stat-value" id="extinction">-</div><div class="stat-label">Extinction Ratio (dB)</div></div>
+                <div class="stat-box"><div class="stat-value" id="loss">-</div><div class="stat-label">Insertion Loss (dB)</div></div>
+            </div>
+            
+            <button class="btn" onclick="startAnim()">▶️ Animate</button>
+            <button class="btn btn-danger" onclick="stopAnim()">⏹️ Stop</button>
         </div>
 
-        <footer><p>Space Photonics Digital Twin v2.0 — PPLN Cascaded χ⁽²⁾ Architecture</p></footer>
+        <div class="card">
+            <h2>Transfer Function</h2>
+            <svg id="transfer-plot" viewBox="0 0 600 300" preserveAspectRatio="none">
+                <rect width="600" height="300" fill="#0d1b2a"/>
+                <polyline id="tf-line" fill="none" stroke="#00d4aa" stroke-width="2"/>
+                <polyline id="tf-line2" fill="none" stroke="#90e0ef" stroke-width="2"/>
+                <line x1="0" y1="250" x2="600" y2="250" stroke="#415a77" stroke-width="1"/>
+                <line x1="50" y1="0" x2="50" y2="300" stroke="#415a77" stroke-width="1"/>
+                <text x="300" y="290" text-anchor="middle" fill="#778da9" font-size="12">Phase Shift (rad)</text>
+                <text x="20" y="20" fill="#778da9" font-size="12">Transmission</text>
+                <text x="550" y="20" fill="#00d4aa" font-size="12">Out 1</text>
+                <text x="550" y="40" fill="#90e0ef" font-size="12">Out 2</text>
+                <circle id="tf-marker" r="6" fill="#ffd166"/>
+            </svg>
+        </div>
+
+        <div class="card">
+            <h2>Waveguide Modes</h2>
+            <svg id="mode-plot" viewBox="0 0 600 250" preserveAspectRatio="xMidYMid meet">
+                <rect width="600" height="250" fill="#0d1b2a"/>
+                <!-- TE0 -->
+                <path d="M 100 125 Q 200 50 300 125 T 500 125" fill="none" stroke="#00d4aa" stroke-width="3"/>
+                <text x="300" y="60" text-anchor="middle" fill="#00d4aa" font-size="12">TE₀</text>
+                <!-- TE1 -->
+                <path d="M 100 125 Q 200 100 300 125 T 500 125" fill="none" stroke="#90e0ef" stroke-width="2" stroke-dasharray="5,3"/>
+                <path d="M 100 125 Q 200 150 300 125 T 500 125" fill="none" stroke="#90e0ef" stroke-width="2" stroke-dasharray="5,3"/>
+                <text x="300" y="200" text-anchor="middle" fill="#90e0ef" font-size="12">TE₁</text>
+                <!-- Waveguide cross-section -->
+                <rect x="250" y="100" width="100" height="50" fill="none" stroke="#ffd166" stroke-width="2"/>
+                <text x="300" y="130" text-anchor="middle" fill="#ffd166" font-size="10">Si₃N₄</text>
+            </svg>
+        </div>
+
+        <footer><p>Space Photonics Digital Twin — 3D Visualization Module</p></footer>
     </div>
 
-    <script type="module">
-        import * as THREE from 'three';
-        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    <script>
+        let animId = null;
+        let animPhase = 0;
 
-        // ===== SCENE 1: SATELLITE WITH PPLN =====
-        function initSatelliteScene() {
-            const container = document.getElementById('satellite-3d');
-            const scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x0a0e1a);
+        function computeOutputs(phase, power, wavelength, temp) {
+            // MZI transfer function
+            const T1 = Math.cos(phase / 2) ** 2;
+            const T2 = Math.sin(phase / 2) ** 2;
             
-            const camera = new THREE.PerspectiveCamera(50, container.clientWidth / container.clientHeight, 0.1, 1000);
-            camera.position.set(8, 5, 8);
+            // Wavelength dependence (FSR = 10 nm)
+            const fsr = 10;
+            const wl_offset = (wavelength - 1550) / fsr;
+            const phase_eff = phase + 2 * Math.PI * wl_offset;
             
-            const renderer = new THREE.WebGLRenderer({ antialias: true });
-            renderer.setSize(container.clientWidth, container.clientHeight);
-            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-            container.appendChild(renderer.domElement);
+            // Temperature dependence (dn/dT = 4e-5 /°C)
+            const dphase_T = 0.1 * (temp - 25);
+            const phase_total = phase_eff + dphase_T;
             
-            const controls = new OrbitControls(camera, renderer.domElement);
-            controls.enableDamping = true;
-            controls.autoRotate = true;
-            controls.autoRotateSpeed = 0.5;
-
-            // Lights
-            const ambient = new THREE.AmbientLight(0x404040, 0.5);
-            scene.add(ambient);
-            const dirLight = new THREE.DirectionalLight(0xffffff, 1);
-            dirLight.position.set(10, 10, 5);
-            scene.add(dirLight);
-            const blueLight = new THREE.PointLight(0x00d4aa, 2, 20);
-            blueLight.position.set(-2, 0, 0);
-            scene.add(blueLight);
-
-            // Satellite Bus (hexagonal prism)
-            const busGeo = new THREE.CylinderGeometry(1, 1, 2, 6);
-            const busMat = new THREE.MeshStandardMaterial({ 
-                color: 0x1b263b, 
-                metalness: 0.8, 
-                roughness: 0.3 
-            });
-            const bus = new THREE.Mesh(busGeo, busMat);
-            bus.rotation.z = Math.PI / 2;
-            scene.add(bus);
-
-            // Solar Panels
-            const panelGeo = new THREE.BoxGeometry(0.1, 3, 1.5);
-            const panelMat = new THREE.MeshStandardMaterial({ 
-                color: 0x0d1b2a, 
-                metalness: 0.9, 
-                roughness: 0.1,
-                emissive: 0x001133,
-                emissiveIntensity: 0.3
-            });
-            const panel1 = new THREE.Mesh(panelGeo, panelMat);
-            panel1.position.set(0, 2, 0);
-            scene.add(panel1);
-            const panel2 = new THREE.Mesh(panelGeo, panelMat);
-            panel2.position.set(0, -2, 0);
-            scene.add(panel2);
-
-            // OPA Faces (6 faces around the hexagonal bus)
-            const opaGeo = new THREE.PlaneGeometry(0.8, 0.6);
-            const opaMat = new THREE.MeshStandardMaterial({ 
-                color: 0x00d4aa, 
-                emissive: 0x00d4aa, 
-                emissiveIntensity: 0.5,
-                side: THREE.DoubleSide,
-                transparent: true,
-                opacity: 0.8
-            });
+            const out1 = power * Math.cos(phase_total / 2) ** 2;
+            const out2 = power * Math.sin(phase_total / 2) ** 2;
             
-            const opaFaces = [];
-            for (let i = 0; i < 6; i++) {
-                const angle = (i / 6) * Math.PI * 2;
-                const face = new THREE.Mesh(opaGeo, opaMat.clone());
-                face.position.set(
-                    Math.cos(angle) * 1.1,
-                    0,
-                    Math.sin(angle) * 1.1
-                );
-                face.lookAt(0, 0, 0);
-                face.rotateY(Math.PI);
-                scene.add(face);
-                opaFaces.push(face);
-                
-                // OPA beam (transmit - blue)
-                const beamGeo = new THREE.CylinderGeometry(0.02, 0.1, 3, 8);
-                const beamMat = new THREE.MeshBasicMaterial({ 
-                    color: 0x00d4aa, 
-                    transparent: true, 
-                    opacity: 0.4 
-                });
-                const beam = new THREE.Mesh(beamGeo, beamMat);
-                beam.position.set(
-                    Math.cos(angle) * 2.5,
-                    0,
-                    Math.sin(angle) * 2.5
-                );
-                beam.lookAt(
-                    Math.cos(angle) * 10,
-                    0,
-                    Math.sin(angle) * 10
-                );
-                beam.rotateX(Math.PI / 2);
-                scene.add(beam);
-                
-                // PPLN glow (receive - red)
-                const glowGeo = new THREE.SphereGeometry(0.15, 16, 16);
-                const glowMat = new THREE.MeshBasicMaterial({ 
-                    color: 0xe63946, 
-                    transparent: true, 
-                    opacity: 0.3 
-                });
-                const glow = new THREE.Mesh(glowGeo, glowMat);
-                glow.position.copy(face.position);
-                glow.position.multiplyScalar(1.3);
-                scene.add(glow);
-            }
-
-            // PPLN waveguide (internal - shown as translucent)
-            const pplnGeo = new THREE.BoxGeometry(0.3, 0.1, 1.5);
-            const pplnMat = new THREE.MeshStandardMaterial({ 
-                color: 0xff6b9d, 
-                transparent: true, 
-                opacity: 0.6,
-                emissive: 0xff6b9d,
-                emissiveIntensity: 0.3
-            });
-            const ppln = new THREE.Mesh(pplnGeo, pplnMat);
-            ppln.position.set(0, 0, 0);
-            scene.add(ppln);
-
-            // Poling pattern lines
-            for (let i = 0; i < 20; i++) {
-                const lineGeo = new THREE.BoxGeometry(0.02, 0.12, 0.02);
-                const lineMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.5 });
-                const line = new THREE.Mesh(lineGeo, lineMat);
-                line.position.set(-0.7 + i * 0.07, 0, 0);
-                scene.add(line);
-            }
-
-            // Stars
-            const starGeo = new THREE.BufferGeometry();
-            const starCount = 500;
-            const starPos = new Float32Array(starCount * 3);
-            for (let i = 0; i < starCount * 3; i++) {
-                starPos[i] = (Math.random() - 0.5) * 50;
-            }
-            starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
-            const starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.05 });
-            const stars = new THREE.Points(starGeo, starMat);
-            scene.add(stars);
-
-            // Animation
-            let time = 0;
-            function animate() {
-                requestAnimationFrame(animate);
-                time += 0.016;
-                
-                // Pulse OPA faces
-                opaFaces.forEach((face, i) => {
-                    face.material.emissiveIntensity = 0.3 + 0.2 * Math.sin(time * 2 + i);
-                });
-                
-                // Rotate stars slowly
-                stars.rotation.y += 0.0002;
-                
-                controls.update();
-                renderer.render(scene, camera);
-            }
-            animate();
-
-            window.addEventListener('resize', () => {
-                camera.aspect = container.clientWidth / container.clientHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize(container.clientWidth, container.clientHeight);
-            });
+            // Extinction ratio
+            const er = out2 > 0.001 ? 10 * Math.log10(out1 / out2) : 40;
             
-            return { scene, camera, controls };
+            // Insertion loss (3 dB splitter + 2 dB propagation)
+            const il = 5;
+            
+            return { out1, out2, er, il, phase_total };
         }
 
-        // ===== SCENE 2: PPLN WAVEGUIDE INTERNAL =====
-        function initPPLNScene() {
-            const container = document.getElementById('ppln-3d');
-            const scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x0a0e1a);
+        function draw() {
+            const phase = parseFloat(document.getElementById('phase').value);
+            const wavelength = parseFloat(document.getElementById('wavelength').value);
+            const temp = parseFloat(document.getElementById('temperature').value);
+            const power = parseFloat(document.getElementById('power').value);
             
-            const camera = new THREE.PerspectiveCamera(40, container.clientWidth / container.clientHeight, 0.1, 100);
-            camera.position.set(3, 2, 5);
+            document.getElementById('phase-val').textContent = phase.toFixed(2);
+            document.getElementById('wl-val').textContent = wavelength;
+            document.getElementById('temp-val').textContent = temp;
+            document.getElementById('power-val').textContent = power.toFixed(1);
             
-            const renderer = new THREE.WebGLRenderer({ antialias: true });
-            renderer.setSize(container.clientWidth, container.clientHeight);
-            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-            container.appendChild(renderer.domElement);
+            const { out1, out2, er, il } = computeOutputs(phase, power, wavelength, temp);
             
-            const controls = new OrbitControls(camera, renderer.domElement);
-            controls.enableDamping = true;
-            controls.autoRotate = true;
-            controls.autoRotateSpeed = 0.3;
-
-            // Lights
-            scene.add(new THREE.AmbientLight(0x404040, 0.5));
-            scene.add(new THREE.DirectionalLight(0xffffff, 0.8));
-            const pumpLight = new THREE.PointLight(0xe63946, 3, 10);
-            pumpLight.position.set(-2, 0, 0);
-            scene.add(pumpLight);
-
-            // PPLN waveguide (main crystal)
-            const crystalGeo = new THREE.BoxGeometry(6, 0.8, 0.4);
-            const crystalMat = new THREE.MeshPhysicalMaterial({
-                color: 0xff6b9d,
-                transparent: true,
-                opacity: 0.25,
-                transmission: 0.6,
-                roughness: 0.1,
-                metalness: 0.0,
-                thickness: 0.5
-            });
-            const crystal = new THREE.Mesh(crystalGeo, crystalMat);
-            scene.add(crystal);
-
-            // Poling domains (alternating + and -)
-            const domainCount = 40;
-            const domainWidth = 6 / domainCount;
-            for (let i = 0; i < domainCount; i++) {
-                const isUp = i % 2 === 0;
-                const arrowGeo = new THREE.ConeGeometry(0.04, 0.15, 8);
-                const arrowMat = new THREE.MeshBasicMaterial({ 
-                    color: isUp ? 0xffffff : 0x778da9,
-                    transparent: true,
-                    opacity: 0.6
-                });
-                const arrow = new THREE.Mesh(arrowGeo, arrowMat);
-                arrow.position.set(-3 + i * domainWidth + domainWidth/2, isUp ? 0.5 : -0.5, 0);
-                arrow.rotation.z = isUp ? 0 : Math.PI;
-                scene.add(arrow);
+            document.getElementById('output1').textContent = out1.toFixed(2);
+            document.getElementById('output2').textContent = out2.toFixed(2);
+            document.getElementById('extinction').textContent = er.toFixed(1);
+            document.getElementById('loss').textContent = il.toFixed(1);
+            
+            // Update SVG colors
+            const intensity1 = Math.min(out1 / power, 1);
+            const intensity2 = Math.min(out2 / power, 1);
+            document.getElementById('wg1').setAttribute('stroke-opacity', 0.3 + 0.7 * intensity1);
+            document.getElementById('wg2').setAttribute('stroke-opacity', 0.3 + 0.7 * intensity2);
+            document.getElementById('pd1').setAttribute('fill-opacity', 0.3 + 0.7 * intensity1);
+            document.getElementById('pd2').setAttribute('fill-opacity', 0.3 + 0.7 * intensity2);
+            
+            // Transfer function plot
+            const points1 = [];
+            const points2 = [];
+            for (let p = 0; p <= 6.28; p += 0.1) {
+                const T1 = Math.cos(p / 2) ** 2;
+                const T2 = Math.sin(p / 2) ** 2;
+                const x = 50 + (p / 6.28) * 500;
+                points1.push(`${x},${250 - T1 * 200}`);
+                points2.push(`${x},${250 - T2 * 200}`);
             }
-
-            // Signal photons (blue, weak)
-            const signalPhotons = [];
-            for (let i = 0; i < 8; i++) {
-                const photonGeo = new THREE.SphereGeometry(0.04, 8, 8);
-                const photonMat = new THREE.MeshBasicMaterial({ 
-                    color: 0x90e0ef,
-                    transparent: true,
-                    opacity: 0.8
-                });
-                const photon = new THREE.Mesh(photonGeo, photonMat);
-                scene.add(photon);
-                signalPhotons.push({ mesh: photon, offset: i * 0.8, speed: 1.5 });
-            }
-
-            // Pump photons (red, strong)
-            const pumpPhotons = [];
-            for (let i = 0; i < 12; i++) {
-                const photonGeo = new THREE.SphereGeometry(0.06, 8, 8);
-                const photonMat = new THREE.MeshBasicMaterial({ 
-                    color: 0xe63946,
-                    transparent: true,
-                    opacity: 0.9
-                });
-                const photon = new THREE.Mesh(photonGeo, photonMat);
-                scene.add(photon);
-                pumpPhotons.push({ mesh: photon, offset: i * 0.5, speed: 1.5 });
-            }
-
-            // Idler photons (yellow, generated)
-            const idlerPhotons = [];
-            for (let i = 0; i < 6; i++) {
-                const photonGeo = new THREE.SphereGeometry(0.05, 8, 8);
-                const photonMat = new THREE.MeshBasicMaterial({ 
-                    color: 0xffd166,
-                    transparent: true,
-                    opacity: 0
-                });
-                const photon = new THREE.Mesh(photonGeo, photonMat);
-                scene.add(photon);
-                idlerPhotons.push({ mesh: photon, offset: i * 1.0, speed: 1.5, generated: false });
-            }
-
-            // Waveguide cladding (transparent box)
-            const cladGeo = new THREE.BoxGeometry(6.2, 1.0, 0.6);
-            const cladMat = new THREE.MeshBasicMaterial({ 
-                color: 0x1b263b, 
-                wireframe: true,
-                transparent: true,
-                opacity: 0.3
-            });
-            const clad = new THREE.Mesh(cladGeo, cladMat);
-            scene.add(clad);
-
-            // Labels
-            function makeLabel(text, pos) {
-                const div = document.createElement('div');
-                div.style.cssText = 'position:absolute; color:#778da9; font-size:11px; pointer-events:none;';
-                div.textContent = text;
-                container.appendChild(div);
-                return { element: div, position: pos };
-            }
-
-            // Animation
-            let time = 0;
-            function animate() {
-                requestAnimationFrame(animate);
-                time += 0.016;
-
-                // Signal photons
-                signalPhotons.forEach(p => {
-                    const x = ((time * p.speed + p.offset) % 8) - 4;
-                    p.mesh.position.set(x, 0.1, 0);
-                    p.mesh.material.opacity = x < -3 || x > 3 ? 0.3 : 0.8;
-                });
-
-                // Pump photons
-                pumpPhotons.forEach(p => {
-                    const x = ((time * p.speed + p.offset) % 8) - 4;
-                    p.mesh.position.set(x, -0.1, 0);
-                    p.mesh.material.opacity = x < -3 || x > 3 ? 0.3 : 0.9;
-                });
-
-                // Idler photons (generated in center)
-                idlerPhotons.forEach((p, i) => {
-                    const cycle = (time * p.speed + p.offset) % 8;
-                    const x = cycle - 4;
-                    
-                    // Only show idler in center region (SFG zone)
-                    if (x > -1.5 && x < 1.5) {
-                        p.mesh.material.opacity = 0.9;
-                        p.mesh.position.set(x, 0.2 + 0.1 * Math.sin(time * 3 + i), 0);
-                    } else {
-                        p.mesh.material.opacity = 0;
-                        p.mesh.position.set(x, 0, 0);
-                    }
-                });
-
-                // Pulse pump light
-                pumpLight.intensity = 2 + Math.sin(time * 3) * 1;
-
-                controls.update();
-                renderer.render(scene, camera);
-            }
-            animate();
-
-            window.addEventListener('resize', () => {
-                camera.aspect = container.clientWidth / container.clientHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize(container.clientWidth, container.clientHeight);
-            });
+            document.getElementById('tf-line').setAttribute('points', points1.join(' '));
+            document.getElementById('tf-line2').setAttribute('points', points2.join(' '));
+            
+            // Marker
+            const markerX = 50 + (phase / 6.28) * 500;
+            const markerY = 250 - (out1 / power) * 200;
+            const marker = document.getElementById('tf-marker');
+            marker.setAttribute('cx', markerX);
+            marker.setAttribute('cy', markerY);
         }
 
-        // ===== SCENE 3: OPA BEAM STEERING =====
-        function initOPAScene() {
-            const container = document.getElementById('opa-3d');
-            const scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x0a0e1a);
-            
-            const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
-            camera.position.set(0, 3, 8);
-            
-            const renderer = new THREE.WebGLRenderer({ antialias: true });
-            renderer.setSize(container.clientWidth, container.clientHeight);
-            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-            container.appendChild(renderer.domElement);
-            
-            const controls = new OrbitControls(camera, renderer.domElement);
-            controls.enableDamping = true;
-            controls.autoRotate = true;
-            controls.autoRotateSpeed = 0.2;
-
-            scene.add(new THREE.AmbientLight(0x404040, 0.5));
-            scene.add(new THREE.DirectionalLight(0xffffff, 1));
-
-            // OPA Array (8x8 grid of phase shifters)
-            const elements = [];
-            const gridSize = 8;
-            const spacing = 0.25;
-            
-            for (let x = 0; x < gridSize; x++) {
-                for (let y = 0; y < gridSize; y++) {
-                    const geo = new THREE.BoxGeometry(0.15, 0.15, 0.05);
-                    const mat = new THREE.MeshStandardMaterial({ 
-                        color: 0x1b263b,
-                        emissive: 0x00d4aa,
-                        emissiveIntensity: 0.3
-                    });
-                    const elem = new THREE.Mesh(geo, mat);
-                    elem.position.set(
-                        (x - gridSize/2) * spacing,
-                        (y - gridSize/2) * spacing,
-                        0
-                    );
-                    scene.add(elem);
-                    elements.push({ mesh: elem, gx: x, gy: y });
-                }
-            }
-
-            // Substrate
-            const subGeo = new THREE.BoxGeometry(2.2, 2.2, 0.1);
-            const subMat = new THREE.MeshStandardMaterial({ 
-                color: 0x0d1b2a,
-                metalness: 0.5,
-                roughness: 0.5
-            });
-            const substrate = new THREE.Mesh(subGeo, subMat);
-            substrate.position.z = -0.1;
-            scene.add(substrate);
-
-            // Beam (steerable cylinder)
-            const beamCount = 3;
-            const beams = [];
-            for (let b = 0; b < beamCount; b++) {
-                const beamGeo = new THREE.CylinderGeometry(0.08, 0.3, 4, 16);
-                const beamMat = new THREE.MeshBasicMaterial({ 
-                    color: [0x00d4aa, 0xe63946, 0x90e0ef][b],
-                    transparent: true,
-                    opacity: 0.3
-                });
-                const beam = new THREE.Mesh(beamGeo, beamMat);
-                beam.rotation.x = Math.PI / 2;
-                beam.position.set(0, 0, 2);
-                scene.add(beam);
-                beams.push(beam);
-            }
-
-            // Targets
-            const targetGeo = new THREE.SphereGeometry(0.15, 16, 16);
-            const targets = [];
-            for (let t = 0; t < 3; t++) {
-                const targetMat = new THREE.MeshStandardMaterial({ 
-                    color: [0x00d4aa, 0xe63946, 0x90e0ef][t],
-                    emissive: [0x00d4aa, 0xe63946, 0x90e0ef][t],
-                    emissiveIntensity: 0.5
-                });
-                const target = new THREE.Mesh(targetGeo, targetMat);
-                target.position.set(
-                    (t - 1) * 2,
-                    0.5,
-                    5
-                );
-                scene.add(target);
-                targets.push(target);
-            }
-
-            // Animation
-            let time = 0;
-            function animate() {
-                requestAnimationFrame(animate);
-                time += 0.016;
-
-                // Steer beams
-                beams.forEach((beam, i) => {
-                    const angle = Math.sin(time * 0.5 + i * 2) * 0.3;
-                    beam.rotation.x = Math.PI / 2 + angle;
-                    beam.rotation.y = Math.cos(time * 0.3 + i * 2) * 0.2;
-                    
-                    // Update position to match rotation
-                    const dir = new THREE.Vector3(0, 0, 1);
-                    dir.applyEuler(beam.rotation);
-                    beam.position.copy(dir.multiplyScalar(2));
-                });
-
-                // Pulse targets
-                targets.forEach(t => {
-                    t.material.emissiveIntensity = 0.3 + 0.2 * Math.sin(time * 2);
-                });
-
-                // Phase gradient on OPA elements
-                elements.forEach(elem => {
-                    const phase = Math.sin(elem.gx * 0.5 + time) * 0.5 + 0.5;
-                    elem.mesh.material.emissiveIntensity = 0.1 + phase * 0.4;
-                });
-
-                controls.update();
-                renderer.render(scene, camera);
-            }
-            animate();
-
-            window.addEventListener('resize', () => {
-                camera.aspect = container.clientWidth / container.clientHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize(container.clientWidth, container.clientHeight);
-            });
+        function startAnim() {
+            if (animId) return;
+            animId = setInterval(() => {
+                animPhase += 0.05;
+                if (animPhase > 6.28) animPhase = 0;
+                document.getElementById('phase').value = animPhase;
+                draw();
+            }, 50);
         }
 
-        // Initialize all scenes
-        initSatelliteScene();
-        initPPLNScene();
-        initOPAScene();
+        function stopAnim() {
+            if (animId) {
+                clearInterval(animId);
+                animId = null;
+            }
+        }
 
-        // View switching (simplified - just logs for now)
-        window.showSatView = function(view) {
-            document.querySelectorAll('.scene-btn').forEach(b => b.classList.remove('active'));
-            event.target.classList.add('active');
-            console.log('Switching to view:', view);
-        };
+        ['phase', 'wavelength', 'temperature', 'power'].forEach(id => {
+            document.getElementById(id).addEventListener('input', draw);
+        });
+
+        draw();
+        startAnim();
+        setTimeout(stopAnim, 10000); // Auto-stop after 10s
     </script>
 </body>
 </html>
