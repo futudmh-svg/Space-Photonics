@@ -38,6 +38,104 @@
         .status-item { text-align: center; }
         .status-value { color: #00d4aa; font-family: monospace; font-size: 1.1em; }
         .status-label { color: #778da9; font-size: 0.85em; }
+    
+        /* ─── Responsive & Mobile ─── */
+        @media (max-width: 900px) {
+            nav { flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start; padding: 4px; gap: 2px; }
+            nav a { font-size: 0.65em; padding: 4px 6px; flex-shrink: 0; }
+            .hud-left, .hud-right { width: 180px; font-size: 0.65em; max-height: calc(100vh - 220px); }
+            .hud-left { left: 4px; top: 55px; }
+            .hud-right { right: 4px; top: 55px; }
+            .scenario-controls { top: 55px; }
+            .scenario-btn { padding: 5px 8px; font-size: 0.7em; }
+            .time-controls { padding: 6px 8px; gap: 4px; }
+            .minimap-container { display: none; }
+            .cam-indicator { display: none; }
+            .camera-feed { width: 240px; height: 150px; }
+            #cam-canvas { height: 80px !important; }
+        }
+        @media (max-width: 600px) {
+            .hud-left, .hud-right { width: 150px; font-size: 0.6em; padding: 6px; }
+            .hud-bottom-left, .hud-bottom-right { display: none; }
+            .camera-feed { width: 200px; height: 120px; right: 4px; left: auto; transform: none; bottom: 50px; }
+            .time-controls { left: 4px; transform: none; }
+        }
+        
+        /* Collapsible HUD */
+        .hud-toggle {
+            position: fixed; top: 55px; z-index: 150;
+            background: rgba(5,8,17,0.9); border: 1px solid #00d4aa;
+            color: #00d4aa; padding: 4px 8px; border-radius: 4px;
+            cursor: pointer; font-size: 0.7em; display: none;
+        }
+        @media (max-width: 900px) {
+            .hud-toggle { display: block; }
+            .hud-left.collapsed, .hud-right.collapsed { display: none; }
+        }
+        #toggle-left { left: 4px; }
+        #toggle-right { right: 4px; }
+        
+        /* Fullscreen mode */
+        body.fullscreen nav,
+        body.fullscreen .hud-left,
+        body.fullscreen .hud-right,
+        body.fullscreen .scenario-controls,
+        body.fullscreen .time-controls,
+        body.fullscreen .hud-bottom-left,
+        body.fullscreen .hud-bottom-right,
+        body.fullscreen .camera-feed,
+        body.fullscreen .minimap-container,
+        body.fullscreen .cam-indicator,
+        body.fullscreen .hud-toggle {
+            display: none !important;
+        }
+        #fs-toggle {
+            position: fixed; top: 55px; right: 50%; transform: translateX(50%);
+            z-index: 150; background: rgba(5,8,17,0.9); border: 1px solid #00d4aa;
+            color: #00d4aa; padding: 4px 10px; border-radius: 4px;
+            cursor: pointer; font-size: 0.7em;
+        }
+        body.fullscreen #fs-toggle { display: block !important; top: 8px; right: 8px; transform: none; }
+
+    
+        /* ─── Hamburger Navigation ─── */
+        .nav-hamburger {
+            display: none;
+            position: fixed; top: 8px; left: 8px; z-index: 300;
+            background: rgba(5,8,17,0.92); border: 1px solid #00d4aa;
+            color: #00d4aa; padding: 8px 12px; border-radius: 8px;
+            cursor: pointer; font-size: 1.2em;
+        }
+        .nav-overlay {
+            display: none; position: fixed; inset: 0; z-index: 250;
+            background: rgba(5,8,17,0.95); backdrop-filter: blur(12px);
+            flex-direction: column; align-items: center; justify-content: center;
+            gap: 8px; padding: 20px;
+        }
+        .nav-overlay.active { display: flex; }
+        .nav-overlay a {
+            color: #90e0ef; text-decoration: none; padding: 10px 20px;
+            font-size: 1.1em; border-radius: 8px;
+            background: rgba(13,27,42,0.7); border: 1px solid rgba(65,90,119,0.3);
+            width: 200px; text-align: center;
+        }
+        .nav-overlay a:hover { background: #00d4aa; color: #050811; }
+        .nav-close {
+            position: absolute; top: 8px; right: 8px;
+            color: #e63946; font-size: 1.5em; cursor: pointer;
+            background: none; border: none; padding: 8px;
+        }
+        @media (max-width: 768px) {
+            nav { display: none; }
+            .nav-hamburger { display: block; }
+        }
+
+        .hud-left, .hud-right {
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        .hud-left.collapsed { transform: translateX(-120%); opacity: 0; }
+        .hud-right.collapsed { transform: translateX(120%); opacity: 0; }
+
     </style>
     <script type="importmap">
     {
@@ -480,6 +578,19 @@
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
+    
+        // Hamburger nav
+        const hamBtn = document.getElementById('nav-hamburger');
+        const navOverlay = document.getElementById('nav-overlay');
+        const navClose = document.getElementById('nav-close');
+        if (hamBtn && navOverlay) {
+            hamBtn.addEventListener('click', () => navOverlay.classList.add('active'));
+            navClose.addEventListener('click', () => navOverlay.classList.remove('active'));
+            navOverlay.querySelectorAll('a').forEach(a => {
+                a.addEventListener('click', () => navOverlay.classList.remove('active'));
+            });
+        }
+
     </script>
 </body>
 </html>
