@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hypersonic Tracking — Space Photonics</title>
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        }
+    }
+    </script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #050811; color: #e0e6ed; line-height: 1.6; }
@@ -54,6 +62,22 @@
 
         <h1>🚀 Hypersonic Vehicle Tracker</h1>
         <p class="subtitle">Real-time satellite tracking simulation with multi-face handoff</p>
+
+        <!-- 3D Simulation -->
+        <div class="card">
+            <h2>🌍 3D Tracking Simulation</h2>
+            <div id="sim3d-container" style="width:100%;height:400px;position:relative;background:#0d1b2a;border-radius:8px;overflow:hidden;">
+                <canvas id="sim3d" style="width:100%;height:100%;display:block;"></canvas>
+                <div style="position:absolute;top:10px;left:10px;background:rgba(5,8,17,0.85);border:1px solid #415a77;border-radius:8px;padding:10px;font-size:0.7em;max-width:200px;">
+                    <div style="color:#00d4aa;font-weight:600;margin-bottom:4px">📡 Tracking Geometry</div>
+                    <div style="display:flex;justify-content:space-between;margin:2px 0"><span style="color:#90e0ef">Range:</span><span id="s3d-range" style="color:#ffd166;font-family:monospace">350 km</span></div>
+                    <div style="display:flex;justify-content:space-between;margin:2px 0"><span style="color:#90e0ef">Elev:</span><span id="s3d-elev" style="color:#ffd166;font-family:monospace">45°</span></div>
+                    <div style="display:flex;justify-content:space-between;margin:2px 0"><span style="color:#90e0ef">Doppler:</span><span id="s3d-doppler" style="color:#ffd166;font-family:monospace">+2.14 GHz</span></div>
+                    <div style="display:flex;justify-content:space-between;margin:2px 0"><span style="color:#90e0ef">Plasma:</span><span id="s3d-plasma" style="color:#ffd166;font-family:monospace">9.0 GHz</span></div>
+                    <div style="display:flex;justify-content:space-between;margin:2px 0"><span style="color:#90e0ef">Face:</span><span id="s3d-face" style="color:#ffd166;font-family:monospace">Forward</span></div>
+                </div>
+            </div>
+        </div>
 
         <div class="card">
             <h2>Vehicle Parameters</h2>
@@ -282,6 +306,162 @@
 
         // Initial draw
         drawTracker();
+
+        // ═══════════════════════════════════════════════════════════════
+        //  3D THREE.JS SIMULATION
+        // ═══════════════════════════════════════════════════════════════
+    </script>
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        const sim3dCanvas = document.getElementById('sim3d');
+        const sim3dScene = new THREE.Scene();
+        sim3dScene.background = new THREE.Color(0x0d1b2a);
+        const sim3dCamera = new THREE.PerspectiveCamera(50, sim3dCanvas.clientWidth / sim3dCanvas.clientHeight, 0.1, 500);
+        sim3dCamera.position.set(0, 8, 18);
+        const sim3dRenderer = new THREE.WebGLRenderer({ canvas: sim3dCanvas, antialias: true });
+        sim3dRenderer.setSize(sim3dCanvas.clientWidth, sim3dCanvas.clientHeight);
+
+        const sim3dControls = new OrbitControls(sim3dCamera, sim3dCanvas);
+        sim3dControls.enableDamping = true;
+        sim3dControls.autoRotate = true;
+        sim3dControls.autoRotateSpeed = 0.3;
+
+        sim3dScene.add(new THREE.AmbientLight(0x404040, 0.5));
+        const sim3dSun = new THREE.DirectionalLight(0xffffff, 1.0);
+        sim3dSun.position.set(10, 20, 10);
+        sim3dScene.add(sim3dSun);
+
+        // Earth
+        const EARTH_R = 6;
+        const sim3dEarth = new THREE.Mesh(
+            new THREE.SphereGeometry(EARTH_R, 32, 32),
+            new THREE.MeshPhongMaterial({ color: 0x1a3a5c, emissive: 0x0a1a2a, shininess: 25 })
+        );
+        sim3dScene.add(sim3dEarth);
+
+        // Atmosphere
+        sim3dScene.add(new THREE.Mesh(
+            new THREE.SphereGeometry(EARTH_R * 1.04, 16, 16),
+            new THREE.MeshBasicMaterial({ color: 0x4488cc, transparent: true, opacity: 0.06, side: THREE.BackSide })
+        ));
+
+        // Satellites
+        const sim3dSats = [];
+        const satColors = [0x00d4aa, 0x90e0ef, 0xffd166];
+        for (let i = 0; i < 3; i++) {
+            const sat = new THREE.Mesh(
+                new THREE.BoxGeometry(0.3, 0.2, 0.4),
+                new THREE.MeshPhongMaterial({ color: satColors[i] })
+            );
+            const angle = i * (Math.PI * 2 / 3);
+            const r = EARTH_R + 2.5;
+            sat.position.set(r * Math.cos(angle), 1, r * Math.sin(angle));
+            sat.userData = { id: i, baseAngle: angle };
+            sim3dScene.add(sat);
+            sim3dSats.push(sat);
+
+            // Beam to vehicle (updated each frame)
+            const beam = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.015, 0.015, 1, 4),
+                new THREE.MeshBasicMaterial({ color: satColors[i], transparent: true, opacity: 0.2 })
+            );
+            beam.geometry.rotateX(Math.PI / 2);
+            beam.visible = false;
+            sim3dScene.add(beam);
+            sat.userData.beam = beam;
+        }
+
+        // Enemy HGV
+        const h3d = new THREE.Group();
+        const h3dBody = new THREE.Mesh(
+            new THREE.ConeGeometry(0.15, 0.6, 8),
+            new THREE.MeshPhongMaterial({ color: 0xe63946, emissive: 0x440000, emissiveIntensity: 0.3 })
+        );
+        h3dBody.rotation.x = Math.PI / 2;
+        h3d.add(h3dBody);
+        const h3dPlasma = new THREE.Mesh(
+            new THREE.SphereGeometry(0.25, 12, 12),
+            new THREE.MeshBasicMaterial({ color: 0xff6600, transparent: true, opacity: 0.12, blending: THREE.AdditiveBlending })
+        );
+        h3d.add(h3dPlasma);
+        sim3dScene.add(h3d);
+
+        // Triangulation visualization
+        const triGeo = new THREE.BufferGeometry();
+        const triMat = new THREE.LineBasicMaterial({ color: 0x00d4aa, transparent: true, opacity: 0.15 });
+        const triLine = new THREE.Line(triGeo, triMat);
+        sim3dScene.add(triLine);
+
+        function update3DSim() {
+            const mach = parseFloat(document.getElementById('mach').value);
+            const alt = parseFloat(document.getElementById('altitude').value);
+            const fpa = parseFloat(document.getElementById('fpa').value) * Math.PI / 180;
+            const satAlt = parseFloat(document.getElementById('sat-alt').value);
+            const t = Date.now() * 0.0005;
+
+            // Vehicle position
+            const r = EARTH_R + alt * 0.0005;
+            const lat = 30 + 20 * Math.sin(t * 0.3);
+            const lon = t * 20;
+            h3d.position.set(
+                r * Math.cos(lat * 0.017) * Math.cos(lon * 0.017),
+                r * Math.sin(lat * 0.017),
+                r * Math.cos(lat * 0.017) * Math.sin(lon * 0.017)
+            );
+            h3d.lookAt(h3d.position.clone().add(new THREE.Vector3(Math.cos(fpa), 0, Math.sin(fpa))));
+            h3dPlasma.material.opacity = 0.08 + 0.12 * (mach / 20);
+
+            // Satellites orbit
+            sim3dSats.forEach((sat, i) => {
+                sat.userData.baseAngle += 0.001;
+                const a = sat.userData.baseAngle;
+                const sr = EARTH_R + satAlt * 0.001;
+                sat.position.set(sr * Math.cos(a), 0.5, sr * Math.sin(a));
+                sat.lookAt(0, 0, 0);
+
+                // Beam
+                const beam = sat.userData.beam;
+                const dir = h3d.position.clone().sub(sat.position);
+                beam.position.copy(sat.position).add(dir.multiplyScalar(0.5));
+                beam.scale.set(1, 1, dir.length());
+                beam.lookAt(h3d.position);
+                beam.visible = dir.length() < 8;
+            });
+
+            // Triangulation lines
+            const triPoints = [];
+            sim3dSats.forEach(sat => {
+                if (sat.position.distanceTo(h3d.position) < 8) {
+                    triPoints.push(sat.position.clone());
+                    triPoints.push(h3d.position.clone());
+                }
+            });
+            triGeo.setFromPoints(triPoints);
+
+            // Update HUD
+            const slant = satAlt - alt;
+            const elev = Math.atan2(slant, 350) * 57.3;
+            document.getElementById('s3d-range').textContent = Math.floor(350 + 50 * Math.sin(t)) + ' km';
+            document.getElementById('s3d-elev').textContent = elev.toFixed(1) + '°';
+            document.getElementById('s3d-doppler').textContent = '+' + (mach * 0.214).toFixed(2) + ' GHz';
+            document.getElementById('s3d-plasma').textContent = (9 * Math.sqrt(mach * 1e17 / 1e18)).toFixed(1) + ' GHz';
+            const az = ((lon % 360) + 360) % 360;
+            document.getElementById('s3d-face').textContent = az < 45 || az > 315 ? 'Forward' : az < 135 ? 'Starboard' : az < 225 ? 'Aft' : 'Port';
+
+            sim3dControls.update();
+            sim3dRenderer.render(sim3dScene, sim3dCamera);
+            requestAnimationFrame(update3DSim);
+        }
+        update3DSim();
+
+        window.addEventListener('resize', () => {
+            const rect = sim3dCanvas.parentElement.getBoundingClientRect();
+            sim3dCamera.aspect = rect.width / rect.height;
+            sim3dCamera.updateProjectionMatrix();
+            sim3dRenderer.setSize(rect.width, rect.height);
+        });
     </script>
 </body>
 </html>
