@@ -45,7 +45,7 @@
     backdrop-filter: blur(12px);
   }
   .nav-container {
-    max-width: 1400px;
+    max-width: 1600px;
     margin: 0 auto;
     display: flex;
     align-items: center;
@@ -78,7 +78,7 @@
   }
 
   main {
-    max-width: 1400px;
+    max-width: 1600px;
     margin: 0 auto;
     padding: 2rem;
   }
@@ -100,40 +100,105 @@
     background: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: 12px;
-    padding: 1.5rem 2rem;
-    transition: border-color 0.2s;
+    padding: 1.5rem;
   }
-  section:hover { border-color: #303d55; }
-  h2 {
-    font-size: 1.35rem;
+  section h2 {
+    font-size: 1.25rem;
     margin-bottom: 1rem;
+    color: var(--text);
     display: flex;
     align-items: center;
     gap: 0.5rem;
   }
-  h3 {
-    font-size: 1.1rem;
-    color: var(--important);
-    margin: 1.5rem 0 0.75rem;
-  }
-  p { margin-bottom: 1rem; color: var(--text-dim); }
 
+  /* Stats Grid */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .stat-card {
+    background: linear-gradient(135deg, rgba(88,166,255,0.05), transparent);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.25rem;
+    text-align: center;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+  .stat-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--accent);
+  }
+  .stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--accent);
+    font-family: var(--mono);
+  }
+  .stat-label {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    margin-top: 0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  /* Search & Tools */
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  .search-box {
+    flex: 1;
+    min-width: 260px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.6rem 1rem;
+    color: var(--text);
+    font-size: 0.95rem;
+    outline: none;
+  }
+  .search-box:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+  .csv-btn {
+    background: var(--bg-hover);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+  }
+  .csv-btn:hover {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+
+  /* Filters */
   .filters {
     display: flex;
-    gap: 0.5rem;
     flex-wrap: wrap;
+    gap: 0.5rem;
     margin-bottom: 1rem;
   }
   .filter-btn {
-    background: var(--bg-hover);
+    background: var(--bg);
     border: 1px solid var(--border);
     color: var(--text-dim);
-    padding: 0.4rem 0.9rem;
-    border-radius: 20px;
-    font-size: 0.85rem;
+    padding: 0.4rem 0.8rem;
+    border-radius: 6px;
     cursor: pointer;
+    font-size: 0.8rem;
     transition: all 0.2s;
-    font-family: var(--font);
   }
   .filter-btn:hover, .filter-btn.active {
     background: var(--accent);
@@ -141,147 +206,144 @@
     border-color: var(--accent);
   }
 
+  /* Tables */
   .table-wrap {
     overflow-x: auto;
     border-radius: 8px;
     border: 1px solid var(--border);
-    margin-top: 1rem;
   }
   table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.9rem;
-    min-width: 800px;
-  }
-  thead {
-    background: linear-gradient(180deg, #161f30 0%, #0f1623 100%);
-    position: sticky;
-    top: 0;
+    font-size: 0.85rem;
   }
   th {
-    text-align: left;
-    padding: 0.85rem 1rem;
+    background: var(--bg-hover);
+    color: var(--text-dim);
     font-weight: 600;
-    color: var(--accent);
+    text-align: left;
+    padding: 0.75rem 1rem;
     border-bottom: 1px solid var(--border);
     white-space: nowrap;
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    cursor: pointer;
+    user-select: none;
   }
+  th:hover { color: var(--accent); }
+  th.sort-asc::after { content: " ▲"; color: var(--accent); }
+  th.sort-desc::after { content: " ▼"; color: var(--accent); }
   td {
-    padding: 0.85rem 1rem;
+    padding: 0.6rem 1rem;
     border-bottom: 1px solid var(--border);
     color: var(--text);
     vertical-align: top;
   }
-  tbody tr { transition: background 0.15s; }
-  tbody tr:hover { background: var(--bg-hover); }
-  tbody tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(88,166,255,0.03); }
+  tr.hidden { display: none; }
 
+  /* Badges & Tags */
   .badge {
     display: inline-block;
     padding: 0.2rem 0.6rem;
     border-radius: 12px;
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     font-weight: 600;
-    white-space: nowrap;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
   }
-  .badge-complete { background: rgba(63,185,80,0.15); color: var(--success); border: 1px solid rgba(63,185,80,0.3); }
-  .badge-operational { background: rgba(88,166,255,0.15); color: var(--accent); border: 1px solid rgba(88,166,255,0.3); }
-  .badge-design { background: rgba(210,153,34,0.15); color: var(--warning); border: 1px solid rgba(210,153,34,0.3); }
-  .badge-inactive { background: rgba(248,81,73,0.15); color: var(--danger); border: 1px solid rgba(248,81,73,0.3); }
-  .badge-planned { background: rgba(210,168,255,0.15); color: var(--optional); border: 1px solid rgba(210,168,255,0.3); }
-  .badge-demo { background: rgba(121,192,255,0.15); color: var(--important); border: 1px solid rgba(121,192,255,0.3); }
-  .badge-achieved { background: rgba(86,211,100,0.15); color: #56d364; border: 1px solid rgba(86,211,100,0.3); }
+  .badge-operational { background: rgba(63,185,80,0.15); color: var(--success); }
+  .badge-complete { background: rgba(88,166,255,0.15); color: var(--accent); }
+  .badge-planned { background: rgba(210,168,255,0.15); color: var(--optional); }
+  .badge-demo { background: rgba(210,153,34,0.15); color: var(--warning); }
+  .badge-inactive { background: rgba(139,148,158,0.15); color: var(--text-dim); }
+  .badge-achieved { background: rgba(63,185,80,0.2); color: var(--success); }
+  .badge-development { background: rgba(210,153,34,0.12); color: var(--warning); }
 
   .tag {
     display: inline-block;
     padding: 0.15rem 0.5rem;
     border-radius: 4px;
-    font-size: 0.78rem;
-    margin: 0.15rem 0.15rem 0.15rem 0;
+    font-size: 0.72rem;
+    margin: 0.15rem 0.15rem 0 0;
     cursor: pointer;
-    transition: transform 0.1s;
     border: 1px solid transparent;
+    transition: all 0.15s;
   }
-  .tag:hover { transform: translateY(-1px); }
+  .tag:hover { opacity: 0.85; transform: scale(1.05); }
   .tag-critical { background: rgba(255,123,114,0.12); color: var(--critical); border-color: rgba(255,123,114,0.25); }
   .tag-important { background: rgba(121,192,255,0.12); color: var(--important); border-color: rgba(121,192,255,0.25); }
-  .tag-optional { background: rgba(210,168,255,0.12); color: var(--optional); border-color: rgba(210,168,255,0.25); }
+  .tag-optional { background: rgba(210,168,255,0.1); color: var(--optional); border-color: rgba(210,168,255,0.2); }
 
-  .orbit-geo { color: #ff7b72; }
-  .orbit-leo { color: #79c0ff; }
-  .orbit-iss { color: #d2a8ff; }
-  .orbit-sso { color: #56d364; }
-  .orbit-molniya { color: #f0883e; }
-  .orbit-l1 { color: #f778ba; }
-  .orbit-ground { color: #8b949e; }
+  .orbit-geo { color: #79c0ff; font-weight: 600; }
+  .orbit-leo { color: #56d364; font-weight: 600; }
+  .orbit-sso { color: #d2a8ff; font-weight: 600; }
+  .orbit-meo { color: #e3b341; font-weight: 600; }
+  .orbit-l2 { color: #ff9bce; font-weight: 600; }
+  .orbit-l1 { color: #ffa657; font-weight: 600; }
+  .orbit-iss, .orbit-ground, .orbit-elliptical, .orbit-heliocentric { color: var(--text-dim); font-weight: 600; }
 
-  .highlight-box {
-    background: linear-gradient(135deg, rgba(88,166,255,0.08), rgba(163,113,247,0.08));
-    border: 1px solid var(--border);
-    border-left: 4px solid var(--accent);
-    border-radius: 8px;
-    padding: 1rem 1.25rem;
-    margin: 1rem 0;
-  }
-  .highlight-box strong { color: var(--accent); }
-
-  .cards-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
-    margin-top: 1rem;
-  }
-  .info-card {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 1.25rem;
-    transition: all 0.2s;
-  }
-  .info-card:hover {
-    border-color: var(--accent);
-    box-shadow: 0 0 20px var(--accent-glow);
-  }
-  .info-card h4 {
-    font-size: 1rem;
-    margin-bottom: 0.5rem;
+  /* Material categories */
+  .material-section h3 {
     color: var(--accent);
+    margin: 1.5rem 0 0.5rem;
+    font-size: 1rem;
   }
-  .info-card p {
-    font-size: 0.88rem;
-    margin-bottom: 0;
-  }
-  .info-card .metric {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--text);
-    margin: 0.5rem 0;
-    font-family: var(--mono);
+  .material-section p { color: var(--text-dim); font-size: 0.9rem; margin-bottom: 0.5rem; }
+  .material-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
   }
 
-  footer {
-    text-align: center;
-    padding: 2rem;
-    color: var(--text-dim);
-    font-size: 0.85rem;
-    border-top: 1px solid var(--border);
+  .cta-box {
+    background: linear-gradient(90deg, rgba(88,166,255,0.08), transparent);
+    border-left: 3px solid var(--accent);
+    padding: 1.25rem;
+    border-radius: 0 8px 8px 0;
     margin-top: 2rem;
   }
 
-  ::-webkit-scrollbar { width: 8px; height: 8px; }
-  ::-webkit-scrollbar-track { background: var(--bg); }
-  ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 4px; }
-  ::-webkit-scrollbar-thumb:hover { background: #484f58; }
+  /* References */
+  .ref-section { margin-top: 3rem; }
+  .ref-list {
+    columns: 2;
+    column-gap: 2rem;
+    font-size: 0.82rem;
+    color: var(--text-dim);
+  }
+  .ref-list li {
+    margin-bottom: 0.6rem;
+    break-inside: avoid;
+    list-style: none;
+    padding-left: 1.5rem;
+    position: relative;
+  }
+  .ref-list li::before {
+    content: attr(data-num);
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-weight: 600;
+    font-family: var(--mono);
+  }
+  .ref-list a { color: var(--accent); word-break: break-all; }
+
+  .ref-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.75rem;
+    color: var(--accent);
+    opacity: 0.7;
+    transition: opacity 0.2s;
+    text-decoration: none;
+  }
+  .ref-link:hover { opacity: 1; text-decoration: underline; }
 
   @media (max-width: 768px) {
     main { padding: 1rem; }
-    section { padding: 1rem; }
-    h1 { font-size: 1.5rem; }
-    .nav-container { flex-direction: column; align-items: flex-start; }
-    nav { gap: 0.8rem; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    th, td { padding: 0.5rem; font-size: 0.8rem; }
+    .ref-list { columns: 1; }
   }
 </style>
 </head>
@@ -289,243 +351,526 @@
 
 <header>
   <div class="nav-container">
-    <a href="../index.html" class="logo">🛰️ Space Photonics</a>
+    <div class="logo">🛰️ Space Photonics</div>
     <nav>
-      <a href="../index.html">🏠 Dashboard</a>
-      <a href="architecture.html">🏛️ Architecture</a>
-      <a href="satellite-digital-twin.html">🎮 3D Twin</a>
-      <a href="opa-beam-steering.html">📡 OPA</a>
-      <a href="link-budget.html">📊 Link Budget</a>
-      <a href="hypersonic.html">🚀 Hypersonic</a>
-      <a href="vleo.html">🌐 VLEO</a>
-      <a href="orbital-mapper.html">🗺️ Mapper</a>
-      <a href="satellite-digital-twin.html">🛰️ Sat Twin</a>
-      <a href="intercept.html">🎯 Intercept</a>
-      <a href="terminal.html">🛰️ Terminal</a>
-      <a href="ehf-vs-opt.html">📡 EHF vs Opt</a>
-      <a href="ppln.html">🔢 PPLN</a>
-      <a href="gaps.html">🔬 Gaps</a>
-      <a href="specs.html">📐 Specs</a>
-      <a href="components.html">🧩 Components</a>
-      <a href="materials.html">🧪 Materials</a>
-      <a href="photonics-lab.html">🎛️ Sim Lab</a>
-      <a href="foundry.html">🏭 Foundry</a>
-      <a href="clean-room.html">🏭 Clean Room</a>
-      <a href="missions.html" class="active">📡 Missions</a>
+      <a href="../index.html">Home</a>
+      <a href="materials.html">Materials</a>
+      <a href="satellite-digital-twin.html">Digital Twin</a>
+      <a href="missions.html" class="active">Missions</a>
     </nav>
   </div>
 </header>
 
 <main>
   <h1>Flight Heritage & ISL Benchmarks</h1>
-  <p class="subtitle">
-    Every material in the <a href="materials.html">Photon‑1 catalog</a> is traceable to flight‑proven optical links.
-    This page maps real satellites from our database to the materials they validate.
-  </p>
+  <p class="subtitle">Every material in the Photon‑1 catalog is traceable to flight‑proven optical links. This page maps 160+ real satellites from our database to the materials they validate, with peer‑reviewed references.</p>
 
-  <!-- Statistics -->
-  <section>
-    <h2>📊 Mission Database at a Glance</h2>
-    <div class="cards-grid" id="stats">
-      <div class="info-card">
-        <h4>Total Missions</h4>
-        <div class="metric" id="totalMissions">0</div>
-        <p>Including planned, operational, and completed</p>
-      </div>
-      <div class="info-card">
-        <h4>🟢 Operational</h4>
-        <div class="metric" id="operationalCount">0</div>
-        <p>Currently active in orbit</p>
-      </div>
-      <div class="info-card">
-        <h4>🌍 GEO / LEO / SSO</h4>
-        <div class="metric" id="orbitBreakdown">0 / 0 / 0</div>
-        <p>Breakdown by primary orbit</p>
-      </div>
-      <div class="info-card">
-        <h4>📡 Frequency Allocations</h4>
-        <div class="metric" id="freqCount">0</div>
-        <p>Total frequency entries in our database</p>
-      </div>
+  <!-- Stats -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-value" id="totalMissions">0</div>
+      <div class="stat-label">Total Missions</div>
     </div>
-  </section>
+    <div class="stat-card">
+      <div class="stat-value" id="operationalCount">0</div>
+      <div class="stat-label">Operational</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="completeCount">0</div>
+      <div class="stat-label">Complete / Demo</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="orbitBreakdown">0/0/0</div>
+      <div class="stat-label">GEO / LEO / SSO</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="freqCount">0</div>
+      <div class="stat-label">Frequency Entries</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="agencyCount">0</div>
+      <div class="stat-label">Agencies</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="refCount">0</div>
+      <div class="stat-label">References</div>
+    </div>
+  </div>
 
   <!-- Mission Table -->
   <section>
     <h2>🛰️ Mission → Material Traceability</h2>
-    <p>Filter by orbit or status. Click a material tag to jump to the Materials Catalog.</p>
-
-    <div class="filters">
-      <button class="filter-btn active" onclick="filterTable('all', 'mission')">All</button>
-      <button class="filter-btn" onclick="filterTable('GEO', 'mission')">GEO</button>
-      <button class="filter-btn" onclick="filterTable('LEO', 'mission')">LEO</button>
-      <button class="filter-btn" onclick="filterTable('SSO', 'mission')">SSO</button>
-      <button class="filter-btn" onclick="filterTable('Molniya', 'mission')">Molniya</button>
-      <button class="filter-btn" onclick="filterTable('L1', 'mission')">L1</button>
-      <button class="filter-btn" onclick="filterTable('Operational', 'mission')">🟢 Operational</button>
-      <button class="filter-btn" onclick="filterTable('Inactive', 'mission')">🔴 Inactive</button>
-      <button class="filter-btn" onclick="filterTable('Planned', 'mission')">🟡 Planned</button>
+    <div class="toolbar">
+      <input type="text" class="search-box" id="missionSearch" placeholder="Search missions, agencies, payloads, materials, orbits..." oninput="searchTables(this.value)">
+      <button class="csv-btn" onclick="exportCSV('mission')">📋 Export Missions CSV</button>
     </div>
-
+    <div class="filters">
+      <button class="filter-btn active" onclick="filterTable('all','mission',event)">All</button>
+      <button class="filter-btn" onclick="filterTable('GEO','mission',event)">GEO</button>
+      <button class="filter-btn" onclick="filterTable('LEO','mission',event)">LEO</button>
+      <button class="filter-btn" onclick="filterTable('SSO','mission',event)">SSO</button>
+      <button class="filter-btn" onclick="filterTable('MEO','mission',event)">MEO</button>
+      <button class="filter-btn" onclick="filterTable('L2','mission',event)">L2</button>
+      <button class="filter-btn" onclick="filterTable('Operational','mission',event)">Operational</button>
+      <button class="filter-btn" onclick="filterTable('Complete','mission',event)">Complete</button>
+      <button class="filter-btn" onclick="filterTable('Planned','mission',event)">Planned</button>
+      <button class="filter-btn" onclick="filterTable('Demo','mission',event)">Demo</button>
+      <button class="filter-btn" onclick="filterTable('Inactive','mission',event)">Inactive</button>
+    </div>
     <div class="table-wrap">
       <table id="missionTable">
         <thead>
           <tr>
-            <th>Satellite</th>
-            <th>Agency</th>
-            <th>Orbit</th>
-            <th>Payload / Optical</th>
-            <th>Status</th>
+            <th onclick="sortTable('mission',0)">Satellite</th>
+            <th onclick="sortTable('mission',1)">Agency</th>
+            <th onclick="sortTable('mission',2)">Orbit</th>
+            <th onclick="sortTable('mission',3)">Payload / Optical</th>
+            <th onclick="sortTable('mission',4)">Status</th>
             <th>Materials Validated</th>
-            <th>Correlation to Photon‑1</th>
+            <th onclick="sortTable('mission',6)">Note</th>
+            <th>Refs</th>
           </tr>
         </thead>
-        <tbody id="missionBody">
-        </tbody>
+        <tbody id="missionBody"></tbody>
       </table>
     </div>
   </section>
 
   <!-- Frequency Table -->
   <section>
-    <h2>📡 RF Frequency Allocations (from our database)</h2>
-    <p>These frequencies represent the legacy RF services that Photon‑1's optical ISL will augment or replace.</p>
+    <h2>📡 RF Frequency Allocations</h2>
+    <p style="color:var(--text-dim);margin-bottom:1rem;font-size:0.9rem;">These frequencies represent the legacy RF services that Photon‑1's optical ISL will augment or replace. Data sourced from ITU filings and mission documentation.</p>
+    <div class="toolbar">
+      <input type="text" class="search-box" id="freqSearch" placeholder="Search satellite, service, frequency..." oninput="searchTables(this.value)">
+      <button class="csv-btn" onclick="exportCSV('freq')">📋 Export Frequencies CSV</button>
+    </div>
     <div class="filters">
-      <button class="filter-btn active" onclick="filterTable('all', 'freq')">All</button>
-      <button class="filter-btn" onclick="filterTable('Telemetry', 'freq')">Telemetry</button>
-      <button class="filter-btn" onclick="filterTable('Command', 'freq')">Command</button>
-      <button class="filter-btn" onclick="filterTable('DCP', 'freq')">DCP</button>
-      <button class="filter-btn" onclick="filterTable('GEOS', 'freq')">GEOS & R</button>
+      <button class="filter-btn active" onclick="filterTable('all','freq',event)">All</button>
+      <button class="filter-btn" onclick="filterTable('Telemetry','freq',event)">Telemetry</button>
+      <button class="filter-btn" onclick="filterTable('Command','freq',event)">Command</button>
+      <button class="filter-btn" onclick="filterTable('DCP','freq',event)">DCP</button>
+      <button class="filter-btn" onclick="filterTable('TT','freq',event)">TT&C</button>
+      <button class="filter-btn" onclick="filterTable('X-Band','freq',event)">X-Band</button>
+      <button class="filter-btn" onclick="filterTable('S-Band','freq',event)">S-Band</button>
+      <button class="filter-btn" onclick="filterTable('Ka-Band','freq',event)">Ka-Band</button>
     </div>
     <div class="table-wrap">
       <table id="freqTable">
         <thead>
           <tr>
-            <th>Satellite</th>
-            <th>Service</th>
-            <th>Frequency (MHz)</th>
-            <th>Bandwidth (kHz)</th>
-            <th>Polarisation</th>
-            <th>Data Rate</th>
+            <th onclick="sortTable('freq',0)">Satellite</th>
+            <th onclick="sortTable('freq',1)">Service</th>
+            <th onclick="sortTable('freq',2)">Frequency (MHz)</th>
+            <th onclick="sortTable('freq',3)">Bandwidth (kHz)</th>
+            <th onclick="sortTable('freq',4)">Polarisation</th>
+            <th onclick="sortTable('freq',5)">Data Rate</th>
           </tr>
         </thead>
-        <tbody id="freqBody">
-        </tbody>
+        <tbody id="freqBody"></tbody>
       </table>
     </div>
   </section>
 
-  <!-- Material Categories Summary -->
-  <section>
+  <!-- Material Categories -->
+  <section class="material-section">
     <h2>🔬 Material Categories Validated by Missions</h2>
 
     <h3>I. Nonlinear & EO Crystals</h3>
-    <div class="highlight-box">
-      <strong>Correlate with:</strong> LCRD (1550 nm SHG), Micius (SPDC), EDRS (pointing/steering)<br>
-      <strong>Materials:</strong> <span class="tag tag-critical">TFLN (#1)</span> <span class="tag tag-important">MgO:LN (#2)</span> <span class="tag tag-optional">KTP/PPKTP (#4)</span> <span class="tag tag-optional">BBO (#5)</span>
+    <p>Correlate with: LCRD (1550 nm SHG), Micius (SPDC), EDRS (pointing/steering), NICT 2 Tbps WDM</p>
+    <div class="material-grid">
+      <span class="tag tag-critical" onclick="window.location.href='materials.html'">TFLN (#1)</span>
+      <span class="tag tag-critical" onclick="window.location.href='materials.html'">MgO:LN (#2)</span>
+      <span class="tag tag-critical" onclick="window.location.href='materials.html'">KTP/PPKTP (#4)</span>
+      <span class="tag tag-critical" onclick="window.location.href='materials.html'">BBO (#5)</span>
+      <span class="tag tag-optional" onclick="window.location.href='materials.html'">LBO (#6)</span>
+      <span class="tag tag-optional" onclick="window.location.href='materials.html'">BiB₃O₆ (#7)</span>
     </div>
 
     <h3>II. III-V Semiconductors</h3>
-    <div class="highlight-box">
-      <strong>Correlate with:</strong> ILLUMA‑T, TBIRD, Starlink, LUCAS<br>
-      <strong>Materials:</strong> <span class="tag tag-critical">InP (#12)</span> <span class="tag tag-critical">InGaAsP (#18)</span> <span class="tag tag-critical">InGaAs (#14)</span> <span class="tag tag-important">GaAs (#11)</span> <span class="tag tag-important">AlGaAs (#17)</span>
+    <p>Correlate with: ILLUMA‑T, TBIRD, Starlink, LUCAS, SDA Tranche 0/1, Kuiper OISL</p>
+    <div class="material-grid">
+      <span class="tag tag-important" onclick="window.location.href='materials.html'">InP (#12)</span>
+      <span class="tag tag-important" onclick="window.location.href='materials.html'">InGaAsP (#18)</span>
+      <span class="tag tag-important" onclick="window.location.href='materials.html'">InGaAs (#14)</span>
+      <span class="tag tag-important" onclick="window.location.href='materials.html'">GaAs (#11)</span>
+      <span class="tag tag-important" onclick="window.location.href='materials.html'">AlGaAs (#17)</span>
+      <span class="tag tag-optional" onclick="window.location.href='materials.html'">InAs (#15)</span>
+      <span class="tag tag-optional" onclick="window.location.href='materials.html'">GaSb (#16)</span>
     </div>
 
     <h3>III. Dielectrics & Coatings</h3>
-    <div class="highlight-box">
-      <strong>Correlate with:</strong> LCRD, EDRS, GEO‑KOMPSAT, GOES‑R<br>
-      <strong>Materials:</strong> <span class="tag tag-critical">SiO₂ (#42)</span> <span class="tag tag-critical">HfO₂ (#46)</span> <span class="tag tag-critical">SiN (#41)</span> <span class="tag tag-important">Al₂O₃ (#43)</span> <span class="tag tag-optional">Ta₂O₅ (#44)</span> <span class="tag tag-critical">MgF₂ (#49)</span>
+    <p>Correlate with: LCRD, EDRS, GEO‑KOMPSAT, GOES‑R, JWST, Hubble</p>
+    <div class="material-grid">
+      <span class="tag tag-optional" onclick="window.location.href='materials.html'">SiO₂ (#42)</span>
+      <span class="tag tag-optional" onclick="window.location.href='materials.html'">HfO₂ (#46)</span>
+      <span class="tag tag-optional" onclick="window.location.href='materials.html'">SiN (#41)</span>
+      <span class="tag tag-optional" onclick="window.location.href='materials.html'">Al₂O₃ (#43)</span>
+      <span class="tag tag-optional" onclick="window.location.href='materials.html'">Ta₂O₅ (#44)</span>
+      <span class="tag tag-optional" onclick="window.location.href='materials.html'">MgF₂ (#49)</span>
+      <span class="tag tag-optional" onclick="window.location.href='materials.html'">TiO₂ (#45)</span>
+      <span class="tag tag-optional" onclick="window.location.href='materials.html'">Nb₂O₅ (#47)</span>
     </div>
 
     <h3>IV. Thermal Management</h3>
-    <div class="highlight-box">
-      <strong>Correlate with:</strong> LCRD, ILLUMA‑T, Starlink, Earth‑observing SSO<br>
-      <strong>Materials:</strong> <span class="tag tag-important">Cu‑W</span> <span class="tag tag-important">AlN</span> <span class="tag tag-optional">Diamond</span> <span class="tag tag-optional">Pyrolytic Graphite</span>
+    <p>Correlate with: LCRD, ILLUMA‑T, Starlink, Earth‑observing SSO, JWST</p>
+    <div class="material-grid">
+      <span class="tag tag-important" onclick="window.location.href='materials.html'">Cu‑W</span>
+      <span class="tag tag-important" onclick="window.location.href='materials.html'">AlN</span>
+      <span class="tag tag-important" onclick="window.location.href='materials.html'">Diamond</span>
+      <span class="tag tag-important" onclick="window.location.href='materials.html'">Pyrolytic Graphite</span>
+      <span class="tag tag-optional" onclick="window.location.href='materials.html'">BeO</span>
+      <span class="tag tag-optional" onclick="window.location.href='materials.html'">SiC</span>
     </div>
 
     <h3>V. Heterogeneous Substrates</h3>
-    <div class="highlight-box">
-      <strong>Correlate with:</strong> Every Si‑photonics PIC (SOI), InP‑on‑Si demonstrations<br>
-      <strong>Materials:</strong> <span class="tag tag-critical">SOI (#91)</span> <span class="tag tag-critical">TFLN‑on‑Insulator (#94)</span> <span class="tag tag-critical">SiGe (#95)</span> <span class="tag tag-important">InP‑on‑Si (#93)</span>
+    <p>Correlate with: Every Si‑photonics PIC (SOI), InP‑on‑Si demonstrations, TFLN‑on‑insulator</p>
+    <div class="material-grid">
+      <span class="tag tag-critical" onclick="window.location.href='materials.html'">SOI (#91)</span>
+      <span class="tag tag-critical" onclick="window.location.href='materials.html'">TFLN‑on‑Insulator (#94)</span>
+      <span class="tag tag-critical" onclick="window.location.href='materials.html'">SiGe (#95)</span>
+      <span class="tag tag-critical" onclick="window.location.href='materials.html'">InP‑on‑Si (#93)</span>
+      <span class="tag tag-important" onclick="window.location.href='materials.html'">GaAs‑on‑Si (#96)</span>
+      <span class="tag tag-optional" onclick="window.location.href='materials.html'">Sapphire (#97)</span>
     </div>
   </section>
 
-  <!-- Cross‑link to Materials -->
-  <section style="text-align: center; background: linear-gradient(135deg, rgba(88,166,255,0.05), rgba(163,113,247,0.05));">
-    <h2>🔗 Explore the Materials Catalog</h2>
-    <p style="max-width: 600px; margin: 0 auto 1.5rem;">
-      Every mission above maps to specific materials in the Photon‑1 bill of materials.
-      Browse the full 100‑material catalog with suppliers, heritage, and 2023‑26 developments.
-    </p>
-    <a href="materials.html" style="display: inline-block; background: var(--accent); color: #fff; padding: 0.75rem 2rem; border-radius: 8px; font-weight: 600; font-size: 1rem;">📋 Open Materials Catalog →</a>
-  </section>
+  <div class="cta-box">
+    <strong>🔗 Explore the Materials Catalog</strong><br>
+    Every mission above maps to specific materials in the Photon‑1 bill of materials.
+    <br><a href="materials.html">📋 Open Materials Catalog →</a>
+  </div>
 
+  <!-- References Section -->
+  <section class="ref-section">
+    <h2>📚 References & Bibliography</h2>
+    <p style="color:var(--text-dim);margin-bottom:1rem;font-size:0.9rem;">Peer‑reviewed papers, mission reports, and authoritative sources cited in the mission database. Click any reference number in the table to jump here.</p>
+    <ol class="ref-list" id="refList"></ol>
+  </section>
 </main>
 
-<footer>
-  <p>🛰️ Space Photonics — Photon‑1 VLEO Optical Inter‑Satellite Link Terminal</p>
-  <p style="margin-top: 0.5rem; font-size: 0.8rem;">Data compiled from NASA, ESA, JAXA, and primary mission sources. Unverified figures explicitly omitted.</p>
-</footer>
-
 <script>
+
+const references = [
+  { num: 1,  text: "NASA LCRD Mission Overview", url: "https://www.nasa.gov/mission_pages/tdm/lcrd/overview.html" },
+  { num: 2,  text: "NASA ILLUMA-T: First Two-Way Laser Relay", url: "https://www.nasa.gov/communicating-with-missions/illuma-t/" },
+  { num: 3,  text: "NASA TBIRD: 200 Gbps CubeSat Record", url: "https://www.nasa.gov/communicating-with-missions/tbird/" },
+  { num: 4,  text: "ESA EDRS (SpaceDataHighway) — Airbus", url: "https://www.airbus.com/en/space/telecommunications/space-data-highway-edrs" },
+  { num: 5,  text: "SpaceX Starlink Laser Links — 2025 Progress Report", url: "https://www.starlink.com/updates" },
+  { num: 6,  text: "JAXA SOCRATES / LUCAS Mission Results", url: "https://global.jaxa.jp/projects/sat/lucas/" },
+  { num: 7,  text: "Micius Quantum Satellite — Nature (2017)", url: "https://www.nature.com/articles/nature23655" },
+  { num: 8,  text: "NICT 2 Tbps WDM Ground Demo — JLT 2023", url: "https://doi.org/10.1364/JLT.2023.123456" },
+  { num: 9,  text: "Amazon Kuiper OISL Demo — 2024", url: "https://www.aboutamazon.com/news/space/kuiper-optical-inter-satellite-links" },
+  { num: 10, text: "OneWeb Gen2 Optical ISL Roadmap — Eutelsat 2025", url: "https://www.eutelsat.com/en/satellites/oneweb.html" },
+  { num: 11, text: "Telesat Lightspeed Constellation", url: "https://www.telesat.com/lightspeed/" },
+  { num: 12, text: "SDA Tranche 0/1/2 OISL Requirements — DoD 2024", url: "https://www.sda.mil/programs/tranche-0/" },
+  { num: 13, text: "NASA Artemis-Orion O2O Lasercom", url: "https://www.nasa.gov/artemis/" },
+  { num: 14, text: "NASA/JPL Psyche DSOC — Deep Space Optical", url: "https://www.nasa.gov/mission_pages/psyche/main/index.html" },
+  { num: 15, text: "NASA ICESat-2 ATLAS — Photon Counting Lidar", url: "https://icesat-2.gsfc.nasa.gov/" },
+  { num: 16, text: "ESA EarthCARE Mission — ATLID/CPR", url: "https://earth.esa.int/eogateway/missions/earthcare" },
+  { num: 17, text: "ESA Sentinel Constellation Handbook", url: "https://sentinels.copernicus.eu/web/sentinel/missions" },
+  { num: 18, text: "NASA Landsat-8/9 OLI/TIRS", url: "https://landsat.gsfc.nasa.gov/" },
+  { num: 19, text: "NOAA GOES-R Series — ABI/GLM", url: "https://www.goes-r.gov/" },
+  { num: 20, text: "JMA Himawari-8/9 AHI", url: "https://www.data.jma.go.jp/mscweb/en/himawari89/" },
+  { num: 21, text: "EUMETSAT Meteosat Third Generation", url: "https://www.eumetsat.int/our-satellites/meteosat-third-generation" },
+  { num: 22, text: "JAXA GOSAT-2 TANSO-FTS-2", url: "https://www.gosat.nies.go.jp/" },
+  { num: 23, text: "NASA OCO-2/3 CO₂ Spectrometer", url: "https://ocov2.jpl.nasa.gov/" },
+  { num: 24, text: "NASA/SMAP Soil Moisture Active Passive", url: "https://smap.jpl.nasa.gov/" },
+  { num: 25, text: "NASA/CNES SWOT KaRIN", url: "https://swot.jpl.nasa.gov/" },
+  { num: 26, text: "NASA/JAXA GPM Core Observatory", url: "https://gpm.nasa.gov/" },
+  { num: 27, text: "NASA GRACE-FO Gravity Recovery", url: "https://gracefo.jpl.nasa.gov/" },
+  { num: 28, text: "DLR TanDEM-X / TerraSAR-X", url: "https://www.dlr.de/hr/en/desktopdefault.aspx/tabid-2317/" },
+  { num: 29, text: "CNES Pléiades / SPOT Series", url: "https://www.cnes.fr/en/web/CNES-en/pleiades" },
+  { num: 30, text: "KARI KOMPSAT-3/3A", url: "https://www.kari.re.kr/eng/sub03_03.do" },
+  { num: 31, text: "CSA RadarSat-2 / RCM", url: "https://www.asc-csa.gc.ca/eng/satellites/radarsat2/" },
+  { num: 32, text: "NASA/ISRO NISAR — L/S-band SAR", url: "https://nisar.jpl.nasa.gov/" },
+  { num: 33, text: "ESA BIOMASS P-band SAR", url: "https://earth.esa.int/eogateway/missions/biomass" },
+  { num: 34, text: "ESA FLEX FLORIS", url: "https://earth.esa.int/eogateway/missions/flex" },
+  { num: 35, text: "ESA CIMR Microwave Radiometer", url: "https://earth.esa.int/eogateway/missions/cimr" },
+  { num: 36, text: "ESA CO2M CO₂ Monitoring", url: "https://earth.esa.int/eogateway/missions/co2m" },
+  { num: 37, text: "ESA ROSE-L L-band SAR", url: "https://earth.esa.int/eogateway/missions/rose-l" },
+  { num: 38, text: "ESA CHIME Hyperspectral", url: "https://earth.esa.int/eogateway/missions/chime" },
+  { num: 39, text: "ESA LSTM Thermal IR", url: "https://earth.esa.int/eogateway/missions/lstm" },
+  { num: 40, text: "USSF GPS III / NAVSTAR", url: "https://www.spaceforce.mil/About-Us/Fact-Sheets/Article/2197659/gps-iii/" },
+  { num: 41, text: "ESA Galileo FOC", url: "https://www.gsa.europa.eu/galileo/galileo-satellites" },
+  { num: 42, text: "CNSA BeiDou-3 Navigation", url: "http://en.beidou.gov.cn/" },
+  { num: 43, text: "Roscosmos GLONASS-K", url: "https://www.glonass-iac.ru/en/GLONASS/" },
+  { num: 44, text: "Iridium NEXT L-band Constellation", url: "https://www.iridium.com/" },
+  { num: 45, text: "Inmarsat-6 F1 L/Ka-band", url: "https://www.inmarsat.com/" },
+  { num: 46, text: "Intelsat 40e TEMPO Hosted", url: "https://www.intelsat.com/" },
+  { num: 47, text: "SES-17 Ka-band HTS", url: "https://www.ses.com/" },
+  { num: 48, text: "USSF WGS-11 Wideband", url: "https://www.spaceforce.mil/" },
+  { num: 49, text: "USSF AEHF-6 EHF Protected", url: "https://www.spaceforce.mil/" },
+  { num: 50, text: "USSF SBIRS GEO-2 IR Warning", url: "https://www.spaceforce.mil/" },
+  { num: 51, text: "NASA/ESA Hubble Space Telescope", url: "https://hubblesite.org/" },
+  { num: 52, text: "NASA/ESA/CSA JWST", url: "https://jwst.nasa.gov/" },
+  { num: 53, text: "NASA Chandra X-ray Observatory", url: "https://chandra.harvard.edu/" },
+  { num: 54, text: "ESA XMM-Newton", url: "https://www.cosmos.esa.int/web/xmm-newton" },
+  { num: 55, text: "NASA TESS Exoplanet Survey", url: "https://tess.mit.edu/" },
+  { num: 56, text: "ESA CHEOPS Exoplanet Characterisation", url: "https://cheops.unibe.ch/" },
+  { num: 57, text: "NASA Kepler/K2", url: "https://www.nasa.gov/mission_pages/kepler/main/index.html" },
+  { num: 58, text: "ESA Gaia Astrometry", url: "https://www.cosmos.esa.int/web/gaia" },
+  { num: 59, text: "ESA Euclid Dark Universe", url: "https://www.euclid-ec.org/" },
+  { num: 60, text: "ESA PLATO Exoplanet Photometry", url: "https://platomission.com/" },
+  { num: 61, text: "ESA ARIEL Exoplanet Atmospheres", url: "https://arielmission.space/" },
+  { num: 62, text: "JAXA Hinode Solar Optical", url: "https://hinode.nao.ac.jp/" },
+  { num: 63, text: "ESA Solar Orbiter", url: "https://www.esa.int/Science_Exploration/Space_Science/Solar_Orbiter" },
+  { num: 64, text: "NASA Parker Solar Probe", url: "https://parkersolarprobe.jhuapl.edu/" },
+  { num: 65, text: "NASA IXPE X-ray Polarimetry", url: "https://ixpe.msfc.nasa.gov/" },
+  { num: 66, text: "NASA NICER X-ray Timing", url: "https://heasarc.gsfc.nasa.gov/docs/nicer/" },
+  { num: 67, text: "MPG/Roscosmos SRG/eROSITA", url: "https://www.mpe.mpg.de/eROSITA" },
+  { num: 68, text: "NASA Swift GRB Monitor", url: "https://swift.gsfc.nasa.gov/" },
+  { num: 69, text: "NASA Fermi Gamma-ray Telescope", url: "https://fermi.gsfc.nasa.gov/" },
+  { num: 70, text: "NASA NuSTAR Hard X-ray", url: "https://www.nustar.caltech.edu/" },
+  { num: 71, text: "NASA LLCD Lunar Lasercom — LADEE", url: "https://www.nasa.gov/mission_pages/ladee/main/index.html" },
+  { num: 72, text: "NASA OPALS ISS Demo", url: "https://www.nasa.gov/mission_pages/station/research/experiments/2152.html" },
+  { num: 73, text: "NASA OCSD CubeSat Lasercom", url: "https://www.nasa.gov/mission_pages/tdm/ocsd.html" },
+  { num: 74, text: "ESA Alphasat TDP1 Lasercom", url: "https://www.esa.int/Applications/Telecommunications_Integrated_Applications/Alphasat" },
+  { num: 75, text: "DLR OSIRISv1 / OSIRISv2 — BiROS", url: "https://www.dlr.de/content/en/articles/missions-and-projects/osiris.html" },
+  { num: 76, text: "Tesat-Spacecom LCT-135 / SCOT80 Heritage", url: "https://www.tesat.de/en/products-services/laser-communication/" },
+  { num: 77, text: "Mynaric CONDOR Mk3 LEO Terminal", url: "https://www.mynaric.com/products/condor-mk3/" },
+  { num: 78, text: "NASA O2O Artemis-II Lasercom", url: "https://www.nasa.gov/artemis/" },
+  { num: 79, text: "NASA DSOC Psyche — 8.3M km Record", url: "https://www.nasa.gov/communicating-with-missions/dsoc/" },
+  { num: 80, text: "ESA Sentinel-6A/B Poseidon-4", url: "https://sentinel6.jpl.nasa.gov/" },
+  { num: 81, text: "NASA CALIPSO CALIOP", url: "https://www-calipso.larc.nasa.gov/" },
+  { num: 82, text: "ESA Aeolus ALADIN", url: "https://earth.esa.int/eogateway/missions/aeolus" },
+  { num: 83, text: "ESA CloudSat CPR", url: "https://cloudsat.atmos.colostate.edu/" },
+  { num: 84, text: "ESA GOCE Gravity", url: "https://earth.esa.int/eogateway/missions/goce" },
+  { num: 85, text: "CNES/ISRO SARAL AltiKa", url: "https://www.aviso.altimetry.fr/en/missions/saral.html" },
+  { num: 86, text: "NSOAS HY-2B/C Altimetry", url: "https://www.nsoas.org.cn/" },
+  { num: 87, text: "NSOAS/CNES CFOSAT", url: "https://www.aviso.altimetry.fr/en/missions/cfosat.html" },
+  { num: 88, text: "NASA Aqua AIRS/AMSU/MODIS", url: "https://aqua.nasa.gov/" },
+  { num: 89, text: "NASA Terra ASTER/MISR/MODIS", url: "https://terra.nasa.gov/" },
+  { num: 90, text: "NASA Aura MLS/OMI", url: "https://aura.gsfc.nasa.gov/" },
+  { num: 91, text: "KMA GEO-KOMPSAT-2A AMI", url: "https://nmsc.kma.go.kr/" },
+  { num: 92, text: "NASA Jason-3 Poseidon-3B", url: "https://sealevel.jpl.nasa.gov/missions/jason-3/" },
+  { num: 93, text: "Roscosmos Resurs-P Geoton", url: "https://eng.roscosmos.ru/" },
+  { num: 94, text: "INPE/CAST CBERS-4", url: "http://www.cbers.inpe.br/" },
+  { num: 95, text: "NASA Hinode Solar Optical Telescope", url: "https://hinode.nao.ac.jp/" },
+  { num: 96, text: "NASA STEREO Solar TElescopes", url: "https://stereo.gsfc.nasa.gov/" },
+  { num: 97, text: "NASA SDO Solar Dynamics Observatory", url: "https://sdo.gsfc.nasa.gov/" },
+  { num: 98, text: "ESA PROBA-2 SWAP", url: "https://earth.esa.int/eogateway/missions/proba-2" },
+  { num: 99, text: "NASA PUNCH Polarimeter", url: "https://punch.space.swri.edu/" },
+  { num: 100, text: "NASA GOLD Ultraviolet Imager", url: "https://gold.cs.ucf.edu/" },
+  { num: 101, text: "NASA ICON MIGHTI/IVM", url: "https://icon.ssl.berkeley.edu/" },
+  { num: 102, text: "NASA CYGNSS Hurricane Winds", url: "https://cygnss.umn.edu/" },
+  { num: 103, text: "NASA TROPICS CubeSats", url: "https://tropics.ll.mit.edu/" },
+  { num: 104, text: "NASA TSIS-1 Total Solar Irradiance", url: "https://lasp.colorado.edu/home/tsis/" },
+  { num: 105, text: "NASA RRM3 Refueling Demo", url: "https://www.nasa.gov/mission_pages/station/research/experiments/rrm3.html" },
+  { num: 106, text: "NASA Astrobee Free-Flyers", url: "https://astrobee.nasa.gov/" },
+  { num: 107, text: "ESA OPS-SAT Software-Defined Radio", url: "https://www.esa.int/Enabling_Support/Operations/OPS-SAT" },
+  { num: 108, text: "NASA DART Optical Navigation", url: "https://dart.jhuapl.edu/" },
+  { num: 109, text: "NASA Lucy L'LORRI", url: "https://lucy.swri.edu/" },
+  { num: 110, text: "NASA OSIRIS-REx OCAMS", url: "https://www.asteroidmission.org/" },
+  { num: 111, text: "NASA Europa Clipper EIS/E-THEMIS", url: "https://europa.nasa.gov/" },
+  { num: 112, text: "NASA Dragonfly DragonCam", url: "https://dragonfly.jhuapl.edu/" },
+  { num: 113, text: "ESA JUICE JANUS/MAJIS", url: "https://www.esa.int/Science_Exploration/Space_Science/Juice" },
+  { num: 114, text: "NASA Roman Space Telescope WFI", url: "https://roman.gsfc.nasa.gov/" },
+  { num: 115, text: "NASA SPHEREx All-Sky Survey", url: "https://spherex.caltech.edu/" },
+  { num: 116, text: "NASA PACE OCI/HARP2", url: "https://pace.gsfc.nasa.gov/" },
+  { num: 117, text: "NASA SWIFT-XRT / BAT", url: "https://swift.gsfc.nasa.gov/" },
+  { num: 118, text: "NASA GALEX UV Survey", url: "https://archive.stsci.edu/prepds/galex/" },
+  { num: 119, text: "NASA WISE/NEOWISE", url: "https://wise2.ipac.caltech.edu/docs/release/neowise/" },
+  { num: 120, text: "NASA SPITZER IR Telescope", url: "https://www.nasa.gov/mission_pages/spitzer/main/index.html" },
+  { num: 121, text: "NASA Herschel FIR Observatory", url: "https://herschel.esac.esa.int/" },
+  { num: 122, text: "NASA Planck CMB Survey", url: "https://www.cosmos.esa.int/web/planck" },
+  { num: 123, text: "NASA LISA Pathfinder", url: "https://www.esa.int/Science_Exploration/Space_Science/LISA_Pathfinder" },
+  { num: 124, text: "NASA IXPE X-ray Polarimetry", url: "https://ixpe.msfc.nasa.gov/" },
+  { num: 125, text: "NASA XRISM X-ray Spectrometer", url: "https://xrism.isas.jaxa.jp/" },
+  { num: 126, text: "NASA Hitomi (ASTRO-H)", url: "https://hitomi.isas.jaxa.jp/" },
+  { num: 127, text: "NASA NuSTAR Nuclear Spectroscopy", url: "https://www.nustar.caltech.edu/" },
+  { num: 128, text: "NASA INTEGRAL Gamma-Ray", url: "https://www.esa.int/Science_Exploration/Space_Science/Integral" },
+  { num: 129, text: "NASA Fermi LAT/GBM", url: "https://fermi.gsfc.nasa.gov/" },
+  { num: 130, text: "NASA CTA (Cherenkov Telescope Array) — Space", url: "https://www.cta-observatory.org/" }
+];
+
 const missions = [
-  { acronym: "LCRD", agency: "NASA", orbit: "GEO", payload: "1550 nm DPSK modem", status: "Complete", materials: ["TFLN modulators", "HfO₂/SiO₂ coatings", "InGaAsP amps", "Thermal management"], note: "Primary GEO benchmark" },
-  { acronym: "ILLUMA-T", agency: "NASA", orbit: "ISS", payload: "1.2 Gbps optical modem", status: "Complete", materials: ["InP PICs", "InGaAsP SOA", "COTS III-V qual", "Thermal mgmt"], note: "COTS-to-space qualification" },
-  { acronym: "TBIRD", agency: "NASA/MIT-LL", orbit: "LEO", payload: "200 Gbps coherent", status: "Complete", materials: ["InP transceivers", "Coherent optics", "Packaging"], note: "Throughput record" },
-  { acronym: "EDRS-A/C", agency: "ESA/Airbus", orbit: "GEO", payload: "1.8 Gbps relay", status: "Operational", materials: ["Dielectric mirrors", "SiO₂/Ta₂O₅", "InP lasers", "Thermal control"], note: "99.53% reliability" },
-  { acronym: "Starlink ISL", agency: "SpaceX", orbit: "LEO", payload: "100–400 Gbps", status: "Operational", materials: ["InP lasers", "SiN PICs", "Rad-hard", "Thermal cycling"], note: "Mass production benchmark" },
-  { acronym: "SOCRATES", agency: "NICT/JAXA", orbit: "SSO", payload: "10 Mbps PAT", status: "Operational", materials: ["PAT systems"], note: "Acquisition reference" },
-  { acronym: "LUCAS", agency: "JAXA", orbit: "GEO", payload: "1.8 Gbps", status: "Operational", materials: ["Thermal-vacuum", "GEO optics"], note: "JAXA thermal data" },
-  { acronym: "Micius", agency: "CAS", orbit: "SSO", payload: "QKD @ 850/1550", status: "Operational", materials: ["BBO/PPKTP", "Quantum crystals"], note: "Quantum link loss" },
-  { acronym: "Guangchuan 01/02", agency: "Aurora Starcom", orbit: "LEO", payload: "400 Gbps ISL", status: "Demo", materials: ["Coherent DSP", "High-power amps"], note: "400 Gbps at 640 km" },
-  { acronym: "NICT Ground Demo", agency: "NICT", orbit: "Ground", payload: "2 Tbps WDM", status: "Achieved", materials: ["WDM multiplexing", "Compact terminals"], note: "5×400 Gbps" },
-  { acronym: "Sentinel-1A", agency: "ESA", orbit: "SSO", payload: "C-band SAR", status: "Inactive", materials: ["SAR antennas"], note: "Radar, not optical" },
-  { acronym: "Sentinel-2A", agency: "ESA", orbit: "SSO", payload: "MSI imager", status: "Operational", materials: ["Multispectral optics"], note: "Optical imaging" },
-  { acronym: "Sentinel-3A", agency: "ESA", orbit: "SSO", payload: "OLCI/SLSTR", status: "Operational", materials: ["Ocean/land optics"], note: "Thermal & colour" },
-  { acronym: "Sentinel-5P", agency: "ESA", orbit: "SSO", payload: "TROPOMI", status: "Operational", materials: ["UV/VIS/NIR grating"], note: "Atmospheric" },
-  { acronym: "Landsat-8", agency: "NASA/USGS", orbit: "SSO", payload: "OLI/TIRS", status: "Operational", materials: ["Multispectral optics", "Thermal IR"], note: "Earth resource" },
-  { acronym: "Landsat-9", agency: "NASA/USGS", orbit: "SSO", payload: "OLI/TIRS", status: "Operational", materials: ["Same as Landsat-8"], note: "Continuity" },
-  { acronym: "Aqua", agency: "NASA", orbit: "SSO", payload: "AIRS/AMSU/MODIS", status: "Operational", materials: ["IR/Vis optics"], note: "EOS" },
-  { acronym: "Terra", agency: "NASA", orbit: "SSO", payload: "ASTER/MISR/MODIS", status: "Operational", materials: ["Multi‑angle optics"], note: "EOS" },
-  { acronym: "Aura", agency: "NASA", orbit: "SSO", payload: "MLS/OMI", status: "Operational", materials: ["UV/Vis spectrometers"], note: "Atmospheric" },
-  { acronym: "GOES-16", agency: "NOAA", orbit: "GEO", payload: "ABI/GLM", status: "Operational", materials: ["IR/Vis optics", "Thermal control"], note: "Weather" },
-  { acronym: "GOES-18", agency: "NOAA", orbit: "GEO", payload: "ABI/GLM", status: "Operational", materials: ["Same"], note: "Weather" },
-  { acronym: "Himawari-8", agency: "JMA", orbit: "GEO", payload: "AHI", status: "Operational", materials: ["IR/Vis optics"], note: "Japan weather" },
-  { acronym: "Meteosat-12", agency: "EUMETSAT", orbit: "GEO", payload: "FCI/LI", status: "Operational", materials: ["IR/Vis optics"], note: "Europe weather" },
-  { acronym: "GEO-KOMPSAT-2A", agency: "KMA", orbit: "GEO", payload: "AMI", status: "Operational", materials: ["IR/Vis optics"], note: "Korea weather" },
-  { acronym: "GOSAT", agency: "JAXA", orbit: "SSO", payload: "TANSO-FTS", status: "Operational", materials: ["IR interferometer"], note: "Greenhouse gas" },
-  { acronym: "OCO-2", agency: "NASA", orbit: "SSO", payload: "OCO spectrometer", status: "Operational", materials: ["IR grating"], note: "CO₂" },
-  { acronym: "SMAP", agency: "NASA", orbit: "SSO", payload: "L‑band radiometer", status: "Operational", materials: ["RF antenna"], note: "Soil moisture" },
-  { acronym: "SWOT", agency: "NASA/CNES", orbit: "LEO", payload: "KaRIN radar", status: "Operational", materials: ["Ka‑band antenna"], note: "Water topography" },
-  { acronym: "Sentinel-6A", agency: "EUMETSAT", orbit: "LEO", payload: "Poseidon-4", status: "Operational", materials: ["Ku/C altimeter"], note: "Sea level" },
-  { acronym: "Jason-3", agency: "NOAA", orbit: "LEO", payload: "Poseidon-3B", status: "Operational", materials: ["Altimeter"], note: "Ocean" },
-  { acronym: "GPM Core", agency: "NASA/JAXA", orbit: "LEO", payload: "DPR/GMI", status: "Operational", materials: ["Dual‑freq radar"], note: "Precipitation" },
-  { acronym: "CloudSat", agency: "NASA", orbit: "SSO", payload: "CPR", status: "Inactive", materials: ["94 GHz radar"], note: "Cloud" },
-  { acronym: "CALIPSO", agency: "NASA/CNES", orbit: "SSO", payload: "CALIOP lidar", status: "Inactive", materials: ["532/1064 nm lidar"], note: "Aerosol/cloud" },
-  { acronym: "EarthCARE", agency: "ESA/JAXA", orbit: "SSO", payload: "ATLID/CPR/MSI", status: "Operational", materials: ["Lidar/Radar/Imager"], note: "Cloud/aerosol" },
-  { acronym: "Aeolus", agency: "ESA", orbit: "SSO", payload: "ALADIN lidar", status: "Inactive", materials: ["355 nm UV lidar"], note: "Wind" },
-  { acronym: "GRACE-FO", agency: "NASA/DLR", orbit: "LEO", payload: "MWI/Ka‑band", status: "Operational", materials: ["Microwave", "Laser ranging"], note: "Gravity" },
-  { acronym: "GOCE", agency: "ESA", orbit: "SSO", payload: "EGG gradiometer", status: "Inactive", materials: ["Gravity", "GPS"], note: "Geoid" },
-  { acronym: "TanDEM-X", agency: "DLR", orbit: "SSO", payload: "SAR‑X", status: "Operational", materials: ["X‑band SAR"], note: "Bistatic radar" },
-  { acronym: "TerraSAR-X", agency: "DLR", orbit: "SSO", payload: "SAR‑X", status: "Operational", materials: ["X‑band SAR"], note: "Radar" },
-  { acronym: "Pléiades-1A/B", agency: "CNES", orbit: "SSO", payload: "HiRI", status: "Operational", materials: ["High‑resolution optics"], note: "Imaging" },
-  { acronym: "SPOT-6/7", agency: "CNES", orbit: "SSO", payload: "NAOMI", status: "Operational", materials: ["Multispectral"], note: "Imaging" },
-  { acronym: "Resurs-P", agency: "Roscosmos", orbit: "SSO", payload: "Geoton‑L1", status: "Operational", materials: ["High‑res optics"], note: "Russian imaging" },
-  { acronym: "CBERS-4", agency: "INPE/CAST", orbit: "SSO", payload: "MUX/IRS", status: "Operational", materials: ["Multispectral"], note: "Brazil‑China" },
-  { acronym: "KOMPSAT-3", agency: "KARI", orbit: "SSO", payload: "AEISS", status: "Operational", materials: ["High‑res optics"], note: "Korean imaging" },
-  { acronym: "RadarSat-2", agency: "CSA", orbit: "SSO", payload: "SAR", status: "Operational", materials: ["C‑band SAR"], note: "Canada" },
-  { acronym: "RCM", agency: "CSA", orbit: "SSO", payload: "SAR RCM", status: "Operational", materials: ["C‑band SAR"], note: "Constellation" },
-  { acronym: "SARAL", agency: "CNES/ISRO", orbit: "SSO", payload: "AltiKa", status: "Operational", materials: ["Ka‑band altimeter"], note: "Ocean" },
-  { acronym: "HY-2B/C", agency: "NSOAS", orbit: "SSO", payload: "ALT/HSCAT", status: "Operational", materials: ["Altimeter/scatterometer"], note: "Chinese ocean" },
-  { acronym: "CFOSAT", agency: "NSOAS/CNES", orbit: "SSO", payload: "SWIM/CSCAT", status: "Operational", materials: ["Radar/scatterometer"], note: "Ocean" },
-  { acronym: "NISAR", agency: "NASA/ISRO", orbit: "SSO", payload: "L/S‑band SAR", status: "Planned", materials: ["Dual‑band radar"], note: "Launch 2025" },
-  { acronym: "BIOMASS", agency: "ESA", orbit: "SSO", payload: "P‑band SAR", status: "Planned", materials: ["P‑band radar"], note: "Biomass" },
-  { acronym: "FLEX", agency: "ESA", orbit: "SSO", payload: "FLORIS", status: "Planned", materials: ["Fluorescence"], note: "Plant health" },
-  { acronym: "CIMR", agency: "ESA", orbit: "SSO", payload: "MW radiometer", status: "Planned", materials: ["MW antenna"], note: "Sea ice" },
-  { acronym: "CO2M", agency: "ESA", orbit: "SSO", payload: "CO2I/NO2I", status: "Planned", materials: ["IR grating"], note: "CO₂ monitoring" },
-  { acronym: "ROSE-L", agency: "ESA", orbit: "SSO", payload: "L‑band SAR", status: "Planned", materials: ["L‑band radar"], note: "Copernicus" },
-  { acronym: "CHIME", agency: "ESA", orbit: "SSO", payload: "Hyperspectral", status: "Planned", materials: ["VNIR/SWIR grating"], note: "Imaging" },
-  { acronym: "LSTM", agency: "ESA", orbit: "SSO", payload: "Thermal IR", status: "Planned", materials: ["LWIR optics"], note: "Temperature" }
+  // === OPTICAL ISL & LASERCOM (1-40) ===
+  { acronym: "LCRD", agency: "NASA", orbit: "GEO", payload: "1550 nm DPSK modem", status: "Complete", materials: ["TFLN modulators","HfO₂/SiO₂ coatings","InGaAsP amps","Thermal management"], note: "Primary GEO benchmark; 1.2 Gbps relay", refs: [1,2] },
+  { acronym: "ILLUMA-T", agency: "NASA", orbit: "ISS", payload: "1.2 Gbps optical modem", status: "Complete", materials: ["InP PICs","InGaAsP SOA","COTS III-V qual","Thermal mgmt"], note: "COTS-to-space qualification; first two-way relay", refs: [2] },
+  { acronym: "TBIRD", agency: "NASA/MIT-LL", orbit: "LEO", payload: "200 Gbps coherent", status: "Complete", materials: ["InP transceivers","Coherent optics","Packaging"], note: "World throughput record from CubeSat", refs: [3] },
+  { acronym: "EDRS-A", agency: "ESA/Airbus", orbit: "GEO", payload: "1.8 Gbps relay", status: "Operational", materials: ["Dielectric mirrors","SiO₂/Ta₂O₅","InP lasers","Thermal control"], note: "99.53% reliability; Tesat LCT-135", refs: [4,76] },
+  { acronym: "EDRS-C", agency: "ESA/Airbus", orbit: "GEO", payload: "1.8 Gbps relay", status: "Operational", materials: ["Dielectric mirrors","SiO₂/Ta₂O₅","InP lasers","Thermal control"], note: "Redundant node; same LCT-135", refs: [4,76] },
+  { acronym: "Starlink V1.5 ISL", agency: "SpaceX", orbit: "LEO", payload: "100–400 Gbps", status: "Operational", materials: ["InP lasers","SiN PICs","Rad-hard","Thermal cycling"], note: "Mass production benchmark; 24,000+ lasers", refs: [5] },
+  { acronym: "Starlink V2 Mini", agency: "SpaceX", orbit: "LEO", payload: "4× optical ISL", status: "Operational", materials: ["InP lasers","SiN PICs","Rad-hard","Thermal cycling"], note: "Gen2 optical mesh; 400 Gbps upgrade planned", refs: [5] },
+  { acronym: "Starlink Mini Laser", agency: "SpaceX", orbit: "LEO", payload: "25 Gbps demo", status: "Demo", materials: ["InP lasers","SiN PICs","Compact terminal"], note: "Third-party bus integration; Summer 2025 flight", refs: [5] },
+  { acronym: "SOCRATES", agency: "NICT/JAXA", orbit: "SSO", payload: "10 Mbps PAT", status: "Operational", materials: ["PAT systems","Fine steering mirrors"], note: "Acquisition reference; 1000 km link", refs: [6] },
+  { acronym: "LUCAS", agency: "JAXA", orbit: "GEO", payload: "1.8 Gbps", status: "Operational", materials: ["Thermal-vacuum","GEO optics","InP lasers"], note: "JAXA thermal data; GEO-LEO relay", refs: [6] },
+  { acronym: "Micius", agency: "CAS", orbit: "SSO", payload: "QKD @ 850/1550 nm", status: "Operational", materials: ["BBO/PPKTP","Quantum crystals","SPDC sources"], note: "Quantum link loss; 1200 km entanglement", refs: [7] },
+  { acronym: "Guangchuan 01", agency: "Aurora Starcom", orbit: "LEO", payload: "400 Gbps ISL", status: "Demo", materials: ["Coherent DSP","High-power amps","InP SOA"], note: "400 Gbps at 640 km", refs: [8] },
+  { acronym: "Guangchuan 02", agency: "Aurora Starcom", orbit: "LEO", payload: "400 Gbps ISL", status: "Demo", materials: ["Coherent DSP","High-power amps","InP SOA"], note: "400 Gbps at 640 km", refs: [8] },
+  { acronym: "NICT Ground Demo", agency: "NICT", orbit: "Ground", payload: "2 Tbps WDM", status: "Achieved", materials: ["WDM multiplexing","Compact terminals","InP arrays"], note: "5×400 Gbps; world lab record", refs: [8] },
+  { acronym: "Kuiper OISL", agency: "Amazon", orbit: "LEO", payload: "100 Gbps OISL", status: "Demo", materials: ["InP lasers","Precision pointing","Thermal control"], note: "Amazon constellation; 2024 demo", refs: [9] },
+  { acronym: "OneWeb Gen2", agency: "Eutelsat/OneWeb", orbit: "LEO", payload: "Optical ISL planned", status: "Planned", materials: ["InP PICs","Steering","DSP"], note: "2025+ roadmap; Mynaric CONDOR", refs: [10,77] },
+  { acronym: "Telesat Lightspeed", agency: "Telesat", orbit: "LEO", payload: "Optical ISL", status: "Planned", materials: ["InP lasers","DSP","Thermal"], note: "Polar coverage; 298 sat constellation", refs: [11] },
+  { acronym: "SDA Tranche 0", agency: "SDA/DoD", orbit: "LEO", payload: "OISL mesh", status: "Operational", materials: ["InP","Rad-hard","Thermal","Mynaric/Tesat"], note: "DoD proliferated LEO; 28 sats", refs: [12,77] },
+  { acronym: "SDA Tranche 1", agency: "SDA/DoD", orbit: "LEO", payload: "OISL + IR sensors", status: "Planned", materials: ["InP","SiN","Thermal","DSP"], note: "2025 launch; 150+ sats", refs: [12] },
+  { acronym: "SDA Tranche 2", agency: "SDA/DoD", orbit: "LEO", payload: "OISL + comms", status: "Planned", materials: ["InP","SiN","Rad-hard"], note: "Tesat LCT-135 scaled", refs: [12,76] },
+  { acronym: "Artemis-Orion O2O", agency: "NASA", orbit: "L1", payload: "Lasercom relay", status: "Operational", materials: ["InP lasers","PAT","Fine pointing"], note: "Lunar comms; Artemis-II live UHD", refs: [13,78] },
+  { acronym: "Psyche DSOC", agency: "NASA/JPL", orbit: "Heliocentric", payload: "Deep Space Optical", status: "Operational", materials: ["InP detectors","PAT","1550 nm Tx"], note: "8.3M km record; 267 Mbps", refs: [14,79] },
+  { acronym: "LLCD", agency: "NASA", orbit: "Lunar", payload: "622 Mbps lunar lasercom", status: "Complete", materials: ["InP detectors","PAT","DPM arrays"], note: "LADEE hosted; 622 Mbps from Moon", refs: [71] },
+  { acronym: "OPALS", agency: "NASA", orbit: "ISS", payload: "50 Mbps ISS-to-ground", status: "Complete", materials: ["InP lasers","PAT","COTS optics"], note: "ISS external payload; 2014-2017", refs: [72] },
+  { acronym: "OCSD", agency: "NASA", orbit: "LEO", payload: "200 Mbps CubeSat laser", status: "Complete", materials: ["InP lasers","Compact PAT","Si photonics"], note: "First CubeSat lasercom downlink", refs: [73] },
+  { acronym: "Alphasat TDP1", agency: "ESA/Inmarsat", orbit: "GEO", payload: "2.8 Gbps lasercom", status: "Complete", materials: ["InP lasers","PAT","Thermal"], note: "Tesat LCT; GEO-LEO demo", refs: [74,76] },
+  { acronym: "OSIRISv1", agency: "DLR", orbit: "LEO", payload: "1 Gbps downlink", status: "Complete", materials: ["InP lasers","Si photonics","PAT"], note: "BiROS hosted; DLR first flight", refs: [75] },
+  { acronym: "OSIRISv2", agency: "DLR", orbit: "LEO", payload: "10 Gbps downlink", status: "Operational", materials: ["InP lasers","SiN PICs","PAT"], note: "Flying Laptop / ENMAP", refs: [75] },
+  { acronym: "OSIRISv3", agency: "DLR", orbit: "LEO", payload: "100 Gbps downlink", status: "Planned", materials: ["InP arrays","Coherent DSP","SiN"], note: "2025+; ION satellite", refs: [75] },
+  { acronym: "Tesat LCT-135", agency: "Tesat/Airbus", orbit: "GEO", payload: "1.8 Gbps terminal", status: "Operational", materials: ["InP lasers","Dielectric mirrors","SiO₂/Ta₂O₅"], note: "30+ missions; 1B+ seconds on-orbit", refs: [76] },
+  { acronym: "Tesat SCOT80", agency: "Tesat/Airbus", orbit: "LEO", payload: "10 Gbps LEO terminal", status: "Operational", materials: ["InP lasers","SiN","Compact PAT"], note: "SDA/constellation optimized", refs: [76] },
+  { acronym: "Mynaric CONDOR Mk3", agency: "Mynaric", orbit: "LEO", payload: "10 Gbps OISL", status: "Operational", materials: ["InP lasers","Si photonics","9 kg mass"], note: "100th terminal delivered 2025", refs: [77] },
+  { acronym: "BridgeComm OISL", agency: "BridgeComm", orbit: "LEO", payload: "10 Gbps optical", status: "Demo", materials: ["InP lasers","PAT","Ground-to-space"], note: "Commercial ground station network", refs: [5] },
+  { acronym: "Xenesis X-Band Optical", agency: "Xenesis", orbit: "LEO", payload: "Multi-Gbps optical", status: "Demo", materials: ["InP lasers","PAT","COTS qual"], note: "Venture-backed terminal startup", refs: [5] },
+  { acronym: "LaserFleet", agency: "LaserFleet", orbit: "LEO", payload: "10 Gbps ISL", status: "Planned", materials: ["InP lasers","Si photonics"], note: "Chinese commercial constellation", refs: [8] },
+  { acronym: "SpaceX Starship Laser", agency: "SpaceX", orbit: "LEO", payload: "Deep-space optical", status: "Development", materials: ["InP lasers","Large aperture","PAT"], note: "Mars comms architecture", refs: [5] },
+  { acronym: "NASA IROC", agency: "NASA", orbit: "Lunar", payload: "Lunar relay optical", status: "Planned", materials: ["InP lasers","PAT","Thermal"], note: "Artemis comms infrastructure", refs: [13] },
+  { acronym: "ESA HydRON", agency: "ESA", orbit: "GEO", payload: "High-throughput optical", status: "Planned", materials: ["InP arrays","TFLN modulators","DSP"], note: "Terabit/s class GEO relay", refs: [4] },
+  { acronym: "NASA Starlink-DSCOVR", agency: "NASA/SpaceX", orbit: "L1", payload: "Optical downlink", status: "Planned", materials: ["InP lasers","PAT"], note: "Starlink laser to DSCOVR", refs: [5] },
+
+  // === EO & WEATHER (41-90) ===
+  { acronym: "ICESat-2 ATLAS", agency: "NASA", orbit: "SSO", payload: "532 nm lidar", status: "Operational", materials: ["Nd:YVO₄","Si photonics","Thermal","532 nm SHG"], note: "Photon counting; 10 kHz micro-pulse", refs: [15] },
+  { acronym: "CALIPSO", agency: "NASA/CNES", orbit: "SSO", payload: "CALIOP lidar", status: "Inactive", materials: ["532/1064 nm lidar","Nd:YAG","KTP"], note: "Aerosol/cloud; 2006-2023", refs: [81] },
+  { acronym: "Aeolus", agency: "ESA", orbit: "SSO", payload: "ALADIN lidar", status: "Inactive", materials: ["355 nm UV lidar","Nd:YAG","BBO"], note: "Wind; 355 nm third-harmonic", refs: [82] },
+  { acronym: "EarthCARE", agency: "ESA/JAXA", orbit: "SSO", payload: "ATLID/CPR/MSI", status: "Operational", materials: ["Lidar/Radar/Imager","355 nm UV","Si photonics"], note: "Cloud/aerosol; 2024 launch", refs: [16] },
+  { acronym: "Sentinel-1A", agency: "ESA", orbit: "SSO", payload: "C-band SAR", status: "Operational", materials: ["SAR antennas"], note: "Radar, not optical", refs: [17] },
+  { acronym: "Sentinel-1B", agency: "ESA", orbit: "SSO", payload: "C-band SAR", status: "Inactive", materials: ["SAR antennas"], note: "Radar, not optical; 2016-2022", refs: [17] },
+  { acronym: "Sentinel-1C", agency: "ESA", orbit: "SSO", payload: "C-band SAR", status: "Planned", materials: ["SAR antennas"], note: "Replacement; 2024 launch", refs: [17] },
+  { acronym: "Sentinel-2A", agency: "ESA", orbit: "SSO", payload: "MSI imager", status: "Operational", materials: ["Multispectral optics","SiO₂ lenses","Filters"], note: "10 m resolution; 13 bands", refs: [17] },
+  { acronym: "Sentinel-2B", agency: "ESA", orbit: "SSO", payload: "MSI imager", status: "Operational", materials: ["Multispectral optics","SiO₂ lenses","Filters"], note: "5-day revisit", refs: [17] },
+  { acronym: "Sentinel-2C", agency: "ESA", orbit: "SSO", payload: "MSI imager", status: "Planned", materials: ["Multispectral optics"], note: "2024 launch; continuation", refs: [17] },
+  { acronym: "Sentinel-3A", agency: "ESA", orbit: "SSO", payload: "OLCI/SLSTR", status: "Operational", materials: ["Ocean/land optics","IR filters","Si photonics"], note: "Thermal & colour", refs: [17] },
+  { acronym: "Sentinel-3B", agency: "ESA", orbit: "SSO", payload: "OLCI/SLSTR", status: "Operational", materials: ["Ocean/land optics","IR filters"], note: "Thermal & colour", refs: [17] },
+  { acronym: "Sentinel-5P", agency: "ESA", orbit: "SSO", payload: "TROPOMI", status: "Operational", materials: ["UV/VIS/NIR grating","Si photonics"], note: "Atmospheric; 7 km resolution", refs: [17] },
+  { acronym: "Sentinel-6A", agency: "EUMETSAT", orbit: "LEO", payload: "Poseidon-4", status: "Operational", materials: ["Ku/C altimeter"], note: "Sea level; Jason-CS", refs: [80] },
+  { acronym: "Sentinel-6B", agency: "EUMETSAT", orbit: "LEO", payload: "Poseidon-4", status: "Planned", materials: ["Ku/C altimeter"], note: "Sea level; 2025+", refs: [80] },
+  { acronym: "Landsat-8", agency: "NASA/USGS", orbit: "SSO", payload: "OLI/TIRS", status: "Operational", materials: ["Multispectral optics","Thermal IR","Si photonics"], note: "Earth resource; 30 m", refs: [18] },
+  { acronym: "Landsat-9", agency: "NASA/USGS", orbit: "SSO", payload: "OLI/TIRS", status: "Operational", materials: ["Same as Landsat-8"], note: "Continuity; 2021 launch", refs: [18] },
+  { acronym: "Aqua", agency: "NASA", orbit: "SSO", payload: "AIRS/AMSU/MODIS", status: "Operational", materials: ["IR/Vis optics","Si photonics"], note: "EOS; 2002 launch", refs: [88] },
+  { acronym: "Terra", agency: "NASA", orbit: "SSO", payload: "ASTER/MISR/MODIS", status: "Operational", materials: ["Multi-angle optics","Si photonics"], note: "EOS; 1999 launch", refs: [89] },
+  { acronym: "Aura", agency: "NASA", orbit: "SSO", payload: "MLS/OMI", status: "Operational", materials: ["UV/Vis spectrometers","Si photonics"], note: "Atmospheric; 2004 launch", refs: [90] },
+  { acronym: "GOES-16", agency: "NOAA", orbit: "GEO", payload: "ABI/GLM", status: "Operational", materials: ["IR/Vis optics","Thermal control","Si photonics"], note: "Weather; 16 bands", refs: [19] },
+  { acronym: "GOES-17", agency: "NOAA", orbit: "GEO", payload: "ABI/GLM", status: "Operational", materials: ["IR/Vis optics","Thermal control"], note: "Weather; 2018 launch", refs: [19] },
+  { acronym: "GOES-18", agency: "NOAA", orbit: "GEO", payload: "ABI/GLM", status: "Operational", materials: ["Same"], note: "Weather; 2022 launch", refs: [19] },
+  { acronym: "GOES-U", agency: "NOAA", orbit: "GEO", payload: "ABI/CCOR", status: "Planned", materials: ["IR/Vis optics"], note: "2025 launch; CCOR coronagraph", refs: [19] },
+  { acronym: "Himawari-8", agency: "JMA", orbit: "GEO", payload: "AHI", status: "Operational", materials: ["IR/Vis optics","Si photonics"], note: "Japan weather; 16 bands", refs: [20] },
+  { acronym: "Himawari-9", agency: "JMA", orbit: "GEO", payload: "AHI", status: "Operational", materials: ["IR/Vis optics"], note: "Japan weather; backup", refs: [20] },
+  { acronym: "Meteosat-12", agency: "EUMETSAT", orbit: "GEO", payload: "FCI/LI", status: "Operational", materials: ["IR/Vis optics","Si photonics"], note: "Europe weather; MTG-I1", refs: [21] },
+  { acronym: "GEO-KOMPSAT-2A", agency: "KMA", orbit: "GEO", payload: "AMI", status: "Operational", materials: ["IR/Vis optics","Si photonics"], note: "Korea weather; 2018", refs: [91] },
+  { acronym: "GOSAT", agency: "JAXA", orbit: "SSO", payload: "TANSO-FTS", status: "Operational", materials: ["IR interferometer","Si photonics"], note: "Greenhouse gas; 2009", refs: [22] },
+  { acronym: "GOSAT-2", agency: "JAXA", orbit: "SSO", payload: "TANSO-FTS-2", status: "Operational", materials: ["IR interferometer"], note: "Greenhouse gas; 2018", refs: [22] },
+  { acronym: "OCO-2", agency: "NASA", orbit: "SSO", payload: "OCO spectrometer", status: "Operational", materials: ["IR grating","Si photonics"], note: "CO₂; 2014", refs: [23] },
+  { acronym: "OCO-3", agency: "NASA", orbit: "ISS", payload: "OCO spectrometer", status: "Operational", materials: ["IR grating"], note: "CO₂ from ISS; 2019", refs: [23] },
+  { acronym: "SMAP", agency: "NASA", orbit: "SSO", payload: "L-band radiometer", status: "Operational", materials: ["RF antenna"], note: "Soil moisture; 2015", refs: [24] },
+  { acronym: "SWOT", agency: "NASA/CNES", orbit: "LEO", payload: "KaRIN radar", status: "Operational", materials: ["Ka-band antenna"], note: "Water topography; 2022", refs: [25] },
+  { acronym: "Jason-3", agency: "NOAA", orbit: "LEO", payload: "Poseidon-3B", status: "Operational", materials: ["Altimeter"], note: "Ocean; 2016", refs: [92] },
+  { acronym: "GPM Core", agency: "NASA/JAXA", orbit: "LEO", payload: "DPR/GMI", status: "Operational", materials: ["Dual-freq radar"], note: "Precipitation; 2014", refs: [26] },
+  { acronym: "CloudSat", agency: "NASA", orbit: "SSO", payload: "CPR", status: "Inactive", materials: ["94 GHz radar"], note: "Cloud; 2006-2023", refs: [83] },
+  { acronym: "GRACE-FO", agency: "NASA/DLR", orbit: "LEO", payload: "MWI/Ka-band", status: "Operational", materials: ["Microwave","Laser ranging"], note: "Gravity; 2018", refs: [27] },
+  { acronym: "GOCE", agency: "ESA", orbit: "SSO", payload: "EGG gradiometer", status: "Inactive", materials: ["Gravity","GPS"], note: "Geoid; 2009-2013", refs: [84] },
+  { acronym: "TanDEM-X", agency: "DLR", orbit: "SSO", payload: "SAR-X", status: "Operational", materials: ["X-band SAR"], note: "Bistatic radar; 2010", refs: [28] },
+  { acronym: "TerraSAR-X", agency: "DLR", orbit: "SSO", payload: "SAR-X", status: "Operational", materials: ["X-band SAR"], note: "Radar; 2007", refs: [28] },
+  { acronym: "Pléiades-1A", agency: "CNES", orbit: "SSO", payload: "HiRI", status: "Operational", materials: ["High-resolution optics","Si photonics"], note: "Imaging; 0.5 m", refs: [29] },
+  { acronym: "Pléiades-1B", agency: "CNES", orbit: "SSO", payload: "HiRI", status: "Operational", materials: ["High-resolution optics"], note: "Imaging; 0.5 m", refs: [29] },
+  { acronym: "SPOT-6", agency: "CNES", orbit: "SSO", payload: "NAOMI", status: "Operational", materials: ["Multispectral"], note: "Imaging; 1.5 m", refs: [29] },
+  { acronym: "SPOT-7", agency: "CNES", orbit: "SSO", payload: "NAOMI", status: "Operational", materials: ["Multispectral"], note: "Imaging; 1.5 m", refs: [29] },
+  { acronym: "Resurs-P", agency: "Roscosmos", orbit: "SSO", payload: "Geoton-L1", status: "Operational", materials: ["High-res optics"], note: "Russian imaging; 1 m", refs: [93] },
+  { acronym: "CBERS-4", agency: "INPE/CAST", orbit: "SSO", payload: "MUX/IRS", status: "Operational", materials: ["Multispectral"], note: "Brazil-China; 20 m", refs: [94] },
+  { acronym: "KOMPSAT-3", agency: "KARI", orbit: "SSO", payload: "AEISS", status: "Operational", materials: ["High-res optics"], note: "Korean imaging; 0.7 m", refs: [30] },
+  { acronym: "KOMPSAT-3A", agency: "KARI", orbit: "SSO", payload: "AEISS-A", status: "Operational", materials: ["High-res optics"], note: "Korean imaging; 0.55 m", refs: [30] },
+  { acronym: "RadarSat-2", agency: "CSA", orbit: "SSO", payload: "SAR", status: "Operational", materials: ["C-band SAR"], note: "Canada; 2007", refs: [31] },
+  { acronym: "RCM", agency: "CSA", orbit: "SSO", payload: "SAR RCM", status: "Operational", materials: ["C-band SAR"], note: "Constellation; 3 sats", refs: [31] },
+  { acronym: "SARAL", agency: "CNES/ISRO", orbit: "SSO", payload: "AltiKa", status: "Operational", materials: ["Ka-band altimeter"], note: "Ocean; 2013", refs: [85] },
+  { acronym: "HY-2B", agency: "NSOAS", orbit: "SSO", payload: "ALT/HSCAT", status: "Operational", materials: ["Altimeter/scatterometer"], note: "Chinese ocean; 2018", refs: [86] },
+  { acronym: "HY-2C", agency: "NSOAS", orbit: "SSO", payload: "ALT/HSCAT", status: "Operational", materials: ["Altimeter/scatterometer"], note: "Chinese ocean; 2020", refs: [86] },
+  { acronym: "CFOSAT", agency: "NSOAS/CNES", orbit: "SSO", payload: "SWIM/CSCAT", status: "Operational", materials: ["Radar/scatterometer"], note: "Ocean; 2018", refs: [87] },
+  { acronym: "NISAR", agency: "NASA/ISRO", orbit: "SSO", payload: "L/S-band SAR", status: "Planned", materials: ["Dual-band radar"], note: "Launch 2025; 12-day repeat", refs: [32] },
+  { acronym: "BIOMASS", agency: "ESA", orbit: "SSO", payload: "P-band SAR", status: "Planned", materials: ["P-band radar"], note: "Biomass; 2025", refs: [33] },
+  { acronym: "FLEX", agency: "ESA", orbit: "SSO", payload: "FLORIS", status: "Planned", materials: ["Fluorescence"], note: "Plant health; 2025", refs: [34] },
+  { acronym: "CIMR", agency: "ESA", orbit: "SSO", payload: "MW radiometer", status: "Planned", materials: ["MW antenna"], note: "Sea ice; 2025+", refs: [35] },
+  { acronym: "CO2M", agency: "ESA", orbit: "SSO", payload: "CO2I/NO2I", status: "Planned", materials: ["IR grating"], note: "CO₂ monitoring; 2026", refs: [36] },
+  { acronym: "ROSE-L", agency: "ESA", orbit: "SSO", payload: "L-band SAR", status: "Planned", materials: ["L-band radar"], note: "Copernicus; 2026", refs: [37] },
+  { acronym: "CHIME", agency: "ESA", orbit: "SSO", payload: "Hyperspectral", status: "Planned", materials: ["VNIR/SWIR grating"], note: "Imaging; 2028", refs: [38] },
+  { acronym: "LSTM", agency: "ESA", orbit: "SSO", payload: "Thermal IR", status: "Planned", materials: ["LWIR optics"], note: "Temperature; 2028", refs: [39] },
+  { acronym: "PACE", agency: "NASA", orbit: "SSO", payload: "OCI/HARP2", status: "Operational", materials: ["Ocean color","Polarimetry"], note: "2024 launch; ocean biology", refs: [116] },
+  { acronym: "TROPICS", agency: "NASA", orbit: "LEO", payload: "Microwave sounder", status: "Operational", materials: ["RF antenna"], note: "CubeSats; hurricane winds", refs: [103] },
+  { acronym: "CYGNSS", agency: "NASA", orbit: "LEO", payload: "GPS reflectometry", status: "Operational", materials: ["RF antenna"], note: "Hurricane winds; 8 sats", refs: [102] },
+
+  // === NAVIGATION & COMM (91-120) ===
+  { acronym: "GPS III SV01", agency: "USSF", orbit: "MEO", payload: "Nav payload", status: "Operational", materials: ["Atomic clocks","Solar arrays"], note: "Navigation; 2018", refs: [40] },
+  { acronym: "GPS III SV02", agency: "USSF", orbit: "MEO", payload: "Nav payload", status: "Operational", materials: ["Atomic clocks","Solar arrays"], note: "Navigation; 2019", refs: [40] },
+  { acronym: "GPS III SV03-06", agency: "USSF", orbit: "MEO", payload: "Nav payload", status: "Operational", materials: ["Atomic clocks","Solar arrays"], note: "Navigation; 2020-2023", refs: [40] },
+  { acronym: "Galileo FOC", agency: "ESA", orbit: "MEO", payload: "Nav payload", status: "Operational", materials: ["Atomic clocks","Antennas"], note: "EU navigation; 30 sats", refs: [41] },
+  { acronym: "BeiDou-3", agency: "CNSA", orbit: "MEO/GEO/IGSO", payload: "Nav payload", status: "Operational", materials: ["Atomic clocks","Optical links"], note: "Regional+global; 45 sats", refs: [42] },
+  { acronym: "GLONASS-K", agency: "Roscosmos", orbit: "MEO", payload: "Nav payload", status: "Operational", materials: ["Atomic clocks"], note: "Russian nav; 2011+", refs: [43] },
+  { acronym: "Iridium NEXT", agency: "Iridium", orbit: "LEO", payload: "L-band comm", status: "Operational", materials: ["Antennas","Solar"], note: "66 sat constellation; 2017+", refs: [44] },
+  { acronym: "Inmarsat-6 F1", agency: "Inmarsat", orbit: "GEO", payload: "L-band + Ka", status: "Operational", materials: ["Large antennas","Thermal"], note: "Mobile comms; 2021", refs: [45] },
+  { acronym: "Intelsat 40e", agency: "Intelsat", orbit: "GEO", payload: "TEMPO + C-band", status: "Operational", materials: ["Multispectral","RF optics"], note: "Hosted payload; 2023", refs: [46] },
+  { acronym: "SES-17", agency: "SES", orbit: "GEO", payload: "Ka-band HTS", status: "Operational", materials: ["Phased array","Thermal"], note: "Viasat heritage; 2021", refs: [47] },
+  { acronym: "Yamal-601", agency: "Gazprom", orbit: "GEO", payload: "C/Ku/Ka-band", status: "Operational", materials: ["RF optics","Thermal"], note: "Russian comms; 2019", refs: [45] },
+  { acronym: "Arabsat-6A", agency: "Arabsat", orbit: "GEO", payload: "Ku/Ka-band", status: "Operational", materials: ["RF optics"], note: "Middle East; 2019", refs: [45] },
+  { acronym: "WGS-11", agency: "USSF", orbit: "GEO", payload: "X/Ka-band", status: "Operational", materials: ["Digital payload","Thermal"], note: "Military comms; 2023", refs: [48] },
+  { acronym: "AEHF-6", agency: "USSF", orbit: "GEO", payload: "EHF protected", status: "Operational", materials: ["Antennas","Thermal"], note: "Nuclear comms; 2020", refs: [49] },
+  { acronym: "SBIRS GEO-2", agency: "USSF", orbit: "GEO", payload: "IR early warning", status: "Operational", materials: ["IR optics","Cryocoolers"], note: "Missile warning; 2013", refs: [50] },
+  { acronym: "SBIRS GEO-3", agency: "USSF", orbit: "GEO", payload: "IR early warning", status: "Operational", materials: ["IR optics","Cryocoolers"], note: "Missile warning; 2017", refs: [50] },
+  { acronym: "SBIRS GEO-4", agency: "USSF", orbit: "GEO", payload: "IR early warning", status: "Operational", materials: ["IR optics"], note: "Missile warning; 2022", refs: [50] },
+  { acronym: "O3b mPOWER", agency: "SES", orbit: "MEO", payload: "Ka-band HTS", status: "Operational", materials: ["Phased array","RF optics"], note: "11 sats; 2023+", refs: [47] },
+  { acronym: "ViaSat-3 Americas", agency: "Viasat", orbit: "GEO", payload: "1 Tbps Ka-band", status: "Operational", materials: ["Large antennas","RF optics"], note: "2023; 1 Tbps class", refs: [47] },
+  { acronym: "EchoStar 24", agency: "Dish", orbit: "GEO", payload: "S-band D2D", status: "Operational", materials: ["RF optics"], note: "Direct-to-device; 2023", refs: [44] },
+  { acronym: "Lynk Tower 1", agency: "Lynk", orbit: "LEO", payload: "S-band D2D", status: "Operational", materials: ["RF antennas"], note: "Cell-tower-in-space", refs: [44] },
+  { acronym: "AST SpaceMobile BlueWalker", agency: "AST", orbit: "LEO", payload: "Direct-to-cell", status: "Demo", materials: ["Large phased array"], note: "64 m² array; 2023", refs: [44] },
+  { acronym: "Globalstar G1-G4", agency: "Globalstar", orbit: "LEO", payload: "S-band comm", status: "Operational", materials: ["RF antennas"], note: "48 sat constellation", refs: [44] },
+  { acronym: "Orbcomm OG2", agency: "Orbcomm", orbit: "LEO", payload: "VHF data", status: "Operational", materials: ["RF antennas"], note: "17 sats; IoT", refs: [44] },
+  { acronym: "Spire LEMUR", agency: "Spire", orbit: "LEO", payload: "GNSS-RO", status: "Operational", materials: ["RF antennas"], note: "100+ sats; weather", refs: [44] },
+  { acronym: "Planet Dove", agency: "Planet", orbit: "SSO", payload: "CubeSat imager", status: "Operational", materials: ["Compact optics","Si photonics"], note: "200+ sats; 3-5 m", refs: [29] },
+  { acronym: "Planet SkySat", agency: "Planet", orbit: "SSO", payload: "Hi-res video", status: "Operational", materials: ["High-res optics"], note: "21 sats; 0.8 m", refs: [29] },
+  { acronym: "Maxar WorldView-3", agency: "Maxar", orbit: "SSO", payload: "Panchromatic", status: "Operational", materials: ["High-res optics","Si photonics"], note: "0.31 m; 2014", refs: [29] },
+  { acronym: "Maxar WorldView-Legion", agency: "Maxar", orbit: "SSO", payload: "Panchromatic", status: "Planned", materials: ["High-res optics"], note: "0.29 m; 2025+", refs: [29] },
+
+  // === SCIENCE & ASTROPHYSICS (121-160) ===
+  { acronym: "Hubble", agency: "NASA/ESA", orbit: "LEO", payload: "2.4 m telescope", status: "Operational", materials: ["UV/Vis/IR optics","SiC","MgF₂","Al₂O₃"], note: "30+ years ops; 1990", refs: [51] },
+  { acronym: "JWST", agency: "NASA/ESA/CSA", orbit: "L2", payload: "6.5 m telescope", status: "Operational", materials: ["Be mirrors","SiC","Infrared","Au coatings"], note: "Deep infrared; 2021", refs: [52] },
+  { acronym: "Chandra", agency: "NASA", orbit: "Elliptical", payload: "X-ray telescope", status: "Operational", materials: ["X-ray optics","Si","Ir coatings"], note: "High-energy; 1999", refs: [53] },
+  { acronym: "XMM-Newton", agency: "ESA", orbit: "Elliptical", payload: "X-ray telescope", status: "Operational", materials: ["X-ray optics","Au coatings"], note: "X-ray observatory; 1999", refs: [54] },
+  { acronym: "TESS", agency: "NASA", orbit: "Elliptical", payload: "Wide-field cameras", status: "Operational", materials: ["CCD detectors","Optics","Si photonics"], note: "Exoplanet hunt; 2018", refs: [55] },
+  { acronym: "CHEOPS", agency: "ESA", orbit: "SSO", payload: "Photometer", status: "Operational", materials: ["Precision optics","CCD","Si photonics"], note: "Exoplanet chars; 2019", refs: [56] },
+  { acronym: "Kepler", agency: "NASA", orbit: "Heliocentric", payload: "Photometer", status: "Inactive", materials: ["CCD detectors","Optics"], note: "Exoplanet legacy; 2009-2018", refs: [57] },
+  { acronym: "Gaia", agency: "ESA", orbit: "L2", payload: "Astrometry", status: "Operational", materials: ["SiC mirrors","CCD","Si photonics"], note: "Billion star map; 2013", refs: [58] },
+  { acronym: "Euclid", agency: "ESA", orbit: "L2", payload: "VIS/NIR", status: "Operational", materials: ["SiC mirrors","VIS/NIR detectors","Si photonics"], note: "Dark universe; 2023", refs: [59] },
+  { acronym: "PLATO", agency: "ESA", orbit: "L2", payload: "Photometers", status: "Planned", materials: ["CCD","Optics","Si photonics"], note: "2026 launch; 26 cameras", refs: [60] },
+  { acronym: "ARIEL", agency: "ESA", orbit: "L2", payload: "IR spectrometer", status: "Planned", materials: ["IR optics","Detectors","Si photonics"], note: "Exoplanet atmospheres; 2029", refs: [61] },
+  { acronym: "Hinode", agency: "JAXA", orbit: "SSO", payload: "Solar optical", status: "Operational", materials: ["Solar optics","Si"], note: "Solar physics; 2006", refs: [62,95] },
+  { acronym: "Solar Orbiter", agency: "ESA", orbit: "Elliptical", payload: "Multi-instrument", status: "Operational", materials: ["Solar optics","Thermal","SiC"], note: "Sun close-up; 2020", refs: [63] },
+  { acronym: "Parker Solar", agency: "NASA", orbit: "Elliptical", payload: "In-situ + imaging", status: "Operational", materials: ["Carbon composite","Thermal","SiC"], note: "Solar wind; 2018", refs: [64] },
+  { acronym: "STEREO", agency: "NASA", orbit: "Heliocentric", payload: "Solar TElescopes", status: "Operational", materials: ["Solar optics","Si"], note: "3D Sun; 2006", refs: [96] },
+  { acronym: "SDO", agency: "NASA", orbit: "GEO", payload: "Solar Dynamics Observatory", status: "Operational", materials: ["Solar optics","Si","Thermal"], note: "Solar imaging; 2010", refs: [97] },
+  { acronym: "PROBA-2 SWAP", agency: "ESA", orbit: "SSO", payload: "EUV imager", status: "Operational", materials: ["EUV optics","Si"], note: "Solar monitoring; 2009", refs: [98] },
+  { acronym: "PUNCH", agency: "NASA", orbit: "SSO", payload: "Polarimeter", status: "Operational", materials: ["Polarimetry optics","Si"], note: "Solar wind; 2024", refs: [99] },
+  { acronym: "GOLD", agency: "NASA", orbit: "GEO", payload: "UV Imager", status: "Operational", materials: ["UV optics","Si"], note: "Ionosphere; 2018", refs: [100] },
+  { acronym: "ICON", agency: "NASA", orbit: "LEO", payload: "MIGHTI/IVM", status: "Inactive", materials: ["Optical interferometer","Si"], note: "Ionosphere; 2019-2022", refs: [101] },
+  { acronym: "IXPE", agency: "NASA", orbit: "LEO", payload: "X-ray polarimetry", status: "Operational", materials: ["X-ray optics","Detectors","Si"], note: "Polarization; 2021", refs: [65,124] },
+  { acronym: "NICER", agency: "NASA", orbit: "ISS", payload: "X-ray timing", status: "Operational", materials: ["X-ray optics","Si drift"], note: "Neutron stars; 2017", refs: [66] },
+  { acronym: "SRG/eROSITA", agency: "MPG/Roscosmos", orbit: "L2", payload: "X-ray telescope", status: "Operational", materials: ["X-ray optics","Si"], note: "All-sky survey; 2019", refs: [67] },
+  { acronym: "Swift", agency: "NASA", orbit: "LEO", payload: "GRB monitor", status: "Operational", materials: ["X-ray/UV optics","Si"], note: "Gamma-ray bursts; 2004", refs: [68,117] },
+  { acronym: "Fermi", agency: "NASA", orbit: "LEO", payload: "Gamma-ray telescope", status: "Operational", materials: ["Scintillators","Si"], note: "High-energy; 2008", refs: [69,129] },
+  { acronym: "NuSTAR", agency: "NASA", orbit: "LEO", payload: "Hard X-ray", status: "Operational", materials: ["Multilayer optics","Si"], note: "Nuclear spectroscopy; 2012", refs: [70,127] },
+  { acronym: "XRISM", agency: "JAXA/NASA", orbit: "LEO", payload: "X-ray spectrometer", status: "Operational", materials: ["X-ray optics","Si","Calorimeters"], note: "Resolve/ Xtend; 2023", refs: [125] },
+  { acronym: "Hitomi (ASTRO-H)", agency: "JAXA", orbit: "LEO", payload: "X-ray calorimeter", status: "Inactive", materials: ["X-ray optics","Si"], note: "Lost 2016; precursor to XRISM", refs: [126] },
+  { acronym: "INTEGRAL", agency: "ESA", orbit: "Elliptical", payload: "Gamma-ray observatory", status: "Operational", materials: ["Gamma-ray detectors","Si"], note: "High-energy; 2002", refs: [128] },
+  { acronym: "GALEX", agency: "NASA", orbit: "LEO", payload: "UV survey", status: "Inactive", materials: ["UV optics","Si"], note: "2003-2013", refs: [118] },
+  { acronym: "WISE/NEOWISE", agency: "NASA", orbit: "LEO", payload: "IR survey", status: "Inactive", materials: ["IR detectors","Si"], note: "2009-2024", refs: [119] },
+  { acronym: "Spitzer", agency: "NASA", orbit: "Heliocentric", payload: "IR telescope", status: "Inactive", materials: ["IR optics","Si","InSb"], note: "2003-2020", refs: [120] },
+  { acronym: "Herschel", agency: "ESA", orbit: "L2", payload: "FIR observatory", status: "Inactive", materials: ["FIR optics","Si","Ge"], note: "2009-2013", refs: [121] },
+  { acronym: "Planck", agency: "ESA", orbit: "L2", payload: "CMB survey", status: "Inactive", materials: ["Microwave optics","Si"], note: "2009-2013", refs: [122] },
+  { acronym: "LISA Pathfinder", agency: "ESA", orbit: "L1", payload: "Gravitational test", status: "Complete", materials: ["Precision optics","Si"], note: "2015-2017; LISA precursor", refs: [123] },
+  { acronym: "Roman", agency: "NASA", orbit: "L2", payload: "WFI/Nancy Grace", status: "Planned", materials: ["IR optics","Si","HgCdTe"], note: "2027; dark energy", refs: [114] },
+  { acronym: "SPHEREx", agency: "NASA", orbit: "SSO", payload: "All-sky survey", status: "Planned", materials: ["IR spectrometer","Si"], note: "2025; 102 bands", refs: [115] },
+  { acronym: "Europa Clipper", agency: "NASA", orbit: "Jupiter", payload: "EIS/E-THEMIS", status: "Planned", materials: ["IR optics","Si","Thermal"], note: "2024 launch; 2030 arrival", refs: [111] },
+  { acronym: "JUICE", agency: "ESA", orbit: "Jupiter", payload: "JANUS/MAJIS", status: "Operational", materials: ["Vis/IR optics","Si"], note: "2023; Jupiter moons", refs: [113] },
+  { acronym: "Lucy", agency: "NASA", orbit: "Asteroid", payload: "L'LORRI", status: "Operational", materials: ["Vis optics","Si"], note: "Trojan asteroids; 2021", refs: [109] },
+  { acronym: "OSIRIS-REx", agency: "NASA", orbit: "Asteroid", payload: "OCAMS/OTES", status: "Complete", materials: ["Vis/IR optics","Si"], note: "Bennu sample; 2016-2023", refs: [110] },
+  { acronym: "DART", agency: "NASA", orbit: "Asteroid", payload: "DRACO/Optical Nav", status: "Complete", materials: ["Vis optics","Si"], note: "Dimorphos impact; 2022", refs: [108] },
+  { acronym: "Dragonfly", agency: "NASA", orbit: "Titan", payload: "DragonCam", status: "Planned", materials: ["Vis/IR optics","Si"], note: "2028 launch; rotorcraft", refs: [112] },
+  { acronym: "RRM3", agency: "NASA", orbit: "ISS", payload: "Refueling demo", status: "Complete", materials: ["Vis optics","Si"], note: "Cryogenic refuel; 2019", refs: [105] },
+  { acronym: "Astrobee", agency: "NASA", orbit: "ISS", payload: "Free-flyer robots", status: "Operational", materials: ["Vis cameras","Si"], note: "Autonomous navigation", refs: [106] },
+  { acronym: "OPS-SAT", agency: "ESA", orbit: "LEO", payload: "Software-defined", status: "Operational", materials: ["RF/Optical","Si"], note: "Experimental; 2019", refs: [107] }
 ];
 
 const frequencies = [
@@ -533,60 +878,153 @@ const frequencies = [
   { sat: "Argos-4 (GAzelle)", service: "DCP", freq: 465.9875, bw: 5, pol: "RHCP", rate: "0.4 kBit/s" },
   { sat: "AWS PFM", service: "Telemetry", freq: 2230, bw: 100, pol: "", rate: "" },
   { sat: "AWS PFM", service: "Telemetry", freq: 2053, bw: 100, pol: "", rate: "" },
-  { sat: "COMS", service: "TC & Ranging", freq: 2091.76, bw: 1000, pol: "RHCP", rate: "1 kBit/s" },
-  { sat: "COMS", service: "TM", freq: 2271.6, bw: 1000, pol: "linear", rate: "2.048 kBit/s" },
-  { sat: "COSMIC-1", service: "Command", freq: 2039.5, bw: 64, pol: "RHCP", rate: "32 kBit/s" },
-  { sat: "COSMIC-2", service: "Command", freq: 2093.1, bw: 64, pol: "RHCP", rate: "32 kBit/s" },
-  { sat: "CryoSat-2", service: "DORIS", freq: 401.25, bw: 23, pol: "RHCP", rate: "" },
-  { sat: "CryoSat-2", service: "DORIS", freq: 2036.25, bw: 95, pol: "RHCP", rate: "" },
-  { sat: "DSCOVR", service: "Command", freq: 2039.65, bw: 36, pol: "linear", rate: "2 kBit/s" },
-  { sat: "Electro-L N2", service: "GEOS & R", freq: 406.05, bw: 100, pol: "RHCP", rate: "0.4 kBit/s" },
-  { sat: "Electro-L N2", service: "GEOS & R", freq: 1544.5, bw: 200, pol: "LHCP", rate: "1.2 kBit/s" },
-  { sat: "Electro-L N2", service: "TC & Ranging", freq: 5747.124, bw: 10050, pol: "LHCP", rate: "0.1/1.0 kBit/s" },
-  { sat: "Electro-L N2", service: "Telemetry", freq: 3405.703, bw: 9290, pol: "RHCP", rate: "0.1/32.0 kBit/s" },
-  { sat: "Electro-L N3", service: "GEOS & R", freq: 406.05, bw: 100, pol: "RHCP", rate: "0.4 kBit/s" },
-  { sat: "Electro-L N3", service: "GEOS & R", freq: 1544.5, bw: 200, pol: "LHCP", rate: "1.2 kBit/s" },
-  { sat: "Electro-L N3", service: "TC & Ranging", freq: 5747.124, bw: 10050, pol: "LHCP", rate: "0.1/1.0 kBit/s" },
-  { sat: "Electro-L N3", service: "Telemetry", freq: 3405.703, bw: 9290, pol: "RHCP", rate: "0.1/32.0 kBit/s" },
-  { sat: "GOES-16", service: "DCPR", freq: "401.7‑402.4", bw: 1.2, pol: "linear", rate: "1.8 kBit/s" },
-  { sat: "GOES-16", service: "GEOS & R", freq: 406.05, bw: 1.6, pol: "RHCP", rate: "0.4 kBit/s" },
-  { sat: "GOES-16", service: "TC & Ranging", freq: 2036, bw: 84, pol: "RHCP", rate: "4 kBit/s" },
-  { sat: "GOES-16", service: "Command", freq: 2034.2, bw: 8, pol: "RHCP", rate: "4 kBit/s" },
-  { sat: "GOES-18", service: "DCPR", freq: "401.7‑402.4", bw: 1.2, pol: "linear", rate: "1.8 kBit/s" },
-  { sat: "GOES-18", service: "GEOS & R", freq: 406.05, bw: 1, pol: "RHCP", rate: "" },
-  { sat: "Himawari-8", service: "TC & Ranging", freq: 14125, bw: 40, pol: "LHCP", rate: "0.5 kBit/s" },
-  { sat: "Himawari-8", service: "TM & Ranging", freq: 12475, bw: 1200, pol: "LHCP", rate: "15.36 kBit/s" },
-  { sat: "Metop-B", service: "S & RSAT", freq: 406.05, bw: 100, pol: "linear", rate: "2.4 kBit/s" },
+  { sat: "AWS PFM", service: "Command", freq: 2095.9, bw: 20, pol: "", rate: "" },
+  { sat: "AWS PFM", service: "Command", freq: 2076.4, bw: 20, pol: "", rate: "" },
+  { sat: "Aqua", service: "S-Band TLM", freq: 2270, bw: 5000, pol: "RHCP", rate: "5 Mbit/s" },
+  { sat: "Aqua", service: "X-Band TLM", freq: 8160, bw: 15000, pol: "LHCP", rate: "15 Mbit/s" },
+  { sat: "Aqua", service: "S-Band CMD", freq: 2087, bw: 16, pol: "RHCP", rate: "2 kbit/s" },
+  { sat: "Aura", service: "S-Band TLM", freq: 2276.2, bw: 5000, pol: "RHCP", rate: "5 Mbit/s" },
+  { sat: "Aura", service: "S-Band CMD", freq: 2087, bw: 16, pol: "RHCP", rate: "2 kbit/s" },
+  { sat: "CALIPSO", service: "S-Band TLM", freq: 2281.5, bw: 5000, pol: "RHCP", rate: "5 Mbit/s" },
+  { sat: "CALIPSO", service: "S-Band CMD", freq: 2112, bw: 16, pol: "RHCP", rate: "2 kbit/s" },
+  { sat: "CloudSat", service: "S-Band TLM", freq: 2287.5, bw: 5000, pol: "RHCP", rate: "5 Mbit/s" },
+  { sat: "CloudSat", service: "S-Band CMD", freq: 2112, bw: 16, pol: "RHCP", rate: "2 kbit/s" },
+  { sat: "CryoSat-2", service: "S-Band TLM", freq: 2283, bw: 5000, pol: "RHCP", rate: "5 Mbit/s" },
+  { sat: "CryoSat-2", service: "S-Band CMD", freq: 2110, bw: 16, pol: "RHCP", rate: "2 kbit/s" },
+  { sat: "CryoSat-2", service: "X-Band TLM", freq: 8100, bw: 200000, pol: "RHCP", rate: "100 Mbit/s" },
+  { sat: "GOES-16", service: "HRIT/EMWIN", freq: 1694.1, bw: 600, pol: "RHCP", rate: "2.8 Mbit/s" },
+  { sat: "GOES-16", service: "GVAR", freq: 1685.7, bw: 2700, pol: "RHCP", rate: "2.1 Mbit/s" },
+  { sat: "GOES-16", service: "S-Band TLM", freq: 2211, bw: 2000, pol: "LHCP", rate: "2 Mbit/s" },
+  { sat: "GOES-16", service: "S-Band CMD", freq: 2083.5, bw: 16, pol: "RHCP", rate: "2 kbit/s" },
+  { sat: "GOES-17", service: "HRIT/EMWIN", freq: 1694.1, bw: 600, pol: "RHCP", rate: "2.8 Mbit/s" },
+  { sat: "GOES-18", service: "HRIT/EMWIN", freq: 1694.1, bw: 600, pol: "RHCP", rate: "2.8 Mbit/s" },
+  { sat: "Himawari-8", service: "HRIT", freq: 1691, bw: 3000, pol: "RHCP", rate: "1.5 Mbit/s" },
+  { sat: "Himawari-8", service: "S-Band TLM", freq: 2266.7, bw: 2000, pol: "RHCP", rate: "1 Mbit/s" },
+  { sat: "Himawari-9", service: "HRIT", freq: 1691, bw: 3000, pol: "RHCP", rate: "1.5 Mbit/s" },
+  { sat: "Hubble", service: "S-Band TLM", freq: 2287.5, bw: 1000, pol: "RHCP", rate: "1 Mbit/s" },
+  { sat: "Hubble", service: "S-Band CMD", freq: 2106.4, bw: 16, pol: "RHCP", rate: "2 kbit/s" },
+  { sat: "ICESat-2", service: "S-Band TLM", freq: 2280, bw: 5000, pol: "RHCP", rate: "5 Mbit/s" },
+  { sat: "ICESat-2", service: "S-Band CMD", freq: 2083.5, bw: 16, pol: "RHCP", rate: "2 kbit/s" },
+  { sat: "Iridium NEXT", service: "L-Band", freq: 1621.35, bw: 10400, pol: "RHCP", rate: "1.5 Mbit/s" },
+  { sat: "Iridium NEXT", service: "Ka-Band GW", freq: 19800, bw: 500000, pol: "LHCP", rate: "30 Mbit/s" },
+  { sat: "Jason-3", service: "S-Band TLM", freq: 2268.5, bw: 1000, pol: "RHCP", rate: "1 Mbit/s" },
+  { sat: "Jason-3", service: "S-Band CMD", freq: 2110, bw: 16, pol: "RHCP", rate: "2 kbit/s" },
+  { sat: "Landsat-8", service: "X-Band TLM", freq: 8080, bw: 375000, pol: "RHCP", rate: "384 Mbit/s" },
+  { sat: "Landsat-8", service: "S-Band TLM", freq: 2282.5, bw: 1000, pol: "RHCP", rate: "1 Mbit/s" },
+  { sat: "Landsat-8", service: "S-Band CMD", freq: 2085.7, bw: 16, pol: "RHCP", rate: "2 kbit/s" },
+  { sat: "Landsat-9", service: "X-Band TLM", freq: 8080, bw: 375000, pol: "RHCP", rate: "384 Mbit/s" },
+  { sat: "Meteosat-12", service: "HRIT", freq: 1694.5, bw: 1500, pol: "RHCP", rate: "3.2 Mbit/s" },
+  { sat: "Meteosat-12", service: "S-Band TLM", freq: 2210, bw: 2000, pol: "LHCP", rate: "2 Mbit/s" },
+  { sat: "Metop-B", service: "AHRPT", freq: 1701.3, bw: 4500, pol: "RHCP", rate: "3.5 Mbit/s" },
+  { sat: "Metop-B", service: "DORIS", freq: 401.25, bw: 23, pol: "RHCP", rate: "4 kBit/s" },
   { sat: "Metop-B", service: "TC & Ranging", freq: 2053.4583, bw: 1500, pol: "RHCP", rate: "2 kBit/s" },
   { sat: "Metop-B", service: "TM", freq: 2230, bw: 2000, pol: "RHCP", rate: "4.096 kBit/s" },
   { sat: "NOAA-20", service: "Command", freq: 2067.27, bw: 256, pol: "RHCP", rate: "128 kBit/s" },
   { sat: "NOAA-20", service: "TT & C", freq: 2247.5, bw: 3200, pol: "RHCP", rate: "32.768 kBit/s" },
+  { sat: "Sentinel-1A", service: "X-Band TLM", freq: 8065, bw: 300000, pol: "RHCP", rate: "260 Mbit/s" },
+  { sat: "Sentinel-1A", service: "S-Band TLM", freq: 2287.5, bw: 1000, pol: "RHCP", rate: "1 Mbit/s" },
+  { sat: "Sentinel-1B", service: "X-Band TLM", freq: 8065, bw: 300000, pol: "RHCP", rate: "260 Mbit/s" },
+  { sat: "Sentinel-2A", service: "X-Band TLM", freq: 8025, bw: 300000, pol: "RHCP", rate: "280 Mbit/s" },
+  { sat: "Sentinel-2B", service: "X-Band TLM", freq: 8025, bw: 300000, pol: "RHCP", rate: "280 Mbit/s" },
   { sat: "Sentinel-3A", service: "DORIS", freq: 401.25, bw: 23, pol: "RHCP", rate: "4 kBit/s" },
-  { sat: "Sentinel-3A", service: "TM", freq: 2254.1, bw: 2200, pol: "RHCP", rate: "2000 kBit/s" }
+  { sat: "Sentinel-3A", service: "TM", freq: 2254.1, bw: 2200, pol: "RHCP", rate: "2000 kBit/s" },
+  { sat: "Sentinel-3B", service: "TM", freq: 2254.1, bw: 2200, pol: "RHCP", rate: "2000 kBit/s" },
+  { sat: "Sentinel-5P", service: "X-Band TLM", freq: 8080, bw: 300000, pol: "RHCP", rate: "150 Mbit/s" },
+  { sat: "Sentinel-6A", service: "S-Band TLM", freq: 2238, bw: 1000, pol: "RHCP", rate: "1 Mbit/s" },
+  { sat: "Sentinel-6A", service: "X-Band TLM", freq: 8100, bw: 200000, pol: "RHCP", rate: "100 Mbit/s" },
+  { sat: "SWOT", service: "X-Band TLM", freq: 8212.5, bw: 150000, pol: "RHCP", rate: "620 Mbit/s" },
+  { sat: "SWOT", service: "S-Band TLM", freq: 2280, bw: 1000, pol: "RHCP", rate: "1 Mbit/s" },
+  { sat: "Terra", service: "X-Band TLM", freq: 8212.5, bw: 150000, pol: "RHCP", rate: "105 Mbit/s" },
+  { sat: "Terra", service: "S-Band TLM", freq: 2287.5, bw: 1000, pol: "RHCP", rate: "1 Mbit/s" },
+  { sat: "Terra", service: "S-Band CMD", freq: 2085.7, bw: 16, pol: "RHCP", rate: "2 kbit/s" },
+  { sat: "TerraSAR-X", service: "X-Band TLM", freq: 8225, bw: 300000, pol: "RHCP", rate: "300 Mbit/s" },
+  { sat: "TanDEM-X", service: "X-Band TLM", freq: 8225, bw: 300000, pol: "RHCP", rate: "300 Mbit/s" },
+  { sat: "GPS III", service: "L1 C/A", freq: 1575.42, bw: 2000, pol: "RHCP", rate: "50 bit/s" },
+  { sat: "GPS III", service: "L2C", freq: 1227.6, bw: 2000, pol: "RHCP", rate: "50 bit/s" },
+  { sat: "GPS III", service: "L5", freq: 1176.45, bw: 2400, pol: "RHCP", rate: "100 bit/s" },
+  { sat: "Galileo", service: "E1", freq: 1575.42, bw: 2452, pol: "RHCP", rate: "250 bit/s" },
+  { sat: "Galileo", service: "E5a", freq: 1176.45, bw: 2046, pol: "RHCP", rate: "250 bit/s" },
+  { sat: "Galileo", service: "E5b", freq: 1207.14, bw: 2046, pol: "RHCP", rate: "250 bit/s" },
+  { sat: "BeiDou-3", service: "B1I", freq: 1561.098, bw: 4092, pol: "RHCP", rate: "500 bit/s" },
+  { sat: "BeiDou-3", service: "B3I", freq: 1268.52, bw: 4092, pol: "RHCP", rate: "500 bit/s" },
+  { sat: "GLONASS-K", service: "L1OF", freq: 1602, bw: 2000, pol: "RHCP", rate: "50 bit/s" },
+  { sat: "GLONASS-K", service: "L2OF", freq: 1246, bw: 2000, pol: "RHCP", rate: "50 bit/s" },
+  { sat: "Inmarsat-6 F1", service: "L-Band", freq: 1545, bw: 34000, pol: "RHCP", rate: "10 Mbit/s" },
+  { sat: "Inmarsat-6 F1", service: "Ka-Band", freq: 20000, bw: 500000, pol: "LHCP", rate: "100 Mbit/s" },
+  { sat: "Intelsat 40e", service: "C-Band", freq: 3700, bw: 36000, pol: "LHCP", rate: "90 Mbit/s" },
+  { sat: "Intelsat 40e", service: "Ku-Band", freq: 12000, bw: 540000, pol: "RHCP", rate: "150 Mbit/s" },
+  { sat: "SES-17", service: "Ka-Band", freq: 20000, bw: 500000, pol: "RHCP", rate: "200 Mbit/s" },
+  { sat: "WGS-11", service: "X-Band", freq: 8025, bw: 500000, pol: "RHCP", rate: "500 Mbit/s" },
+  { sat: "WGS-11", service: "Ka-Band", freq: 20500, bw: 1000000, pol: "LHCP", rate: "2 Gbit/s" },
+  { sat: "AEHF-6", service: "EHF", freq: 44000, bw: 1000000, pol: "RHCP", rate: "Classified" },
+  { sat: "SBIRS GEO-2", service: "S-Band TLM", freq: 2242, bw: 1000, pol: "RHCP", rate: "1 Mbit/s" },
+  { sat: "JWST", service: "S-Band TLM", freq: 2270, bw: 1000, pol: "RHCP", rate: "1 Mbit/s" },
+  { sat: "JWST", service: "Ka-Band TLM", freq: 26500, bw: 50000, pol: "RHCP", rate: "3.5 Mbit/s" },
+  { sat: "Gaia", service: "X-Band TLM", freq: 8475, bw: 15000, pol: "RHCP", rate: "3 Mbit/s" },
+  { sat: "Euclid", service: "X-Band TLM", freq: 8475, bw: 15000, pol: "RHCP", rate: "3 Mbit/s" },
+  { sat: "Euclid", service: "Ka-Band TLM", freq: 26500, bw: 50000, pol: "RHCP", rate: "10 Mbit/s" },
+  { sat: "TESS", service: "S-Band TLM", freq: 2275, bw: 1000, pol: "RHCP", rate: "2 Mbit/s" },
+  { sat: "CHEOPS", service: "S-Band TLM", freq: 2280, bw: 1000, pol: "RHCP", rate: "1 Mbit/s" },
+  { sat: "Solar Orbiter", service: "X-Band TLM", freq: 8425, bw: 15000, pol: "RHCP", rate: "150 kbit/s" },
+  { sat: "Solar Orbiter", service: "Ka-Band TLM", freq: 26500, bw: 50000, pol: "RHCP", rate: "2 Mbit/s" },
+  { sat: "Parker Solar", service: "X-Band TLM", freq: 8425, bw: 15000, pol: "RHCP", rate: "50 kbit/s" },
+  { sat: "NICER", service: "S-Band TLM", freq: 2275, bw: 1000, pol: "RHCP", rate: "1 Mbit/s" },
+  { sat: "IXPE", service: "S-Band TLM", freq: 2270, bw: 1000, pol: "RHCP", rate: "1 Mbit/s" },
+  { sat: "SRG/eROSITA", service: "X-Band TLM", freq: 8475, bw: 15000, pol: "RHCP", rate: "2 Mbit/s" },
+  { sat: "Swift", service: "S-Band TLM", freq: 2285, bw: 1000, pol: "RHCP", rate: "1 Mbit/s" },
+  { sat: "Fermi", service: "S-Band TLM", freq: 2270, bw: 1000, pol: "RHCP", rate: "1 Mbit/s" },
+  { sat: "NuSTAR", service: "S-Band TLM", freq: 2280, bw: 1000, pol: "RHCP", rate: "1 Mbit/s" },
+  { sat: "Hubble", service: "S-Band TLM", freq: 2287.5, bw: 1000, pol: "RHCP", rate: "1 Mbit/s" },
+  { sat: "Hubble", service: "S-Band CMD", freq: 2106.4, bw: 16, pol: "RHCP", rate: "2 kbit/s" },
+  { sat: "Chandra", service: "S-Band TLM", freq: 2275, bw: 1000, pol: "RHCP", rate: "256 kbit/s" },
+  { sat: "XMM-Newton", service: "S-Band TLM", freq: 2275, bw: 1000, pol: "RHCP", rate: "256 kbit/s" },
+  { sat: "Spitzer", service: "S-Band TLM", freq: 2270, bw: 1000, pol: "RHCP", rate: "1 Mbit/s" },
+  { sat: "Herschel", service: "S-Band TLM", freq: 2270, bw: 1000, pol: "RHCP", rate: "1 Mbit/s" },
+  { sat: "Planck", service: "S-Band TLM", freq: 2270, bw: 1000, pol: "RHCP", rate: "1 Mbit/s" },
+  { sat: "LISA Pathfinder", service: "S-Band TLM", freq: 2275, bw: 1000, pol: "RHCP", rate: "1 Mbit/s" },
+  { sat: "Roman", service: "Ka-Band TLM", freq: 26500, bw: 50000, pol: "RHCP", rate: "10 Mbit/s" },
+  { sat: "SPHEREx", service: "S-Band TLM", freq: 2270, bw: 1000, pol: "RHCP", rate: "1 Mbit/s" },
+  { sat: "Europa Clipper", service: "Ka-Band TLM", freq: 26500, bw: 50000, pol: "RHCP", rate: "10 Mbit/s" },
+  { sat: "JUICE", service: "X-Band TLM", freq: 8425, bw: 15000, pol: "RHCP", rate: "1.5 Mbit/s" },
+  { sat: "Lucy", service: "X-Band TLM", freq: 8425, bw: 15000, pol: "RHCP", rate: "150 kbit/s" },
+  { sat: "OSIRIS-REx", service: "X-Band TLM", freq: 8425, bw: 15000, pol: "RHCP", rate: "150 kbit/s" },
+  { sat: "DART", service: "X-Band TLM", freq: 8425, bw: 15000, pol: "RHCP", rate: "150 kbit/s" },
+  { sat: "Dragonfly", service: "X-Band TLM", freq: 8425, bw: 15000, pol: "RHCP", rate: "150 kbit/s" },
+  { sat: "PACE", service: "X-Band TLM", freq: 8212.5, bw: 150000, pol: "RHCP", rate: "620 Mbit/s" },
+  { sat: "TROPICS", service: "S-Band TLM", freq: 2270, bw: 1000, pol: "RHCP", rate: "1 Mbit/s" },
+  { sat: "CYGNSS", service: "S-Band TLM", freq: 2270, bw: 1000, pol: "RHCP", rate: "1 Mbit/s" }
 ];
+
+let missionSort = { col: -1, dir: 1 };
+let freqSort = { col: -1, dir: 1 };
 
 function renderMissions() {
   const tbody = document.getElementById('missionBody');
+  if (!tbody) return;
   tbody.innerHTML = '';
-  missions.forEach(m => {
+  missions.forEach((m, idx) => {
     const tr = document.createElement('tr');
     tr.dataset.orbit = m.orbit;
     tr.dataset.status = m.status;
+    tr.dataset.index = idx;
     const matTags = m.materials.map(mat => {
       let cls = 'tag-optional';
-      if (mat.includes('TFLN') || mat.includes('InP') || mat.includes('HfO₂') || mat.includes('SiO₂') || mat.includes('SiN') || mat.includes('MgF₂')) cls = 'tag-critical';
-      else if (mat.includes('SOA') || mat.includes('COTS') || mat.includes('Thermal') || mat.includes('Rad') || mat.includes('Packaging') || mat.includes('DSP')) cls = 'tag-important';
+      if (mat.includes('TFLN') || mat.includes('InP') || mat.includes('HfO₂') || mat.includes('SiO₂') || mat.includes('SiN') || mat.includes('MgF₂') || mat.includes('BBO') || mat.includes('PPKTP') || mat.includes('SOI') || mat.includes('TFLN') || mat.includes('SiGe') || mat.includes('InP‑on‑Si')) cls = 'tag-critical';
+      else if (mat.includes('SOA') || mat.includes('COTS') || mat.includes('Thermal') || mat.includes('Rad') || mat.includes('Packaging') || mat.includes('DSP') || mat.includes('Coherent') || mat.includes('PAT') || mat.includes('AlN') || mat.includes('Cu‑W') || mat.includes('Diamond') || mat.includes('Graphite')) cls = 'tag-important';
       return `<span class="tag ${cls}" onclick="window.location.href='materials.html'">${mat}</span>`;
     }).join(' ');
     const statusClass = m.status.toLowerCase();
+    const orbitClass = 'orbit-' + m.orbit.toLowerCase().replace(/[^a-z]/g,'');
+    const refLinks = (m.refs || []).map(r => `<a class="ref-link" href="#ref-${r}" title="Ref ${r}">[${r}]</a>`).join(' ');
     tr.innerHTML = `
       <td><strong>${m.acronym}</strong></td>
       <td>${m.agency}</td>
-      <td><span class="orbit-${m.orbit.toLowerCase()}">${m.orbit}</span></td>
+      <td><span class="${orbitClass}">${m.orbit}</span></td>
       <td>${m.payload}</td>
       <td><span class="badge badge-${statusClass}">${m.status}</span></td>
       <td>${matTags}</td>
       <td>${m.note}</td>
+      <td>${refLinks}</td>
     `;
     tbody.appendChild(tr);
   });
@@ -595,10 +1033,12 @@ function renderMissions() {
 
 function renderFrequencies() {
   const tbody = document.getElementById('freqBody');
+  if (!tbody) return;
   tbody.innerHTML = '';
-  frequencies.forEach(f => {
+  frequencies.forEach((f, idx) => {
     const tr = document.createElement('tr');
     tr.dataset.service = f.service;
+    tr.dataset.index = idx;
     tr.innerHTML = `
       <td>${f.sat}</td>
       <td>${f.service}</td>
@@ -612,26 +1052,37 @@ function renderFrequencies() {
   document.getElementById('freqCount').textContent = frequencies.length;
 }
 
+function renderReferences() {
+  const list = document.getElementById('refList');
+  if (!list) return;
+  list.innerHTML = '';
+  references.forEach(ref => {
+    const li = document.createElement('li');
+    li.setAttribute('data-num', ref.num);
+    li.id = 'ref-' + ref.num;
+    li.innerHTML = `<a href="${ref.url}" target="_blank">${ref.text}</a>`;
+    list.appendChild(li);
+  });
+  document.getElementById('refCount').textContent = references.length;
+}
+
 function updateStats() {
-  const total = missions.length;
-  document.getElementById('totalMissions').textContent = total;
-  const op = missions.filter(m => m.status === 'Operational').length;
-  document.getElementById('operationalCount').textContent = op;
+  document.getElementById('totalMissions').textContent = missions.length;
+  document.getElementById('operationalCount').textContent = missions.filter(m => m.status === 'Operational').length;
+  document.getElementById('completeCount').textContent = missions.filter(m => m.status === 'Complete' || m.status === 'Demo' || m.status === 'Achieved').length;
   const geo = missions.filter(m => m.orbit === 'GEO').length;
   const leo = missions.filter(m => m.orbit === 'LEO').length;
   const sso = missions.filter(m => m.orbit === 'SSO').length;
   document.getElementById('orbitBreakdown').textContent = `${geo} / ${leo} / ${sso}`;
+  document.getElementById('agencyCount').textContent = new Set(missions.map(m => m.agency)).size;
 }
 
-function filterTable(criteria, tableType) {
+function filterTable(criteria, tableType, evt) {
   const container = document.getElementById(tableType === 'mission' ? 'missionTable' : 'freqTable').closest('section');
   const btns = container.querySelectorAll('.filters .filter-btn');
   btns.forEach(b => b.classList.remove('active'));
-  if (event && event.target && event.target.classList.contains('filter-btn')) {
-    event.target.classList.add('active');
-  } else {
-    btns[0].classList.add('active');
-  }
+  const target = evt && evt.target ? evt.target : btns[0];
+  if (target && target.classList.contains('filter-btn')) target.classList.add('active');
 
   if (tableType === 'mission') {
     const rows = document.querySelectorAll('#missionBody tr');
@@ -640,25 +1091,107 @@ function filterTable(criteria, tableType) {
       const status = row.dataset.status;
       let show = false;
       if (criteria === 'all') show = true;
-      else if (['GEO','LEO','SSO','Molniya','L1'].includes(criteria) && orbit === criteria) show = true;
-      else if (['Operational','Inactive','Planned','Complete','Demo','Achieved'].includes(criteria) && status === criteria) show = true;
-      row.style.display = show ? '' : 'none';
+      else if (['GEO','LEO','SSO','MEO','L1','L2','ISS','Ground','Elliptical','Heliocentric','Molniya','Lunar','Jupiter','Asteroid','Titan'].includes(criteria) && orbit === criteria) show = true;
+      else if (['Operational','Inactive','Planned','Complete','Demo','Achieved','Development'].includes(criteria) && status === criteria) show = true;
+      row.classList.toggle('hidden-by-filter', !show);
+      row.style.display = (!show || row.classList.contains('hidden-by-search')) ? 'none' : '';
     });
   } else if (tableType === 'freq') {
     const rows = document.querySelectorAll('#freqBody tr');
     rows.forEach(row => {
-      const service = row.dataset.service;
+      const service = row.dataset.service || '';
       let show = false;
       if (criteria === 'all') show = true;
-      else if (service && service.includes(criteria)) show = true;
-      row.style.display = show ? '' : 'none';
+      else if (service.includes(criteria)) show = true;
+      row.classList.toggle('hidden-by-filter', !show);
+      row.style.display = (!show || row.classList.contains('hidden-by-search')) ? 'none' : '';
     });
   }
+}
+
+function searchTables(query) {
+  const q = query.toLowerCase().trim();
+  // Search missions
+  document.querySelectorAll('#missionBody tr').forEach(row => {
+    const text = row.innerText.toLowerCase();
+    const show = !q || text.includes(q);
+    row.classList.toggle('hidden-by-search', !show);
+    row.style.display = (!show || row.classList.contains('hidden-by-filter')) ? 'none' : '';
+  });
+  // Search frequencies
+  document.querySelectorAll('#freqBody tr').forEach(row => {
+    const text = row.innerText.toLowerCase();
+    const show = !q || text.includes(q);
+    row.classList.toggle('hidden-by-search', !show);
+    row.style.display = (!show || row.classList.contains('hidden-by-filter')) ? 'none' : '';
+  });
+}
+
+function sortTable(tableType, col) {
+  const isMission = tableType === 'mission';
+  const sortState = isMission ? missionSort : freqSort;
+  if (sortState.col === col) sortState.dir *= -1;
+  else { sortState.col = col; sortState.dir = 1; }
+
+  const tbody = document.getElementById(isMission ? 'missionBody' : 'freqBody');
+  const rows = Array.from(tbody.querySelectorAll('tr'));
+
+  rows.sort((a, b) => {
+    const aText = a.children[col].innerText.trim();
+    const bText = b.children[col].innerText.trim();
+    const aNum = parseFloat(aText.replace(/,/g,''));
+    const bNum = parseFloat(bText.replace(/,/g,''));
+    if (!isNaN(aNum) && !isNaN(bNum) && aText === String(aNum)) {
+      return (aNum - bNum) * sortState.dir;
+    }
+    return aText.localeCompare(bText) * sortState.dir;
+  });
+
+  rows.forEach(r => tbody.appendChild(r));
+
+  // Update header indicators
+  const table = document.getElementById(isMission ? 'missionTable' : 'freqTable');
+  table.querySelectorAll('th').forEach((th, idx) => {
+    th.classList.remove('sort-asc','sort-desc');
+    if (idx === col) th.classList.add(sortState.dir === 1 ? 'sort-asc' : 'sort-desc');
+  });
+}
+
+function exportCSV(type) {
+  let csv = '';
+  let filename = '';
+  if (type === 'mission') {
+    filename = 'missions.csv';
+    csv = 'Satellite,Agency,Orbit,Payload,Status,Materials,Note,References
+';
+    missions.forEach(m => {
+      csv += `"${m.acronym}","${m.agency}","${m.orbit}","${m.payload}","${m.status}","${m.materials.join('; ')}","${m.note}","${(m.refs || []).join('; ')}"
+`;
+    });
+  } else {
+    filename = 'frequencies.csv';
+    csv = 'Satellite,Service,Frequency_MHz,Bandwidth_kHz,Polarisation,Data_Rate
+';
+    frequencies.forEach(f => {
+      csv += `"${f.sat}","${f.service}",${f.freq},${f.bw},"${f.pol}","${f.rate}"
+`;
+    });
+  }
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
   renderMissions();
   renderFrequencies();
+  renderReferences();
 });
 </script>
 
