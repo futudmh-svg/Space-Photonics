@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Components — 100 Space Photonics Devices — Space Photonics</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #050811; color: #e0e6ed; line-height: 1.6; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 16px; }
+        nav { background: #1b263b; padding: 12px; border-radius: 10px; margin-bottom: 16px; display: flex; flex-wrap: wrap; gap: 8px; }
+        nav a { color: #e0e6ed; text-decoration: none; padding: 8px 14px; border-radius: 6px; font-size: 0.9em; background: #0d1b2a; }
+        nav a:hover, nav a.active { background: #00d4aa; color: #050811; }
+        h1 { font-size: 1.5em; color: #00d4aa; margin: 16px 0 8px; }
+        .subtitle { color: #778da9; font-size: 0.9em; margin-bottom: 16px; }
+        .card { background: #1b263b; border-radius: 12px; padding: 18px; margin-bottom: 16px; border: 1px solid #415a77; }
+        .card h2 { font-size: 1.15em; color: #00d4aa; margin-bottom: 12px; }
+        .hud { background: rgba(5,8,17,0.88); border: 1px solid rgba(65,90,119,0.5); border-radius: 10px; backdrop-filter: blur(12px); padding: 18px; margin-bottom: 16px; }
+        footer { text-align: center; padding: 30px; color: #778da9; font-size: 0.8em; }
+
+        .sec-marker { font-family: 'SF Mono', ui-monospace, Menlo, monospace; font-size: 0.7em; letter-spacing: 0.25em; color: #ffd166; text-transform: uppercase; margin-bottom: 4px; }
+        .sec-marker::before { content: ''; display: inline-block; width: 22px; height: 1px; background: #ffd166; vertical-align: middle; margin-right: 8px; }
+
+        /* ─── Asymmetric hero ─── */
+        .hero { display: grid; grid-template-columns: 1.4fr 1fr; gap: 20px; align-items: end; margin: 20px 0 24px; }
+        .hero h1 { font-size: 2.1em; line-height: 1.25; color: #e0e6ed; margin: 6px 0 10px; }
+        .hero h1 .tag { display: inline-block; padding: 1px 10px; border-radius: 6px; font-size: 0.55em; vertical-align: middle; font-family: ui-monospace, Menlo, monospace; }
+        .tag-teal { background: rgba(0,212,170,0.15); color: #00d4aa; border: 1px solid rgba(0,212,170,0.4); }
+        .tag-amber { background: rgba(255,209,102,0.12); color: #ffd166; border: 1px solid rgba(255,209,102,0.4); }
+        .stat-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+        .stat-chip { font-family: ui-monospace, Menlo, monospace; font-size: 0.72em; padding: 4px 12px; border-radius: 999px; background: #0d1b2a; border: 1px solid rgba(65,90,119,0.6); color: #90e0ef; }
+        .stat-chip b { color: #ffd166; font-weight: 600; }
+
+        /* ─── Filter bar ─── */
+        .filter-bar { position: sticky; top: 8px; z-index: 100; background: rgba(5,8,17,0.92); backdrop-filter: blur(12px); border: 1px solid rgba(65,90,119,0.5); border-radius: 10px; padding: 12px 14px; margin-bottom: 16px; }
+        .filter-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 6px; }
+        .filter-row:last-child { margin-bottom: 0; }
+        .filter-label { font-family: ui-monospace, Menlo, monospace; font-size: 0.65em; letter-spacing: 0.15em; color: #415a77; text-transform: uppercase; min-width: 74px; }
+        .fchip { font-size: 0.74em; padding: 4px 11px; border-radius: 999px; border: 1px solid #415a77; background: #0d1b2a; color: #778da9; cursor: pointer; font-family: ui-monospace, Menlo, monospace; }
+        .fchip:hover { border-color: #00d4aa; color: #00d4aa; }
+        .fchip.on { background: #00d4aa; color: #050811; border-color: #00d4aa; font-weight: 600; }
+        .fchip.on.amber { background: #ffd166; border-color: #ffd166; }
+        .fchip.on.ice { background: #90e0ef; border-color: #90e0ef; }
+        .fchip.on.dim { background: #778da9; border-color: #778da9; }
+        #search { flex: 1; min-width: 180px; background: #0d1b2a; border: 1px solid #415a77; border-radius: 8px; color: #e0e6ed; padding: 7px 12px; font-size: 0.85em; font-family: ui-monospace, Menlo, monospace; }
+        #search:focus { outline: none; border-color: #00d4aa; }
+        #counter { font-family: ui-monospace, Menlo, monospace; font-size: 0.75em; color: #ffd166; white-space: nowrap; }
+
+        /* ─── Device cards ─── */
+        #grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 12px; }
+        .dev { background: #1b263b; border: 1px solid rgba(65,90,119,0.5); border-radius: 10px; padding: 14px 16px; display: flex; flex-direction: column; gap: 7px; }
+        .dev:hover { border-color: rgba(0,212,170,0.5); }
+        .dev-head { display: flex; align-items: baseline; gap: 8px; }
+        .dev-id { font-family: ui-monospace, Menlo, monospace; font-size: 0.72em; color: #415a77; }
+        .dev-name { font-size: 0.95em; font-weight: 600; color: #e0e6ed; flex: 1; }
+        .badge { font-family: ui-monospace, Menlo, monospace; font-size: 0.62em; padding: 2px 9px; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.08em; white-space: nowrap; }
+        .b-critical { background: #00d4aa; color: #050811; font-weight: 700; }
+        .b-important { background: rgba(255,209,102,0.15); color: #ffd166; border: 1px solid rgba(255,209,102,0.5); }
+        .b-optional { background: rgba(144,224,239,0.1); color: #90e0ef; border: 1px solid rgba(144,224,239,0.4); }
+        .b-notneeded { background: rgba(119,141,169,0.1); color: #778da9; border: 1px solid rgba(119,141,169,0.3); }
+        .cat-tag { font-family: ui-monospace, Menlo, monospace; font-size: 0.66em; color: #2a9d8f; }
+        .dev-specs { font-size: 0.76em; color: #ffd166; font-family: ui-monospace, Menlo, monospace; line-height: 1.45; }
+        .dev-sups { display: flex; flex-direction: column; gap: 2px; font-size: 0.72em; }
+        .dev-sups .sr { display: flex; gap: 6px; }
+        .dev-sups .rg { min-width: 30px; font-family: ui-monospace, Menlo, monospace; color: #778da9; font-size: 0.9em; }
+        .dev-sups .sv { color: #90e0ef; }
+        .dev-line { font-size: 0.74em; color: #778da9; }
+        .dev-line b { color: #90e0ef; font-weight: 600; }
+        .why-toggle { align-self: flex-start; background: none; border: 1px solid #415a77; color: #00d4aa; border-radius: 6px; padding: 3px 10px; font-size: 0.7em; cursor: pointer; font-family: ui-monospace, Menlo, monospace; }
+        .why-toggle:hover { border-color: #00d4aa; }
+        .why { display: none; font-size: 0.76em; color: #e0e6ed; background: rgba(13,27,42,0.7); border-left: 2px solid #00d4aa; border-radius: 0 6px 6px 0; padding: 7px 10px; }
+        .why.open { display: block; }
+
+        /* ─── BOM view ─── */
+        #bom-view { display: none; }
+        #bom-view.on { display: block; }
+        #grid-wrap.off { display: none; }
+        .bom-summary { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
+        .bom-box { flex: 1; min-width: 130px; background: rgba(13,27,42,0.7); border: 1px solid rgba(65,90,119,0.4); border-radius: 8px; padding: 10px 12px; }
+        .bom-box .k { font-size: 0.66em; color: #778da9; text-transform: uppercase; letter-spacing: 0.08em; }
+        .bom-box .v { font-size: 1.35em; color: #00d4aa; font-family: ui-monospace, Menlo, monospace; font-weight: 600; }
+        .bom-box.warn .v { color: #ffd166; }
+        .bom-cat { margin-bottom: 12px; }
+        .bom-cat h3 { font-size: 0.88em; color: #90e0ef; font-family: ui-monospace, Menlo, monospace; margin: 10px 0 5px; }
+        .bom-cat h3::before { content: '▸ '; color: #00d4aa; }
+        .bom-cat h3 .cnt { color: #ffd166; }
+        .bom-item { display: flex; gap: 8px; align-items: baseline; font-size: 0.78em; padding: 3px 0; border-bottom: 1px dashed rgba(65,90,119,0.35); }
+        .bom-item .bi-id { font-family: ui-monospace, Menlo, monospace; color: #415a77; min-width: 28px; }
+        .bom-item .bi-name { flex: 1; }
+        .bom-ties { font-size: 0.76em; color: #778da9; margin-top: 12px; font-family: ui-monospace, Menlo, monospace; }
+        .bom-ties b { color: #ffd166; }
+        .picks-box { background: rgba(0,212,170,0.06); border: 1px solid rgba(0,212,170,0.35); border-radius: 10px; padding: 14px 16px; margin-top: 14px; }
+        .picks-box h3 { color: #00d4aa; font-size: 0.95em; margin-bottom: 8px; }
+        .picks-box li { font-size: 0.78em; color: #e0e6ed; margin: 5px 0 5px 18px; }
+        .picks-box li b { color: #ffd166; }
+
+        /* ─── Regional strip ─── */
+        .bars { display: flex; flex-direction: column; gap: 8px; margin: 12px 0; }
+        .bar-row { display: flex; align-items: center; gap: 10px; font-size: 0.78em; }
+        .bar-row .bl { width: 110px; font-family: ui-monospace, Menlo, monospace; color: #90e0ef; font-size: 0.85em; }
+        .bar-track { flex: 1; background: #0d1b2a; border-radius: 5px; height: 18px; position: relative; overflow: hidden; }
+        .bar-fill { height: 100%; border-radius: 5px; }
+        .bar-num { font-family: ui-monospace, Menlo, monospace; color: #ffd166; min-width: 30px; text-align: right; }
+
+        /* ─── Hamburger Navigation ─── */
+        .nav-hamburger { display: none; position: fixed; top: 8px; left: 8px; z-index: 300; background: rgba(5,8,17,0.92); border: 1px solid #00d4aa; color: #00d4aa; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 1.2em; }
+        .nav-overlay { display: none; position: fixed; inset: 0; z-index: 250; background: rgba(5,8,17,0.95); backdrop-filter: blur(12px); flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 20px; overflow-y: auto; }
+        .nav-overlay.active { display: flex; }
+        .nav-overlay a { color: #90e0ef; text-decoration: none; padding: 10px 20px; font-size: 1.1em; border-radius: 8px; background: rgba(13,27,42,0.7); border: 1px solid rgba(65,90,119,0.3); width: 200px; text-align: center; }
+        .nav-overlay a:hover, .nav-overlay a.active { background: #00d4aa; color: #050811; }
+        .nav-close { position: absolute; top: 8px; right: 8px; color: #e63946; font-size: 1.5em; cursor: pointer; background: none; border: none; padding: 8px; }
+
+        @media (max-width: 900px) { .hero { grid-template-columns: 1fr; } }
+        @media (max-width: 768px) {
+            nav { display: none; }
+            .nav-hamburger { display: block; }
+            .hero h1 { font-size: 1.5em; }
+            .filter-bar { position: static; }
+            #grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <button class="nav-hamburger" id="nav-hamburger">☰</button>
+    <div class="nav-overlay" id="nav-overlay">
+        <button class="nav-close" id="nav-close">✕</button>
+        <a href="../index.html">🏠 Dashboard</a>
+        <a href="../pages/architecture.html">🏛️ Architecture</a>
+        <a href="../pages/digital-twin.html">🎮 3D Twin</a>
+        <a href="../pages/opa-analysis.html">📡 OPA</a>
+        <a href="../pages/link-budget.html">📊 Link Budget</a>
+        <a href="../pages/hypersonic.html">🚀 Hypersonic</a>
+        <a href="../pages/vleo-constellation.html">🌐 VLEO</a>
+        <a href="../pages/mapper-3d.html">🗺️ Mapper</a>
+        <a href="../pages/satellite-digital-twin.html">🛰️ Sat Twin</a>
+        <a href="../pages/interception-mission.html">🎯 Intercept</a>
+        <a href="../pages/vehicle-terminal.html">🛰️ Terminal</a>
+        <a href="../pages/ehf-optical-trade.html">📡 EHF vs Opt</a>
+        <a href="../pages/ppln-calculator.html">🔢 PPLN</a>
+        <a href="../pages/research-gaps.html">🔬 Gaps</a>
+        <a href="../pages/specifications.html">📐 Specs</a>
+        <a href="../pages/components.html" class="active">🧩 Components</a>
+        <a href="../pages/foundry.html">🏭 Foundry</a>
+        <a href="../pages/foundry-cleanroom.html">🏭 Clean Room</a>
+    </div>
+
+    <div class="container">
+        <nav>
+            <a href="../index.html">🏠 Dashboard</a>
+            <a href="../pages/architecture.html">🏛️ Architecture</a>
+            <a href="../pages/digital-twin.html">🎮 3D Twin</a>
+            <a href="../pages/opa-analysis.html">📡 OPA</a>
+            <a href="../pages/link-budget.html">📊 Link Budget</a>
+            <a href="../pages/hypersonic.html">🚀 Hypersonic</a>
+            <a href="../pages/vleo-constellation.html">🌐 VLEO</a>
+            <a href="../pages/mapper-3d.html">🗺️ Mapper</a>
+            <a href="../pages/satellite-digital-twin.html">🛰️ Sat Twin</a>
+            <a href="../pages/interception-mission.html">🎯 Intercept</a>
+            <a href="../pages/vehicle-terminal.html">🛰️ Terminal</a>
+            <a href="../pages/ehf-optical-trade.html">📡 EHF vs Opt</a>
+            <a href="../pages/ppln-calculator.html">🔢 PPLN</a>
+            <a href="../pages/research-gaps.html">🔬 Gaps</a>
+            <a href="../pages/specifications.html">📐 Specs</a>
+            <a href="../pages/components.html" class="active">🧩 Components</a>
+            <a href="../pages/foundry.html">🏭 Foundry</a>
+            <a href="../pages/foundry-cleanroom.html">🏭 Clean Room</a>
+        </nav>
+
+        <!-- HERO -->
+        <div class="hero">
+            <div>
+                <div class="sec-marker">18 / Component Cross-Reference</div>
+                <h1>🧩 Components — <span class="tag tag-teal">100 devices</span> · 8 categories · 4 regions · <span class="tag tag-amber">one Photon-1 BOM</span></h1>
+                <p class="subtitle" style="margin-bottom:10px">Every device class in the space-photonics supply chain, cross-referenced by region, flight heritage, 2023–2026 innovation, and Photon-1 relevance. Data condensed from the five component-library research briefs.</p>
+                <div class="stat-chips" id="stat-chips"></div>
+            </div>
+            <div class="hero-meta" style="font-family:ui-monospace,Menlo,monospace;font-size:0.72em;color:#778da9">
+                <div style="display:flex;justify-content:space-between;border-bottom:1px dashed rgba(65,90,119,0.5);padding:4px 0"><span>λ carrier</span><span style="color:#90e0ef">1550 nm C-band</span></div>
+                <div style="display:flex;justify-content:space-between;border-bottom:1px dashed rgba(65,90,119,0.5);padding:4px 0"><span>Modem</span><span style="color:#90e0ef">SDA 3.1 OOK + 400G coherent</span></div>
+                <div style="display:flex;justify-content:space-between;border-bottom:1px dashed rgba(65,90,119,0.5);padding:4px 0"><span>Steerer</span><span style="color:#90e0ef">64×64 TFLN OPA</span></div>
+                <div style="display:flex;justify-content:space-between;border-bottom:1px dashed rgba(65,90,119,0.5);padding:4px 0"><span>Bus</span><span style="color:#90e0ef">12U · 45 W · 12 kg</span></div>
+                <div style="display:flex;justify-content:space-between;border-bottom:1px dashed rgba(65,90,119,0.5);padding:4px 0"><span>Sensitivity</span><span style="color:#90e0ef">−50 dBm target</span></div>
+                <div style="display:flex;justify-content:space-between;padding:4px 0"><span>Regions</span><span style="color:#90e0ef">US · EU · CN · ME</span></div>
+            </div>
+        </div>
+
+        <!-- BOM VIEW -->
+        <div class="hud" id="bom-view">
+            <div class="sec-marker">BOM / Critical + Important</div>
+            <h2 style="font-size:1.15em;color:#00d4aa;margin-bottom:12px">🔧 Photon-1 BOM View</h2>
+            <div class="bom-summary" id="bom-summary"></div>
+            <div id="bom-groups"></div>
+            <div class="bom-ties" id="bom-ties"></div>
+            <div class="picks-box">
+                <h3>⭐ Top Picks for Photon-1 — merged from all 5 briefs (deduplicated)</h3>
+                <ul id="picks-list"></ul>
+            </div>
+        </div>
+
+        <!-- FILTER BAR -->
+        <div class="filter-bar">
+            <div class="filter-row">
+                <input type="text" id="search" placeholder="🔍 Search devices, suppliers, specs…" aria-label="Search devices">
+                <span id="counter">100 / 100</span>
+                <button class="fchip" id="bom-toggle">🔧 BOM view</button>
+            </div>
+            <div class="filter-row"><span class="filter-label">Category</span><span id="cat-chips" style="display:flex;flex-wrap:wrap;gap:6px"></span></div>
+            <div class="filter-row"><span class="filter-label">Region</span><span id="reg-chips" style="display:flex;flex-wrap:wrap;gap:6px"></span></div>
+            <div class="filter-row"><span class="filter-label">Relevance</span><span id="rel-chips" style="display:flex;flex-wrap:wrap;gap:6px"></span></div>
+        </div>
+
+        <!-- GRID -->
+        <div id="grid-wrap">
+            <div id="grid"></div>
+        </div>
+
+        <!-- REGIONAL INSIGHT -->
+        <div class="card" style="margin-top:16px">
+            <div class="sec-marker">Supply Chain / Regional Density</div>
+            <h2>🌍 Regional Supply-Chain Insight</h2>
+            <div class="bars" id="bars"></div>
+            <p style="font-size:0.78em;color:#778da9">Bar = number of device classes with at least one credible supplier in the region. <b style="color:#ffd166">Middle East: whitespace — packaging/JV opportunity</b> (nascent UAE MBRSC/Strata and Saudi KACST capability; only Raicol, Israel, ships a qualified device class today). China is cost-effective for passives but carries export/ITAR and supply-chain-risk considerations for a space terminal.</p>
+        </div>
+
+        <footer><p>Space Photonics Digital Twin — Components Cross-Reference (page 18)</p></footer>
+    </div>
+
+    <script>
+        'use strict';
+        // ─── DATA: 100 devices, condensed from the 5 component-library briefs ───
+        // r: 0=Critical 1=Important 2=Optional 3=Not-needed ; u: suppliers {us,eu,cn,me}
+        const CATS = ['Sources & Lasers','Modulators & Switches','Interferometers & Filters','Waveguides & Couplers','Detectors & Receivers','Passives & Free-Space Optics','PICs & Systems','RF Photonics · Sensors · Packaging'];
+        const D = [
+{id:1,n:"Laser Diode (DFB/FP)",c:0,s:"DFB 1550 nm ITU-grid, 10–100 mW, linewidth 100 kHz–5 MHz, SMSR >40 dB; FP cheaper multi-longitudinal",u:{us:"Coherent, Lumentum, EMCORE",eu:"AMS Osram, Innolume, eagleyard",cn:"Accelink, Hisense, Source Photonics",me:"—"},h:"DFBs flown on ESA EDRS (Tesat) and NASA LCRD/ILLUMA-T; rad-tol screened COTS. TRL 9",i:"6-inch InP fab ramp (Coherent, 2025) cuts cost; +18 dBm tunable DFB/ITLA modules for coherent",r:0,w:"Primary carrier source for the 1550 nm OOK transmit path."},
+{id:2,n:"Pump Laser (980/1480 nm)",c:0,s:"980 nm SM 200–750 mW kink-free or 1480 nm 200–500 mW; FBG-stabilized, uncooled/cooled butterfly",u:{us:"Coherent, Lumentum, B&W Tek",eu:"Lumibird, AMS Osram",cn:"Accelink, Raycus, Hisense",me:"—"},h:"Heritage via all space EDFAs (SDA OCT, LCRD); rad-hard designs to 100 krad. TRL 9 as EDFA subassembly",i:"Uncooled high-power 980 nm chips; radiation-hardened pumps qualified for LEO constellations at volume pricing",r:0,w:"Pumps the 1 W C-band EDFA booster — the core link-budget amplifier."},
+{id:3,n:"Narrow-Linewidth Laser",c:0,s:"1550 nm, linewidth <1–100 kHz (ECL/hybrid), 10–40 mW, RIN <−155 dB/Hz, C-band tunable",u:{us:"Coherent, Lumentum, Freedom Photonics",eu:"Toptica, NKT Photonics (Koheras)",cn:"CAS SIOM/IOE, Focuslight",me:"—"},h:"NKT Koheras flown on multiple missions; <100 kHz DFBs in coherent OISL demos. TRL 6–9",i:"SiN hybrid-integrated lasers reaching <1 kHz Lorentzian on chip (2024–25)",r:0,w:"Mandatory local oscillator / Tx laser for the coherent 400 Gbps roadmap."},
+{id:4,n:"Quantum Cascade Laser",c:0,s:"4–12 µm mid-IR, mW–W, pulsed/CW, wall-plug ~10–20%",u:{us:"Thorlabs, Hamamatsu US, Alpes Lasers",eu:"mirSense, Fraunhofer IAF",cn:"CAS SIMIT",me:"—"},h:"NASA Orion Laser Air Monitor heritage; Mars methane sensing concepts. TRL 5–7 space",i:"Room-temperature CW QCL arrays, on-chip beam-combined >1 W mid-IR (2024)",r:3,w:"Wrong wavelength — no mid-IR role in a 1550 nm comm terminal."},
+{id:5,n:"VCSEL",c:0,s:"850/940 nm multimode 25–100 Gbps/lane; single-mode 1550 nm VCSELs ~1–4 mW emerging",u:{us:"Lumentum, Coherent, Broadcom",eu:"AMS Osram, TRUMPF",cn:"Vertilite, Accelink",me:"—"},h:"850 nm VCSELs flown for intra-satellite optical data bus; ESA rad-tol studies. TRL 6–8 short-reach",i:"100 Gbps/lane VCSELs ramping for AI clusters (2024); 200G/lane demos",r:2,w:"Onboard intra-bus interconnects only; not the free-space Tx source."},
+{id:6,n:"Mode-Locked Laser",c:0,s:"10 MHz–10 GHz rep rate, fs–ps pulses; 1550 nm fiber versions 10–500 mW avg",u:{us:"Calmar Laser, IMRA America",eu:"Menlo Systems, Toptica, NKT",cn:"Raycus, JPT",me:"—"},h:"Femtosecond fiber MLL flown in ranging/comb experiments (ISS optical-clock precursors). TRL 4–6",i:"Quantum-dot MLL combs, ultra-stable 25.5 GHz spacing over 20–120 °C — space thermal range (2025)",r:2,w:"Candidate for comb-based multi-carrier Tx; overkill for baseline OOK."},
+{id:7,n:"External Cavity Diode Laser (ECDL)",c:0,s:"C-band tunable 40–100 nm, linewidth 10 kHz–1 MHz, 10–50 mW, mode-hop-free piezo/MEMS tuning",u:{us:"New Focus (MKS), Santec",eu:"Toptica DL/CTL, Sacher",cn:"CAS IOE, Conquer",me:"—"},h:"Baselined in ISL studies for narrow linewidth + Doppler tunability; MEMS-ECDL space-screened. TRL 5–8",i:"Toptica CTL low-noise series; chip-scale SiN external-cavity lasers <1 kHz (2024)",r:1,w:"Tunable narrow-linewidth Tx/LO covering Doppler for HGV tracking links."},
+{id:8,n:"Fiber Laser",c:0,s:"1550 nm single-frequency <10 kHz, 10 mW–10 W; PM output, no free-space alignment",u:{us:"IPG Photonics, Coherent/Nufern, nLIGHT",eu:"NKT (Koheras), Lumibird/Keopsys",cn:"Raycus, JPT, Maxphotonics",me:"—"},h:"IPG/Nufern fiber lasers flown; NASA LCRD uses fiber-based 1550 Tx, ESA EDRS heritage. TRL 9",i:"Rad-tol Er/Yb co-doped fibers; 5–10 W narrow-linewidth fiber Tx trend in OISL terminals (2025)",r:0,w:"Prime candidate high-power narrow-linewidth Tx for the 100 Gbps path."},
+{id:9,n:"Solid-State Laser (DPSSL)",c:0,s:"1064 nm Nd:YAG DPSSL mW–kW; 1550 via Er:glass; linewidth to <1 kHz (NPRO)",u:{us:"Coherent, IPG, Northrop Grumman",eu:"Lumibird/Quantel, M Squared, InnoLas",cn:"CAS SIOM, Raycus",me:"—"},h:"Deep heritage: EDRS/OPALS 1064 nm, ICESat/MLA altimeters. TRL 9 at 1064 nm",i:"Miniaturized NPRO DPSSL for coherent OISL; dual 1064/1550 compatibility trend",r:1,w:"Fallback / alternate-band Tx; adds mass vs fiber at 1550 nm."},
+{id:10,n:"Laser Crystal (Nd:YAG)",c:0,s:"Nd:YAG rods/slabs 1064 nm, doping 0.6–1.1 at%, AR-coated; also Yb:YAG, Er:YAG",u:{us:"Northrop Grumman SYNOPTICS, Coherent",eu:"EKSMA Optics, Crytur",cn:"CASTECH, CAS FIRSM",me:"—"},h:"Flown on ICESat-2 ATLAS, CALIPSO, MLA; radiation darkening managed. TRL 9",i:"Rad-resistant Nd:YAG/Cr:YAG composites; ceramic YAG for higher doping uniformity",r:2,w:"Only if a 1064 nm DPSSL branch is adopted; not for the 1550 baseline."},
+{id:11,n:"Nonlinear Crystal (Pockels)",c:0,s:"RTP/LN/BBO Pockels cells, half-wave V 1–5 kV, apertures 2–10 mm, MHz modulation",u:{us:"G&H (US), Inrad",eu:"G&H UK, EKSMA",cn:"CASTECH, Crylink",me:"Raicol Crystals (Israel) — notable ME supplier"},h:"EO modulators/Q-switches flown on lidar and ESA Aeolus-class missions. TRL 8–9",i:"Thin-film LN modulators >100 GHz, VπL <2 V·cm — enabling 400 Gbps coherent on-chip (2024–25)",r:1,w:"Thin-film LN phase/IQ modulator for the coherent roadmap; bulk cells for beam control."},
+{id:12,n:"SLED",c:0,s:"1550 nm SLED, 30–80 nm bandwidth, 5–30 mW ex-fiber, low coherence",u:{us:"Exalos, Thorlabs, InPhenix",eu:"Exalos (CH), Superlum (IE)",cn:"Accelink, DenseLight",me:"—"},h:"Flown in fiber-optic gyroscopes on numerous satellites — strong rad-tol record. TRL 9 (gyro)",i:"Higher-power C+L band SLEDs (>30 mW); rad-hard InP SLED qualification for LEO",r:2,w:"Beacon/acquisition wideband source or FOG use; not the data carrier."},
+{id:13,n:"LED",c:0,s:"VIS–IR 10 mW–1 W, wide spectrum, low coherence; 1550 nm LEDs ~1 mW",u:{us:"Broadcom, Luminus",eu:"AMS Osram, Nichia",cn:"San'an Optoelectronics, Nationstar",me:"—"},h:"Flown ubiquitously (calibration, FOG, ISS experiments). TRL 9",i:"Rad-hard LED arrays for on-orbit calibration; micro-LED comm demos (low maturity)",r:3,w:"Insufficient coherence/power for a 100 Mbps–400 Gbps link (optional beacon only)."},
+{id:14,n:"Optical Frequency Comb",c:0,s:"f_rep 100 MHz–1 GHz, octave span with f-2f, CEO-locked; 1550 nm fiber combs 100 mW–1 W",u:{us:"Menlo US, Toptica US, IMRA, Vescent",eu:"Menlo (DE), Toptica",cn:"CAS NIM/THU spinoffs",me:"—"},h:"Space fiber comb flown (FOKUS/ISS rocket experiments, Menlo heritage). TRL 5–7",i:"Compact turn-key space-qualifiable comb packages; comb-based multi-λ coherent Tx demos",r:2,w:"Future multi-carrier WDM source; heavy for the 45 W 12U budget today."},
+{id:15,n:"Microcomb",c:0,s:"Chip-scale Kerr comb, f_rep 10 GHz–1 THz, SiN/SiO2/LN/AlN, mW lines, pump 50–500 mW",u:{us:"Lumentum research, HyperLight, Caltech/UCSB spinouts",eu:"Chilas/LioniX ecosystem, EPFL spinoffs",cn:"CAS, Tsinghua groups",me:"—"},h:"Lab / early flight experiments (NIST/JPL concepts). TRL 3–5 for space",i:"Microcomb DWDM transmitters: 20×128 Gb/s (2025); 1.8 Pbps-class links (Nat. Photonics 2025)",r:1,w:"Roadmap enabler for compact 400 Gbps coherent multi-carrier Tx within the 45 W bus."},
+{id:16,n:"EO-Kerr Frequency Comb",c:0,s:"Hybrid EO-seeded Kerr comb: LN EO comb (35 GHz-class) + SiN DKS; conversion efficiency ~44% (2025)",u:{us:"NIST, UCSB; precursors HyperLight",eu:"EPFL; LioniX",cn:"Peking Univ., CAS/NANOLN groups",me:"—"},h:"Lab only, TRL 2–4; no flight heritage",i:"2025 on-chip pulse+DKS demo with 43.9% conversion efficiency — big SWaP win vs CW-pumped combs",r:2,w:"High-efficiency comb for future low-power coherent Tx; too immature for baseline."},
+{id:17,n:"Soliton Microcomb",c:0,s:"Dissipative Kerr soliton, single-soliton state, octave-spanning demos, lines −20–0 dBm, rep 20 GHz–1 THz",u:{us:"NIST/Papp, Caltech/Vahala; Lumentum research",eu:"EPFL/Kippenberg, Chalmers, Q.ant",cn:"CAS, Tsinghua",me:"—"},h:"TRL 3–4; ISS/comb-adjacent experiments; SiN ring radiation behavior under study",i:"Soliton microcomb + OPA parallel FMCW LiDAR (2025); record-efficiency octave combs (CLEO-EU 2025)",r:1,w:"Pairs with the OPA for multi-beam / LiDAR-augmented HGV tracking and WDM scaling."},
+{id:18,n:"Gain Chip (InP)",c:0,s:"InP reflective SOA/gain chip for external-cavity lasers, C-band, gain 20–30 dB, Pout 10–40 mW",u:{us:"Coherent, Freedom Photonics",eu:"Innolume (QD gain chips), Sivers, III-V Lab",cn:"Henan Shijia / CAS spinoffs",me:"—"},h:"Gain chips inside flown ECDL/tunable lasers; component-level TRL 8 as subassembly",i:"Quantum-dot InP gain chips with ultra-low α-factor & rad-robustness (Innolume 2024)",r:1,w:"Building block for custom narrow-linewidth external-cavity Tx/LO."},
+{id:19,n:"Optical Amplifier (EDFA/SOA)",c:0,s:"Space EDFA: C-band 1530–1565 nm, gain 30–40 dB, NF 4–6 dB, output 20–37 dBm (5 W class), rad-tol 30–100 krad",u:{us:"Coherent/Nufern, Nuphoton; Canada: MPBC (PULSAR)",eu:"G&H, NKT, Lumibird, Airbus DS",cn:"Accelink, fiberwdm-class vendors",me:"—"},h:"TRL 9 — flown on SDA Transport Layer, LCRD, EDRS-class terminals (MPBC 5 W PULSAR, 30 krad, SDA-OCT compatible)",i:"5 W compact LEO booster/preamp combos; modified Er-fiber compositions to >100 krad",r:0,w:"The 1 W C-band EDFA booster is core to the Photon-1 link budget."},
+{id:20,n:"SOA",c:0,s:"InP SOA C-band, gain 20–30 dB, Psat 10–18 dBm, NF 6–8 dB, ns switching; QD-SOA low pattern effects",u:{us:"Coherent, InPhenix, Thorlabs",eu:"Innolume (QD SOA), III-V Lab, Aeon",cn:"Accelink, CAS",me:"—"},h:"SOAs flown within coherent transceiver PICs (space-screened); standalone TRL 6–8",i:"QD-SOAs with <5 dB NF and high saturation power; integrated SOA arrays on coherent PICs (2024–25)",r:1,w:"Receiver pre-amplifier and OPA branch loss compensation; booster backup to the EDFA."},
+{id:21,n:"Electro-Optic Modulator (EOM)",c:1,s:"LiNbO3/TFLN phase/intensity; Vπ 1.5–5 V, BW 10–100+ GHz, IL 2.5–4 dB",u:{us:"Lumentum, EOSPACE",eu:"Exail/iXblue (Besançon)",cn:"HC Photonics, NanoLN ecosystem",me:"—"},h:"Exail TRL 9 — GRACE-FO since 2018, LISA-qualified >500 mW, 352 krad",i:"TFLN >100 GHz with sub-1 V drive (2024+)",r:0,w:"Core of the OOK modem and OPA phase control; immediate-qualified anchor while TFLN matures."},
+{id:22,n:"Mach-Zehnder Modulator (MZM)",c:1,s:"Bulk LN: Vπ 3–5 V, 35–40 GHz, IL ~3.5 dB, ER >30 dB (Exail space-grade 1550 nm); TFLN MZM: VπL 1.5–2.2 V·cm, >100 GHz, 200 Gbps PAM4 single-lane",u:{us:"Lumentum, HyperLight",eu:"Exail, SMART Photonics",cn:"SiFotonics, Accelink, Liobate",me:"—"},h:"Exail space-grade LN MZMs with flight heritage; TFLN MZM 170 GHz extrapolated (2023)",i:"200 Gbps PAM4 single-lane TFLN MZM (AFR 2026)",r:0,w:"100 Gbps OOK modulator + 400G coherent I/Q — direct fit to the SDA 3.1 modem; TFLN dual-source (HyperLight/Exail + NanoLN/SiFotonics)."},
+{id:23,n:"Micro-Ring Modulator (MRM)",c:1,s:"Si/SiN/TFLN ring, <100 µm footprint, Vπ ~1–4 V, BW 35–70 GHz, IL 1–3 dB; needs thermal tuning",u:{us:"Ayar Labs, GlobalFoundries SiPh",eu:"CSEM",cn:"SiFotonics",me:"—"},h:"TRL 3–5; rad-hard demos emerging",i:"TFLN cavity EOM >110 GHz (2024)",r:1,w:"Low-SWaP WDM mesh transmitters; thermal-control burden noted."},
+{id:24,n:"MRR-loaded MZI",c:1,s:"Ring-assisted push-pull MZI: VπL <1 V·cm, BW 50–110 GHz, ER 20–30 dB",u:{us:"AIM Photonics (MPW)",eu:"Ligentec, SMART Photonics",cn:"CHIPX / SJTU pilot line (2025)",me:"—"},h:"TRL 2–4; foundry MPW only",i:"Si-LN heterogeneous ring-MZI 100 GHz (Valdez/Mookherjea 2023–25)",r:1,w:"Candidate for low-drive-voltage OPA / comb modulation."},
+{id:25,n:"Acousto-Optic Modulator (AOM)",c:1,s:"TeO2/quartz; BW 10–200 MHz, rise 10–110 ns, diffraction eff. 70–85%, IL <1 dB, RF 0.5–20 W",u:{us:"G&H US (ITAR), Brimrose, Isomet",eu:"G&H UK, AA Opto-Electronic",cn:"CSRayzer",me:"—"},h:"G&H space-qualified, deployed on multiple missions. TRL 9",i:"Incremental; mature component class",r:2,w:"Laser power control, pulse picking, frequency shifting in calibration loops."},
+{id:26,n:"Optical Switch (generic)",c:1,s:"Solid-state (SOA/MZI) to mechanical; IL 0.5–3 dB, switch ns–ms, crosstalk <−30 dB, 1×2 to 64×64 ports",u:{us:"Coherent (DLC OCS, 64×64, first OCS revenue 2025), Lumentum",eu:"Polatis (DirectLight <0.3 dB)",cn:"Accelink OCS (passed carrier tests)",me:"—"},h:"TRL 5–8 terrestrial; space TRL 3–5",i:"64×64 optical circuit switches entering commercial service (2025)",r:0,w:"Mesh reconfiguration / beam routing across the constellation."},
+{id:27,n:"Magneto-Optic Switch",c:1,s:"Faraday rotation (YIG/Bi:YIG); µs–ms, IL 1–3 dB, no moving parts, high reliability",u:{us:"Primanex/Agiltron, Coherent",eu:"limited",cn:"Flyin, GEZHI",me:"—"},h:"Niche; latching versions on laser terminals. TRL 5–7",i:"Integrated garnet-on-SiN Faraday rotators advancing (2023+)",r:2,w:"Latching low-power redundancy switch; superseded by MEMS/TFLN for speed."},
+{id:28,n:"Thermo-Optic Switch",c:1,s:"Si/SiN/TFLN heater-based; IL 0.5–2 dB, switch 10–100 µs, power 10–30 mW/π, ER 20–40 dB",u:{us:"AIM / Lightwave Logic ecosystem",eu:"CSEM, Ligentec (SiN)",cn:"Accelink, Broadex",me:"—"},h:"Thermo-optic phase shifters flown in PIC payloads. TRL 4–6",i:"Folded TFLN low-power heaters (2024)",r:1,w:"OPA phase trim and WDM filter tuning where µs speed suffices."},
+{id:29,n:"MEMS Optical Switch",c:1,s:"Micro-mirror arrays; IL <0.3–1 dB (Polatis DirectLight), switch 10–50 ms, ports to 384×384, NEBS Zone-4 shock-rated",u:{us:"Coherent, Calient",eu:"Polatis (UK/US)",cn:"Sercalo analogs, Accelink MEMS-OCS pilot 2025",me:"—"},h:"MEMS mirrors flown (laser terminals). TRL 6–8",i:"MEMS-OCS pilot lines in China (2025); <0.3 dB class cross-connects",r:0,w:"64×64-class cross-connect for the mesh backbone."},
+{id:30,n:"Electro-Absorption Modulator (EAM)",c:1,s:"InP MQW QCSE; Vπ 1–2 V, BW 40–64 GHz (NTT 224 Gbps PAM4 EML), IL 4–8 dB, ER 10–20 dB",u:{us:"Coherent (InP), Lumentum",eu:"SMART Photonics (InP foundry)",cn:"Accelink EML",me:"—"},h:"EAM retroreflector links flown/demonstrated (CLICK CubeSat). TRL 5–7",i:"224 Gbps PAM4 EML-class devices (NTT)",r:1,w:"Compact EML option for 100G OOK when SWaP dominates; fallback transmitter."},
+{id:31,n:"Mach-Zehnder Interferometer (MZI)",c:2,s:"Passive/delay-line; FSR set by arm imbalance (GHz–THz), IL <0.5–3 dB, ER 20–30 dB",u:{us:"Broadex, KVH",eu:"Exail (fiber gyro heritage), CSEM",cn:"Accelink, HC Photonics",me:"—"},h:"Fiber-MZIs in FOGs and DPSK demodulators flown. TRL 8–9",i:"Programmable MZI meshes for reconfigurable filtering (2023–25)",r:0,w:"Delay-line demod, IQ modulator backbone, OPA splitter trees."},
+{id:32,n:"Micro-Ring Resonator (MRR)",c:2,s:"Q 10⁵–10⁸ (LNOI record 1.08×10⁸, 0.34 dB/m loss), FSR 50 GHz–5 nm, thermal/EO tuning",u:{us:"AIM Photonics",eu:"Ligentec, CSEM",cn:"NanoLN ecosystem, SiFotonics",me:"—"},h:"TRL 3–5 (comb/gyro demos)",i:"Record-Q LNOI rings (2023–25)",r:1,w:"WDM channel add/drop, narrowband filters, comb sources."},
+{id:33,n:"Ring-Assisted MZI (RA-MZI)",c:2,s:"Ring-coupled MZI box-like filter; FSR 10–100 GHz, sharper rolloff than MZI alone, IL 1–3 dB",u:{us:"AIM Photonics (MPW)",eu:"Ligentec",cn:"CHIPX",me:"—"},h:"TRL 3–5; topology embedded in commercial interleavers",i:"Programmable RA-MZI meshes (iPronics-style) for reconfigurable filtering (2023–25)",r:1,w:"Flexible spectral shaping in the WDM mesh and coherent Rx."},
+{id:34,n:"Fabry-Pérot Interferometer",c:2,s:"FSR 1 GHz–100s nm, finesse 10–10⁴, IL 1–5 dB (fiber FP, bulk etalon, MEMS-tunable)",u:{us:"Micron Optics/Luna, Coherent",eu:"SIOS, LAYERTEC",cn:"HC Photonics",me:"—"},h:"FP etalons flown in lidar (Aeolus heritage) and star sensors. TRL 9",i:"Incremental; mature class",r:1,w:"Laser wavelength locker for WDM grid stability."},
+{id:35,n:"Sagnac Interferometer",c:2,s:"FOG core; bias stability 0.001–1°/h, shot-noise-limited",u:{us:"Honeywell, KVH/EMCORE",eu:"Exail (space FOGs, TRL 9)",cn:"domestic FOG houses",me:"—"},h:"Exail space FOGs TRL 9 — multiple missions",i:"Integrated SiN/TFLN Sagnac chips emerging (2023–25)",r:2,w:"Platform ADCS / pointing support; not in the photonic datapath."},
+{id:36,n:"In-Fiber Interferometer",c:2,s:"Inline Michelson/MZI/FBG sensors; nm–pm displacement resolution, IL <1 dB",u:{us:"Luna, Micron Optics",eu:"FBGS, HBK FiberSensing",cn:"multiple",me:"—"},h:"FBG sensor networks flown for structural health (ESA/NASA demos). TRL 6–8",i:"Incremental; interrogator miniaturization",r:2,w:"Thermal/strain monitoring of the optical bench and OPA calibration."},
+{id:37,n:"Tunable Optical Filter",c:2,s:"MEMS-FP/AOTF/thermal; tuning C-band 40–100 nm, bandwidth 12.5–50 GHz, IL 2–5 dB",u:{us:"Coherent WSS",eu:"Santec partners, EXFO",cn:"Accelink, Gigalight",me:"—"},h:"Tunable filters in lidar/spectrometer payloads. TRL 6–8",i:"TFLN EO-tunable filters at µs speed (2024+)",r:0,w:"Flexible channel selection in the WDM mesh."},
+{id:38,n:"Arrayed Waveguide Grating (AWG)",c:2,s:"8–96 ch, 50/100 GHz grid, IL 3–5 dB (athermal), crosstalk <−25 dB, cyclic FSR",u:{us:"Broadex, Lumentum (NeoPhotonics)",eu:"Enablence partners, SMART Photonics (InP AWG)",cn:"Accelink, ShiJia, HYC, WISOPTIC",me:"—"},h:"AWGs flown in hyperspectral/comms payloads. TRL 5–7",i:"Athermal designs; multiple CN + US suppliers for dual-sourcing",r:0,w:"Passive WDM mux/demux — heart of the mesh."},
+{id:39,n:"Bragg Grating (bulk/volume)",c:2,s:"VBG: reflectivity 10–99%, bandwidth 0.05–1 nm, diffraction eff. >95%, high power handling",u:{us:"OptiGrate (IPG), PD-LD",eu:"limited",cn:"HC Photonics, CSRayzer",me:"—"},h:"VBGs in space lasers/lidar. TRL 6–8",i:"Incremental; high-power handling improvements",r:1,w:"Wavelength stabilization of pump/seed lasers; narrowband rejection filters."},
+{id:40,n:"Fiber Bragg Grating (FBG)",c:2,s:"R 5–99%, BW 0.05–10 nm, IL <0.5 dB; rad-hard FBGs qualified",u:{us:"Luna, Coherent",eu:"FBGS, Exail (rad-hard fiber ecosystem)",cn:"Accelink, T&S",me:"—"},h:"Flown extensively — sensing (ESA Proba, ISS) and laser cavity reflectors. TRL 9",i:"Rad-hard FBG qualification for LEO",r:0,w:"Laser stabilization, dispersion trim, strain sensing; cheapest high-TRL item."},
+{id:41,n:"Photonic Band Gap Sensor",c:2,s:"PBG fiber / photonic-crystal gas/strain/radiation sensing; slow-light enhanced; spec varies (nm/µε)",u:{us:"national labs",eu:"CSEM, DTU ecosystem",cn:"university spin-outs",me:"—"},h:"TRL 2–4; research-stage",i:"Integrated PBG refractive-index sensors on SiN (2023–25)",r:3,w:"Outside comm/OPA mission scope; monitor only."},
+{id:42,n:"WDM Component (mux/demux)",c:2,s:"CWDM/DWDM TFF or PLC; 4–40 ch, IL 0.5–3 dB, isolation >30 dB",u:{us:"Broadex, Coherent, Lumentum",eu:"TE Connectivity / partners",cn:"Accelink, WISOPTIC, Broadex-CN, Gigalight",me:"— (assembly only)"},h:"CWDM modules in laser terminals. TRL 7–9",i:"Incremental; compact PLC modules",r:0,w:"Baseline mesh wavelength management."},
+{id:43,n:"Interleaver",c:2,s:"50/100 GHz or 25/50 GHz de/interleaving; IL 1–2.5 dB, isolation >25 dB, low dispersion",u:{us:"Broadex, Optoplex",eu:"limited",cn:"Accelink, WISOPTIC, Flyin",me:"—"},h:"TRL 4–6; telecom-grade, space qual pending",i:"Integrated MZI-lattice interleavers on SiN/TFLN (2024)",r:1,w:"Doubles usable grid density in the WDM mesh."},
+{id:44,n:"Demultiplexer (integrated Rx demux)",c:2,s:"AWG/echelle + Ge PD arrays; 4–16 ch, IL 3–6 dB incl. coupling, BW >30 GHz/ch",u:{us:"Lumentum, Coherent (ICR)",eu:"SMART Photonics",cn:"SiFotonics (Ge-on-Si), Accelink",me:"—"},h:"Integrated coherent receivers TRL 4–6",i:"Ge-on-Si integrated receiver arrays maturing",r:0,w:"400G coherent path receiver front-end."},
+{id:45,n:"Optical Waveguide (SiN/Si/InP)",c:3,s:"Si (SOI): 1–2.5 dB/cm tight bends; SiN: 0.01–0.5 dB/cm, 400–4000 nm, >5 W; InP: 1–2 dB/cm with gain",u:{us:"AIM, Intel, Ayar",eu:"Ligentec (SiN), imec/AMF (SOI), SMART Photonics (InP)",cn:"CUMEC, IMECAS MPW fabs",me:"—"},h:"TRL 7–9 telecom",i:"SiN+TFLN active modules (Ligentec LABS, 2024)",r:0,w:"PIC platform for the OPA chip and coherent frontend."},
+{id:46,n:"Ultra-Low-Loss Waveguide",c:3,s:"Record SiN <0.5 dB/m multimode / 1 dB/m single-mode, Q >20 M (Ligentec 2026 data)",u:{us:"UCSB/Lumentum heritage",eu:"Ligentec",cn:"several SiN foundries ~0.1 dB/cm",me:"—"},h:"TRL 6–7",i:"Sub-dB/m PDK runs, space-grade packaging demos (2023–26)",r:0,w:"OPA aperture feed loss directly eats link margin toward −50 dBm; long delay lines."},
+{id:47,n:"Photonic Crystal Waveguide",c:3,s:"Slow-light, dispersion-engineered; loss 1–10 dB/cm typical; sensing / dispersion / nonlinear uses",u:{us:"niche MPW fabs",eu:"NTT/DTU/EPFL R&D, niche fabs",cn:"academic fabs",me:"—"},h:"TRL 3–4",i:"Topological PC waveguides, low-loss C-band designs (2023–26)",r:2,w:"Useful for dispersion management in the 100 Gbps coherent path; not flight-mature."},
+{id:48,n:"Grating Coupler",c:3,s:"Fiber/OPA I/O: 1–3 dB standard, <1 dB apodized/mirror; 1550 nm, 40–80 nm 1-dB BW; pol-diversity variants",u:{us:"AIM, GlobalFoundries; ficonTEC packaging",eu:"imec, Ligentec; Tyndall, PHIX",cn:"SiFotonics",me:"—"},h:"TRL 9 (telecom PICs); passive Si/SiN is rad-hard",i:"Sub-dB bi-level gratings, edge couplers ~0.5 dB (2023–26)",r:0,w:"OPA chip coupling and fiber-array interface."},
+{id:49,n:"Directional Coupler",c:3,s:"3-dB splitting ±0.5 dB, excess loss <0.2 dB, 100 nm broadband; 90° optical hybrids for coherent IQ",u:{us:"PDK cells (GF, AIM); Corning/G&H fiber",eu:"Ligentec, imec PDK; Exail (fiber/LN heritage)",cn:"Accelink/WTD fiber couplers",me:"—"},h:"TRL 9; fiber couplers flown in EDFAs and coherent terminals",i:"Incremental PDK improvements",r:0,w:"90° hybrid / LO splitting in the coherent receiver; passive and rad-tolerant."},
+{id:50,n:"1×2 Redundancy Splitter",c:3,s:"Splits signal/LO to redundant receiver chains; IL 3.2–3.5 dB, directivity >50 dB",u:{us:"Corning, Gooch & Housego",eu:"Exail",cn:"Accelink/WTD",me:"—"},h:"TRL 9; fused fiber splitters with extensive space heritage (planetary missions, ISL EDFAs)",i:"On-chip Y/MMI variants in PDKs",r:1,w:"Cross-strapped redundancy for LEO radiation / SEU failures."},
+{id:51,n:"Y-Branch / Power Splitter",c:3,s:"On-chip 1×N fanout, excess loss 0.1–0.5 dB, MMI <0.3 dB; scales to 1×64 for OPA feed trees",u:{us:"AIM/GF SOI PDKs",eu:"Ligentec SiN, SMART Photonics InP",cn:"SiFotonics, CUMEC",me:"—"},h:"TRL 9",i:"Low-loss star couplers for OPA beam forming (DARPA/SOTA 2023–26)",r:0,w:"OPA feed network fanout."},
+{id:52,n:"Polarization Beam Splitter",c:3,s:"PER >20 dB, excess loss <0.5 dB, ~60 nm bandwidth; dual-pol coherent needs PBS + rotators",u:{us:"imec/GF PDK cells; Thorlabs, OZ Optics",eu:"Ligentec PDK; Exail fiber PBS",cn:"Accelink, WTD",me:"—"},h:"TRL 9 terrestrial; flown in fiber assemblies",i:"Compact on-chip PBS/rotator cells",r:0,w:"Dual-polarization handling for 100 Gbps coherent (DP-QPSK/16-QAM)."},
+{id:53,n:"Photodetector (general)",c:4,s:"InGaAs PIN: 0.9–1.0 A/W @1550, dark nA, BW to 40 GHz; Ge-on-Si: 0.8–1.2 A/W, >60 GHz waveguide-integrated",u:{us:"Coherent, Broadcom, Excelitas",eu:"First Sensor/TE, AMS Osram, Exail",cn:"SiFotonics",me:"—"},h:"TRL 9; Ge PDs fly on ISL PICs",i:"Waveguide-integrated Ge PDs >60 GHz",r:0,w:"Baseline receiver element for both links."},
+{id:54,n:"PIN/APD Photodiode",c:4,s:"PIN: 1.0 A/W, NEP ~10 pW/√Hz; APD adds M=10–20 gain, −30 to −35 dBm OOK sensitivity",u:{us:"Excelitas, Coherent, Hamamatsu",eu:"First Sensor/TE, AMS Osram",cn:"Accelink, WTD",me:"—"},h:"Rad-tol InGaAs PINs qualified for ISL; APDs flown in altimeters/lidar",i:"Ge/Si APD on-chip integration maturing",r:0,w:"Critical frontend for the 10 Gbps OOK downlink."},
+{id:55,n:"APD (avalanche)",c:4,s:"InGaAs/InP: 0.8–0.9 A/W primary, M≤15, GBP 100–150 GHz; Ge/Si APD: M to 100, GBP 340–1033 GHz, 56 GHz BW (SiFotonics)",u:{us:"Excelitas, Coherent",eu:"First Sensor/TE",cn:"SiFotonics",me:"—"},h:"APDs flown in altimeters/lidar",i:"Record-low excess noise F=3.1 @ M=20 (2024 Glasgow/Sheffield)",r:1,w:"Sensitivity margin for the OOK path; on-chip Ge/Si APD option."},
+{id:56,n:"Fast Photodiode (>50 GHz)",c:4,s:"InGaAs waveguide/UTC PDs: 50–100+ GHz, 0.4–0.8 A/W (Discovery DSC series); Ge-on-Si 60–110 GHz research",u:{us:"Discovery Semi, Coherent",eu:"Fraunhofer HHI, III-V Lab",cn:"SiFotonics",me:"—"},h:"Telecom heritage; space qual emerging",i:"UTC PD >100 GHz; Ge-on-Si research records",r:1,w:"Needed for 100 Gbps coherent IF beat detection and 56+ GBd symbols."},
+{id:57,n:"Photodiode Array",c:4,s:"4–32 ch InGaAs arrays, 0.9 A/W, 10–40 GHz/ch, for coherent I/Q and multi-aperture OPA combine",u:{us:"Broadcom, Coherent, Excelitas, Discovery",eu:"First Sensor/TE",cn:"SiFotonics, Accelink",me:"—"},h:"TRL 9 telecom; space arrays flown in lidar/FPA",i:"Matched-quad arrays for coherent ICRs",r:1,w:"I/Q dual-pol receiver needs ≥4 matched PDs; OPA multi-element readout."},
+{id:58,n:"Phototransistor",c:4,s:"Built-in gain, slow (MHz–few GHz), Si/GeS; not suited to Gbps links",u:{us:"Excelitas, Broadcom",eu:"AMS Osram, First Sensor/TE",cn:"various",me:"—"},h:"TRL 9 industrial; some space heritage in star trackers",i:"None material for links",r:3,w:"Not for data links; optional slow acquisition/beacon sensing only."},
+{id:59,n:"CCD",c:4,s:"Space imaging heritage (Hubble, Gaia); low-noise Mpixel arrays; readout kHz–MHz class",u:{us:"Teledyne e2v (US ops)",eu:"Teledyne e2v, Hamamatsu (JP)",cn:"Gpixel",me:"—"},h:"Deep space imaging heritage, space-qualified",i:"Incremental; CMOS displacing CCD",r:3,w:"Beacon acquisition camera could use CMOS/CCD but is outside the link budget chain."},
+{id:60,n:"TIA Interface",c:4,s:"28/56 GBd TIAs, gain 0.5–5 kΩ, input noise <20 pA/√Hz; balanced PIN+TIA with AGC (DSC-R412: 50–4000 Ω)",u:{us:"Broadcom, MACOM, Discovery",eu:"Bosch/AMS, Fraunhofer HHI",cn:"Accelink, WTD",me:"—"},h:"Telecom heritage; space rad-tol variants needed",i:"AGC balanced TIAs, −16 to +2 dBm input range",r:0,w:"Determines the −50 dBm sensitivity floor; rad-tol / SEU-mitigated design required."},
+{id:61,n:"Optical Receiver",c:4,s:"Integrated PIN/APD+TIA: 10 Gbps sensitivity −20 to −30 dBm (OOK); APD receivers reach −35 dBm; EDFA-preamp −40 dBm class",u:{us:"Coherent, Broadcom, Excelitas, Discovery",eu:"Exail",cn:"Accelink/WTD",me:"—"},h:"ESA/CNES OOK receivers and EDFA pre-amplified receivers flown on ISLs",i:"Compact pre-amplified receiver modules",r:0,w:"The 10 Gbps OOK downlink receiver."},
+{id:62,n:"Heterodyne/Coherent Detector",c:4,s:"BPSK/QPSK heterodyne near shot-noise limit; balanced 35 GHz PDs, >20 dB CMRR; DP-QPSK lab receivers 100/400G",u:{us:"Discovery, Coherent",eu:"Fraunhofer HHI, III-V Lab; TESAT heritage",cn:"SiFotonics",me:"—"},h:"ESA EDRS/TESAT homodyne BPSK operational at 1.8 Gbps (TRL 9); NASA ILLUMA-T 2023 demo; 100 Gbps coherent space path emerging 2024–26",i:"100/400G-class coherent receivers (DSC-R413)",r:0,w:"The only path to −50 dBm-class sensitivity at 100 Gbps."},
+{id:63,n:"Optical Transceiver",c:4,s:"Pluggable QSFP-DD/OSFP 400G/800G coherent; space ISL terminals (TESAT, Mynaric, Thales/Exail) with BPSK homodyne",u:{us:"Coherent, Broadcom, Cisco/Acacia",eu:"Exail, Thales Alenia",cn:"Accelink, WTD",me:"—"},h:"Space ISL terminals operational; terrestrial coherent mature",i:"Co-packaged optics; space micro-coherent modems (ESA HydRON 2023–26)",r:1,w:"Reference architecture; Photon-1 integrates a custom coherent modem."},
+{id:64,n:"Balanced Photodetector",c:4,s:"15–43 GHz BW, CMRR >20–30 dB, LO handling to +17 dBm; balanced PIN+TIA AGC receivers 40G/100G (DSC-R412/R422, 33 GHz)",u:{us:"Discovery Semiconductors, Coherent, Finisar",eu:"Fraunhofer HHI, III-V Lab",cn:"SiFotonics",me:"—"},h:"Balanced detection flown in heterodyne radiometers; 400G-class balanced coherent receivers demonstrated terrestrially, space qual in progress",i:"AGC balanced coherent receiver modules",r:0,w:"Cancels RIN/DC, enables coherent −50 dBm sensitivity; core of 100 Gbps and the path to 400 Gbps."},
+{id:65,n:"Lens",c:5,s:"λ 633–1550 nm, λ/10 surface, rad-hard glasses (BK7, fused silica, CaF2), athermal mounts",u:{us:"Coherent, G&H US",eu:"G&H UK, Qioptiq/Excelitas",cn:"O-Net, flyin",me:"—"},h:"Ubiquitous on LCRD/EDRS terminals",i:"Metalens-on-chip beamformers (2025)",r:0,w:"5 cm telescope objective / collimation core."},
+{id:66,n:"Mirror",c:5,s:"Protected Al/Ag/Au, λ/20, SiC/Zerodur substrates for space",u:{us:"Coherent, L3Harris",eu:"G&H UK, Safran Reosc",cn:"O-Net",me:"—"},h:"Every optical terminal (LCRD, SILEX)",i:"Lightweight SiC mirrors for smallsats",r:0,w:"FSM backup and telescope fold mirrors."},
+{id:67,n:"Beam Splitter",c:5,s:"50/50–90/10 cube/plate, ±1% ratio, pol or non-pol, LIDT >5 J/cm²",u:{us:"Coherent, Thorlabs",eu:"G&H UK, Altechna",cn:"Accelink, flyin",me:"—"},h:"Coherent-comms Rx/Tx split in LCRD-class terminals",i:"Low-loss metasurface splitters",r:1,w:"Multi-beam combining/splitting, Rx tap."},
+{id:68,n:"Faraday Isolator",c:5,s:">25–30 dB isolation, <1 dB IL, 1550 nm; pol-independent variants for QKD sats",u:{us:"Coherent, Thorlabs, Agiltron",eu:"G&H UK (space-qualified, ESA programs)",cn:"O-Net, flyin",me:"—"},h:"Flown on satcom laser payloads; growing QKD-sat demand 2026–28",i:"Miniaturized space-qualified isolators",r:1,w:"Protects the Tx laser from back-reflection in the fiber-coupled chain."},
+{id:69,n:"Circulator",c:5,s:"3-port, >40 dB isolation, <1 dB IL, 1310/1550 nm; miniaturized space versions",u:{us:"Coherent, Agiltron",eu:"G&H UK",cn:"Accelink, O-Net, flyin",me:"—"},h:"Coherent lidar / comm bidirectional links",i:"On-chip magnet-free isolator/circulator research",r:2,w:"Useful only for shared-aperture Tx/Rx with coherent detection."},
+{id:70,n:"Corner Cube Reflector",c:5,s:"Solid/hollow, <1 arcsec beam deviation, Al/Au coated; arrays for laser ranging",u:{us:"Coherent, PLX",eu:"G&H UK",cn:"O-Net",me:"—"},h:"Apollo LRRR, LAGEOS, ILRS satellites",i:"Lightweight hollow CCRs for debris tracking",r:2,w:"Only if a cooperative-target retroreflection / ranging mode is adopted."},
+{id:71,n:"Retroreflector",c:5,s:"Modulating retroreflector (MRR) variants 1–100 kbps; MEMS MRR",u:{us:"PLX, NRL heritage",eu:"few",cn:"FiberHome",me:"—"},h:"LLCD-era MRR demos; ESA debris retro arrays",i:"High-speed MEMS MRRs for smallsat downlinks",r:3,w:"Photon-1 is an active terminal, not a passive reflector."},
+{id:72,n:"Optical Attenuator",c:5,s:"0–30 dB fixed/variable, MEMS VOA <1 dB IL, PM variants",u:{us:"Coherent, Agiltron",eu:"Diamond SA, SEDI-ATI",cn:"Accelink, flyin",me:"—"},h:"Satcom optical power leveling",i:"On-chip MEMS VOAs on SiN PICs",r:2,w:"AGC leveling in the Rx chain if detector dynamic range is limited."},
+{id:73,n:"Diffraction Grating",c:5,s:"600–1800 l/mm, >90% diffraction efficiency; Echelle/immersion variants for space spectrographs",u:{us:"Coherent, Newport",eu:"G&H UK, Zeiss",cn:"O-Net",me:"—"},h:"ESA/NASA spectrographs (Sentinel, WEAVE fibers)",i:"Meta-gratings, immersion gratings",r:2,w:"Only for WDM demux or spectrometer mode, not core comm."},
+{id:74,n:"Prism",c:5,s:"Fused-silica/CaF2, ±3 arcsec; wedge/Risley prism beam steerers",u:{us:"Coherent, G&H US",eu:"G&H UK",cn:"O-Net, flyin",me:"—"},h:"Pointing mechanisms in early terminals",i:"Liquid-crystal / OAP alternatives displacing Risleys",r:3,w:"OPA + FSM cover steering; no Risley required."},
+{id:75,n:"Optical Fiber (rad-tolerant)",c:5,s:"RIA <20 dB/km at dose, Ge/P or pure-silica-core, PM and SMF 1310/1550, gyro-grade",u:{us:"Corning (rad-tol SMF), Molex/Polymicro",eu:"SEDI-ATI, Exail PM gyro fiber",cn:"FiberHome, Accelink",me:"—"},h:"Rad-hard fibers on ISS experiments, ESA FOG IMUs, nuclear/space links",i:"Sub-0.1 dB/km hollow-core fibers (2025) — rad-immune potential",r:0,w:"Fiber attach to PIC/OPA and laser routing; rad tolerance is non-negotiable."},
+{id:76,n:"Fiber Array",c:5,s:"V-groove 1D/2D, ±0.5 µm pitch accuracy, 8–127 ch, angled polish, hermetic feedthrough",u:{us:"Molex, US Conec (MTP/MX)",eu:"Diamond SA, SEDI-ATI (hermetic KTRAV feedthroughs)",cn:"Accelink, flyin, O-Net",me:"—"},h:"PIC pigtailing in flight transponders",i:"2D arrays for co-packaged optics (Ayar detachable connectors)",r:0,w:"Passive-alignment fiber attach to PIC/OPA — the Photon-1 manufacturing strategy; linchpin component."},
+{id:77,n:"Optical Connector",c:5,s:"IL <0.3 dB, RL >50 dB, ESCC 3420 qualified",u:{us:"Molex, US Conec (MPO)",eu:"Diamond SA — Mini AVIM, the ONLY ESA-qualified single-channel fiber connector (JWST, Mars rovers)",cn:"Accelink, FiberHome",me:"—"},h:"AVIM flown on JWST, Mars rovers, NASA GSFC projects",i:"Detachable CPO connectors (Ayar), expanded-beam space connectors",r:0,w:"Serviceable, vibration-proof fiber interfaces to terminal and PIC; lowest-risk space fiber interconnect."},
+{id:78,n:"Fiber Pigtail",c:5,s:"PM/SM 0.5–2 m, FC/AVIM termination, λ/8 endface, hermetic option",u:{us:"Molex/Polymicro, Thorlabs",eu:"Diamond SA, SEDI-ATI (space range)",cn:"flyin, O-Net, Accelink",me:"—"},h:"Standard in space laser/EDFA modules (SEDI-ATI space harnesses)",i:"Laser-welded fiber-to-chip attach for passive alignment",r:0,w:"Enables passive-alignment manufacturing of the Photon-1 photonic engine."},
+{id:79,n:"PIC (generic platform)",c:6,s:"SiN <0.1 dB/cm, Si 220 nm, InP active; MPW access",u:{us:"Ayar Labs (GF 45nm monolithic), AIM Photonics",eu:"LIGENTEC (SiN), imec (iSiPP), SMART Photonics (InP)",cn:"Accelink, FiberHome R&D",me:"—"},h:"Si photonics flown on CubeSat optical links; LCRD-era discrete",i:"Roadmap to wafer-scale SiPh (Nat Commun 2024)",r:0,w:"Substrate of the OPA steerer and photonic engine."},
+{id:80,n:"Transceiver PIC",c:6,s:"Coherent 100–400 Gbps/ch, integrated modulator + Ge PD; Ayar TeraPHY: 8 Tbps/chiplet, 16 λ, 2 Tbps/mm shoreline, <5 pJ/bit",u:{us:"Ayar Labs (UCIe chiplet 2025, Lockheed collab), Coherent",eu:"SMART Photonics, EFFECT Photonics",cn:"Accelink",me:"—"},h:"Terrestrial coherent; space qualification nascent",i:"UCIe optical chiplet (2025); 8 Tbps class chiplets",r:0,w:"High-rate Tx/Rx engine for the optical link; packaging model for the photonic engine."},
+{id:81,n:"Beamformer PIC (OPA)",c:6,s:"OPA 40–46° FoV, <0.2° precision, self-calibrating via on-chip interferometers + photodiodes (imec SiN-on-Si, fully digital, no moving parts)",u:{us:"Ayar (RF), Analog Photonics",eu:"imec flagship platform; LIGENTEC SiN foundry",cn:"research-stage",me:"—"},h:"Lab TRL 4–6; no flight yet",i:"Multi-spot structured-light steering (imec); DNN temperature-adaptive beamforming (2024)",r:0,w:"IS the Photon-1 OPA fine steerer — self-calibration maps directly to the requirement; direct blueprint (imec) with LIGENTEC as SiN foundry."},
+{id:82,n:"Optical Beamforming Network (OBFN)",c:6,s:"Blass/Rotman matrices on SiN, delay accuracy <1 ps, multi-beam",u:{us:"Ayar/Lockheed converged RF arrays",eu:"LIGENTEC SiN OBFN, imec",cn:"research",me:"—"},h:"ESA-funded OBFN studies for satcom multi-beam antennas",i:"Fully digital calibration (imec), multi-spot",r:1,w:"Photon-1 multi-beam requirement; enables simultaneous beams from one aperture."},
+{id:83,n:"Integrated Optical Gyroscope",c:6,s:"SiN ring/resonator, bias drift target <0.1°/h, low ARW; chip-scale RIOG",u:{us:"Anello Photonics (SiPhOG), Honeywell heritage",eu:"Exail (fiber FOG heritage, ESA IMUs), LIGENTEC research",cn:"research",me:"—"},h:"Coil FOGs standard on ESA spacecraft; chip FOGs pre-flight",i:"SiN resonator gyro ARW records (2024)",r:2,w:"Terminal stabilization/IMU use; FSM + star tracker may suffice."},
+{id:84,n:"Integrated FMCW LiDAR",c:6,s:"Chip-scale coherent LiDAR, ~200 m range, simultaneous range+velocity, OPA steering (EPFL 2024; NEC 2024)",u:{us:"Aeva, Voyant, SiLC",eu:"imec, EPFL",cn:"LightIC (Tower SiPh FMCW, 2026)",me:"—"},h:"Automotive TRL; no space flight",i:"Photonic-electronic coherent LiDAR engine (Nat Commun 2024)",r:2,w:"Could serve as Photon-1 acquisition/ranging sensor, but not core comm."},
+{id:85,n:"Optical True-Time-Delay Receiver",c:6,s:"SiN TTD beamforming Rx, ns-range delays, GHz bandwidth, squint-free multi-beam RF receive",u:{us:"Ayar/Lockheed converged-array work",eu:"LIGENTEC, imec, TU/e research",cn:"research",me:"—"},h:"DARPA/NASA photonic phased-array programs",i:"Integrated TTD + channelized receivers (2023–25)",r:1,w:"Squint-free multi-beam receive aligns with Photon-1 multi-beam + OPA."},
+{id:86,n:"Micro-Spectrometer",c:6,s:"Chip-scale, 50–200 nm span, <1 nm resolution, SiN microring/AWG filter banks",u:{us:"Rockley heritage, research",eu:"imec, LIGENTEC, Mantispectra",cn:"research",me:"—"},h:"No flight heritage; WEAVE-class instruments are bulk fiber",i:"Microring filter-bank spectrometers (2023), computational reconstruction",r:3,w:"Photon-1 has no spectroscopy payload requirement."},
+{id:87,n:"RF Channelizer (photonic)",c:6,s:"Photonic RF channelization 2–40 GHz, MHz-resolution filters, low SWaP vs digital",u:{us:"Lockheed+Ayar optical I/O for RF processing (5× power, 12× size reduction)",eu:"LIGENTEC SiN filters, imec 32-ch filter (2024)",cn:"research",me:"—"},h:"DARPA photonic RF; pre-flight",i:"Optical-I/O-fed RF multi-chip packages",r:2,w:"Only if Photon-1 carries an RF satcom payload; out of optical-terminal core scope."},
+{id:88,n:"Microwave Photonic Oscillator (OEO)",c:7,s:"WGM-resonator OEOs; X/Ka-band 10–36 GHz, phase noise to −145 dBc/Hz @10 kHz; W-band 92–100 GHz demos; <1 W chip-scale",u:{us:"OEwaves (Micro-OEO flown on Lockheed MHTK), EMCORE",eu:"Exail",cn:"CAS/CIOMP groups",me:"—"},h:"Airborne/defense; NASA-funded space demos",i:"Microcomb-referenced oscillators with zeptosecond timing noise (2024)",r:1,w:"Low-phase-noise LO for RF payload & time-transfer carrier."},
+{id:89,n:"WGM Resonator (reference cavity)",c:7,s:"Crystalline WGM microresonators, Q >10⁹, mm-scale, stability ~10⁻¹³ @1 s, vibration <10⁻¹⁰/g, 370–4500 nm",u:{us:"OEwaves (HI-Q lasers <1 Hz linewidth)",eu:"CSEM (chip frequency references)",cn:"CAS WGM/microcomb programs",me:"—"},h:"Quantum-tech & laser stabilization; NASA/DARPA programs",i:"MgF2-referenced soliton microcombs, integrated SiN references (2023–24)",r:0,w:"Optical frequency anchor for ns time sync and the narrow-linewidth laser/PPLN chain; compact 10⁻¹³ reference."},
+{id:90,n:"Frequency Generator Unit (FGU)",c:7,s:"Multi-output RF/clock synthesis from optical reference; 10 MHz–40 GHz, Allan deviation ~10⁻¹³ class",u:{us:"OEwaves, Microchip (atomic clocks), EMCORE",eu:"Safran Timing, Exail",cn:"CIOMP/CAS time-frequency units",me:"—"},h:"GNSS payload FGUs (Galileo PFHs)",i:"Chip-scale atomic sync, electro-optic-comb synthesizers (2024–25)",r:0,w:"Distributes the coherent clock for triangulation timestamping (CEP 10–50 m needs ~ns); O-TWTFT-derived two-way time transfer is the triangulation enabler."},
+{id:91,n:"Frequency Converter (photonic RF)",c:7,s:"Microcomb-based broadband microwave photonic conversion, sub-octave to mm-wave; integrated SiN channelizers: 10×2.6 GHz channels (2024)",u:{us:"OEwaves, EMCORE",eu:"Exail (LiNbO3 modulators)",cn:"Beihang/CAS channelizer programs",me:"—"},h:"Mostly lab; defense receivers",i:"Microcomb RF channelizers, dual-pol integrated channelizers (2024)",r:2,w:"Useful only if Photon-1 carries an RF comms/radar payload."},
+{id:92,n:"LiDAR System",c:7,s:"Flash/FMCW space LiDAR; cm-range accuracy, 1550 nm fiber-laser based; photonic integrated FMCW chips emerging",u:{us:"Coherent, SiLC",eu:"CSEM (FMCW LiDAR), Exail lasers",cn:"CIOMP space LiDAR payloads",me:"—"},h:"CALIPSO/Aeolus-class lidar, planetary altimeters",i:"Microcomb parallel ranging (2023), photonic-chip FMCW",r:2,w:"Supports relative navigation / formation keeping, not core ADCS."},
+{id:93,n:"Optical Sensor (general)",c:7,s:"PSDs, FBG strain/temp, star-tracker-class optical heads; krad-tolerant variants",u:{us:"EMCORE, Broadcom-class",eu:"CSEM custom sensors, Exail fiber sensing",cn:"CIOMP optical payloads",me:"—"},h:"Ubiquitous on spacecraft mechanisms/payloads",i:"Integrated SiN sensing engines, photonic interrogators (2023–25)",r:1,w:"Optical encoders/interrogators support pointing knowledge within ±0.1°."},
+{id:94,n:"Fiber-Optic Gyroscope (FOG)",c:7,s:"Closed-loop IFOG; bias instability <0.05°/h, ARW <0.005°/√h, <2 kg (Exail Astrix NS); 7 yr LEO / 15 yr GEO life",u:{us:"KVH, Exail-US, Honeywell",eu:"Exail (Astrix; Rosetta/Gaia/Aeolus heritage, >7M flight hr, zero failures), Safran",cn:"Beihang/CASIC programs",me:"—"},h:"Exail Astrix: >7M flight hours, zero failures",i:"Si-photonics / SiN optical-engine FOGs, 0.009–0.003°/h chip-driven bias (2024–26)",r:0,w:"Core ADCS rate sensor for ±0.1° pointing; flight-proven zero-failure heritage."},
+{id:95,n:"Integrated Solid-State Gyro (HRG/MEMS/chip)",c:7,s:"Safran HRG (SpaceNaute-class) rad-hard low SWaP; SiN waveguide-coil and TFLN chip gyros reaching 0.022°/h bias instability (2025)",u:{us:"Northrop HRG heritage, Honeywell MEMS",eu:"Safran HRG",cn:"CAS/Beihang integrated gyro chips",me:"—"},h:"HRG flown on telecom/EO sats",i:"Integrated SiN gyro engines, chip-scale RLG (2024–26)",r:1,w:"Backup/secondary IMU; chip gyros cut SWaP for smallsat ADCS."},
+{id:96,n:"Fiber-Optic Accelerometer",c:7,s:"FBG/interferometric; µg resolution, EMI-immune, rad-tolerant fiber coils; few space-qualified COTS units",u:{us:"KVH-adjacent, Micron Optics-type interrogators",eu:"Exail (fiber sensing), CSEM",cn:"CAS fiber-sensing labs",me:"—"},h:"Flown mainly within IMUs; standalone space accelerometers rare",i:"Photonic-integrated accelerometers on SiN (2023–25)",r:2,w:"FOG/HRG already covers angular; useful for micro-vibration monitoring of the optical bench."},
+{id:97,n:"Radiation Monitor (ring + PIN)",c:7,s:"Dosimeter combining RadFET/ring oscillator + PIN diode particle telescope; TID + LET spectra, real-time dose rate; g-class, <1 W",u:{us:"SDL/USU, Los Alamos-class instruments",eu:"ESA-standard monitors; flown on JUICE, Proba, Galileo",cn:"CAS space-environment payloads",me:"— (UAE sourcing ESA/US units)"},h:"Units flown on JUICE, Proba, Galileo",i:"Chip-scale dosimeters, COTS-rad monitors for constellations (2023–25)",r:1,w:"300 km LEO is moderate dose; protects PPLN/photonics life and enables dose-aware graceful degradation."},
+{id:98,n:"Thermal Monitor (FBG thermometry)",c:7,s:"FBG/quartz photonic temperature sensors, mK resolution, −50 to +125 °C, EMI-immune multiplexed arrays",u:{us:"Luna-type interrogators",eu:"CSEM, Exail fiber sensing",cn:"CIOMP/CAS FBG units",me:"—"},h:"FBG thermal sensing flown on ESA/JAXA experiments",i:"Integrated photonic interrogator chips (2024)",r:1,w:"Precision thermal feedback for laser/PPLN within the 40/25/−10 °C zones."},
+{id:99,n:"TEC Cooler",c:7,s:"Single/multi-stage Peltier, ΔT to 70 K, mK stability with closed-loop controllers; space-qualified hermetic TECs for laser packages",u:{us:"Laird/Coherent, Phononic heritage",eu:"European Thermodynamics; integrated in Exail/CSEM packages",cn:"CAS-qualified TEC suppliers",me:"—"},h:"Standard in space laser transmitters (Aeolus, LISA-pathfinder class)",i:"Thin-film / superlattice TECs, higher COP (2023–25)",r:0,w:"Non-negotiable: holds laser & PPLN at set point across thermal zones 40/25/−10 °C."},
+{id:100,n:"Radiation-Tolerant Packaging & Housing",c:7,s:"Hermetic Al/Kovar/AlN packages, fiber feedthroughs, rad-hard epoxies/coatings (TID >100 krad), thermal-path design; ITAR variants",u:{us:"OEwaves (proprietary WGM packaging), EMCORE space qual",eu:"Exail, CSEM packaging services",cn:"CIOMP/CAS space packaging lines",me:"nascent — UAE (MBRSC, Strata) & Saudi (KACST) building capability; no qualified base yet"},h:"Decades of space laser/fiber packaging heritage",i:"Chip-scale vacuum/thermal packaging for microresonators (2023–25)",r:0,w:"Every photonic device survives 300 km LEO only with rad-tolerant hermetic packaging; also the only plausible Middle East localization angle."}
+        ];
+
+        const REL = ['Critical','Important','Optional','Not-needed'];
+        const REL_CLASS = ['b-critical','b-important','b-optional','b-notneeded'];
+        const REL_CHIP = ['','amber','ice','dim'];
+        const REGIONS = [['us','🇺🇸 US'],['eu','🇪🇺 EU'],['cn','🇨🇳 CN'],['me','🌍 ME']];
+
+        const PICKS = [
+            ['TFLN Mach-Zehnder Modulator (#22)', '>100 GHz, sub-1 V drive; direct fit to 100 Gbps OOK and 400G coherent IQ; dual-source HyperLight/Exail + NanoLN/SiFotonics.'],
+            ['Space-grade LiNbO3 EOM (#21)', 'Exail TRL 9 (GRACE-FO, LISA); immediate-qualified anchor while TFLN matures; OPA phase control.'],
+            ['Narrow-linewidth 1550 nm Tx/LO (#3)', '<10 kHz, ≥20 mW, ITU-grid (NKT Koheras-class or SiN hybrid) — coherent 400 Gbps path.'],
+            ['Space-qualified C-band EDFA booster (#19)', '1–5 W, PM, 30–100 krad, NF ≤5.5 dB (MPBC PULSAR / G&H / Nuphoton) — core link-budget amplifier.'],
+            ['Rad-screened 980 nm pump diode (#2)', '≥500 mW kink-free, FBG-stabilized (Lumentum/Coherent space-screened class).'],
+            ['High-power 1550 nm fiber laser (#8)', '5–10 W, <10 kHz (IPG/Nufern or NKT class) — OOK 100 Gbps high-margin Tx.'],
+            ['Tunable MEMS-ECDL (#7)', 'C-band, <100 kHz, mode-hop-free — Doppler tracking for HGV links.'],
+            ['QD-SOA preamp (#20)', 'C-band, NF <6 dB, Psat >15 dBm (Innolume-class) — Rx preamp / OPA loss compensation.'],
+            ['SiN soliton microcomb module (#15/#17)', 'Roadmap TRL 3→6, 20–100 GHz spacing — multi-carrier WDM scaling and OPA-parallel sensing.'],
+            ['AWG (#38)', 'Passive athermal mux/demux, backbone of the WDM mesh; multi-source US + CN.'],
+            ['FBG (#40)', 'TRL 9, rad-tolerant — laser wavelength locking and sensing at minimal SWaP.'],
+            ['MEMS optical switch (#29)', '<0.3 dB, 64×64-class cross-connect for mesh reconfiguration (Coherent/Polatis/Accelink).'],
+            ['Hybrid fast/slow switching fabric (#26/#28)', 'Optical + thermo-optic switches for mesh and OPA trim.'],
+            ['Electro-Absorption Modulator / EML (#30)', 'Compact 100–200 Gbps fallback transmitter for SWaP-constrained terminals.'],
+            ['Tunable optical filter (#37)', 'Flexible channel add/drop; TFLN EO-tunable variants align with the modulator platform.'],
+            ['Balanced coherent receiver (#64)', 'DSC-R412/R422 class, 33+ GHz, AGC, >20 dB CMRR — only detector class reaching −50 dBm.'],
+            ['Heterodyne / coherent detector (#62)', 'DP-QPSK/16-QAM @1550 nm on TESAT/EDRS + ILLUMA-T heritage.'],
+            ['Ultra-low-loss SiN waveguide (#46)', '<1 dB/m (Ligentec) — preserves photon budget through OPA feed and delay networks.'],
+            ['Grating coupler (#48)', 'Sub-dB apodized @1550 nm — fiber-array and OPA chip coupling interface.'],
+            ['Y-branch / power splitter (#51)', 'Low-loss SiN fanout — OPA aperture feed tree.'],
+            ['PIN/APD photodiode (#54/#55)', 'Rad-tol InGaAs PIN, Ge/Si APD option — 10 Gbps OOK downlink sensitivity margin.'],
+            ['Polarization beam splitter (#52)', '>20 dB PER — dual-pol coherent operation.'],
+            ['TIA interface (#60)', 'Low-noise, AGC, SEU-tolerant — sets the −50 dBm sensitivity floor.'],
+            ['Rad-tolerant optical fiber (#75)', 'Corning rad-tol SMF/PM + SEDI-ATI hardened assemblies — radiation tolerance non-negotiable.'],
+            ['Hermetic fiber array (#76)', 'Diamond SA / SEDI-ATI V-groove feedthroughs — linchpin of passive-alignment fiber attach.'],
+            ['Diamond SA Mini AVIM connector (#77)', 'The only ESA-qualified (ESCC 3420) single-channel connector; JWST/Mars heritage.'],
+            ['imec self-calibrating beamformer PIC (#81)', 'Fully digital OPA, 40–46° FoV, <0.2° precision — blueprint for the OPA fine steerer.'],
+            ['Ayar TeraPHY-class transceiver PIC (#80)', '8 Tbps, UCIe, CMOS-manufactured optical I/O — packaging model for the photonic engine.'],
+            ['Space-grade lens + FSM mirror set (#65/#66)', 'Coherent / G&H telescope optics and fast-steering mirror backup for coarse/fine pointing redundancy.'],
+            ['SiN OBFN / TTD receiver (#82/#85)', 'LIGENTEC/imec — squint-free multi-beam from a single aperture.'],
+            ['G&H UK space-qualified Faraday isolator (#68)', 'Protects the Tx laser in the fiber-coupled chain; established ESA heritage.'],
+            ['Optical two-way time transfer unit (#90/#88-derived)', 'fs–ps O-TWTFT (NIST/AFRL EO-comb demos 2024–25) — ns clock sync for CEP 10–50 m triangulation.'],
+            ['FOG, Exail Astrix NS class (#94)', 'Flight-proven ADCS core for ±0.1° pointing, zero-failure heritage.'],
+            ['WGM reference cavity + HI-Q laser (#89)', 'Compact 10⁻¹³ optical reference anchoring the time/frequency chain.'],
+            ['TEC cooler + controller (#99)', 'Non-negotiable laser/PPLN thermal stabilization across all zones.'],
+            ['Radiation monitor (#97)', 'Protects photonics lifetime at 300 km; enables dose-aware operations.'],
+            ['Radiation-tolerant packaging (#100)', 'Cross-cutting survival requirement; only plausible Middle East localization angle (nascent UAE/SA).']
+        ];
+
+        if (typeof document !== 'undefined') {
+            const $ = id => document.getElementById(id);
+            const state = { q: '', cats: new Set(), regs: new Set(), rels: new Set(), bom: false };
+            const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+
+            // Hero stat chips (auto-computed)
+            const counts = [0, 0, 0, 0];
+            D.forEach(d => counts[d.r]++);
+            $('stat-chips').innerHTML =
+                '<span class="stat-chip"><b>' + D.length + '</b> devices</span>' +
+                '<span class="stat-chip"><b>' + CATS.length + '</b> categories</span>' +
+                '<span class="stat-chip"><b>' + counts[0] + '</b> critical</span>' +
+                '<span class="stat-chip"><b>' + counts[1] + '</b> important</span>' +
+                '<span class="stat-chip"><b>' + counts[2] + '</b> optional</span>' +
+                '<span class="stat-chip"><b>' + counts[3] + '</b> not-needed</span>';
+
+            // Chip builders
+            function buildChips(elId, items, set, extraClass) {
+                const el = $(elId);
+                items.forEach((it, i) => {
+                    const b = document.createElement('button');
+                    b.className = 'fchip' + (extraClass && extraClass[i] ? ' ' + extraClass[i] : '');
+                    b.textContent = it.label;
+                    b.addEventListener('click', () => {
+                        if (set.has(i)) { set.delete(i); b.classList.remove('on'); }
+                        else { set.add(i); b.classList.add('on'); }
+                        render();
+                    });
+                    el.appendChild(b);
+                });
+            }
+            buildChips('cat-chips', CATS.map(c => ({ label: c })), state.cats, null);
+            buildChips('reg-chips', REGIONS.map(r => ({ label: r[1] })), state.regs, null);
+            buildChips('rel-chips', REL.map(r => ({ label: r })), state.rels, REL_CHIP);
+
+            $('search').addEventListener('input', e => { state.q = e.target.value.toLowerCase(); render(); });
+
+            // BOM toggle
+            $('bom-toggle').addEventListener('click', () => {
+                state.bom = !state.bom;
+                $('bom-view').classList.toggle('on', state.bom);
+                $('grid-wrap').classList.toggle('off', state.bom);
+                $('bom-toggle').classList.toggle('on', state.bom);
+                if (state.bom) { renderBom(); $('bom-view').scrollIntoView({ behavior: 'smooth' }); }
+            });
+
+            function match(d) {
+                if (state.cats.size && !state.cats.has(d.c)) return false;
+                if (state.regs.size) {
+                    let ok = false;
+                    state.regs.forEach(ri => { const key = REGIONS[ri][0]; if (d.u[key] && d.u[key] !== '—' && !/^(—|none|limited)/.test(d.u[key])) ok = true; });
+                    if (!ok) return false;
+                }
+                if (state.rels.size && !state.rels.has(d.r)) return false;
+                if (state.q) {
+                    const hay = (d.n + ' ' + d.s + ' ' + d.u.us + ' ' + d.u.eu + ' ' + d.u.cn + ' ' + d.u.me + ' ' + d.h + ' ' + d.i + ' ' + CATS[d.c]).toLowerCase();
+                    if (hay.indexOf(state.q) === -1) return false;
+                }
+                return true;
+            }
+
+            function cardHtml(d) {
+                const sups = [['us', '🇺🇸'], ['eu', '🇪🇺'], ['cn', '🇨🇳'], ['me', 'ME']]
+                    .map(p => '<div class="sr"><span class="rg">' + p[1] + '</span><span class="sv">' + esc(d.u[p[0]]) + '</span></div>').join('');
+                return '<div class="dev" data-id="' + d.id + '">' +
+                    '<div class="dev-head"><span class="dev-id">#' + d.id + '</span><span class="dev-name">' + esc(d.n) + '</span>' +
+                    '<span class="badge ' + REL_CLASS[d.r] + '">' + REL[d.r] + '</span></div>' +
+                    '<span class="cat-tag">' + CATS[d.c] + '</span>' +
+                    '<div class="dev-specs">' + esc(d.s) + '</div>' +
+                    '<div class="dev-sups">' + sups + '</div>' +
+                    '<div class="dev-line"><b>Heritage:</b> ' + esc(d.h) + '</div>' +
+                    '<div class="dev-line"><b>2023–26:</b> ' + esc(d.i) + '</div>' +
+                    '<button class="why-toggle" data-id="' + d.id + '">▸ why for Photon-1</button>' +
+                    '<div class="why" id="why-' + d.id + '">' + esc(d.w) + '</div></div>';
+            }
+
+            function render() {
+                const shown = D.filter(match);
+                $('grid').innerHTML = shown.map(cardHtml).join('');
+                $('counter').textContent = shown.length + ' / ' + D.length;
+                $('grid').querySelectorAll('.why-toggle').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const w = $('why-' + btn.dataset.id);
+                        const open = w.classList.toggle('open');
+                        btn.textContent = (open ? '▾' : '▸') + ' why for Photon-1';
+                    });
+                });
+            }
+
+            function renderBom() {
+                const bom = D.filter(d => d.r <= 1);
+                const nc = bom.filter(d => d.r === 0).length, ni = bom.length - nc;
+                const catSet = new Set(bom.map(d => d.c));
+                $('bom-summary').innerHTML =
+                    '<div class="bom-box"><div class="k">Critical</div><div class="v">' + nc + '</div></div>' +
+                    '<div class="bom-box warn"><div class="k">Important</div><div class="v">' + ni + '</div></div>' +
+                    '<div class="bom-box"><div class="k">BOM devices</div><div class="v">' + bom.length + '</div></div>' +
+                    '<div class="bom-box"><div class="k">Categories covered</div><div class="v">' + catSet.size + ' / ' + CATS.length + '</div></div>';
+                let html = '';
+                CATS.forEach((c, ci) => {
+                    const items = bom.filter(d => d.c === ci);
+                    if (!items.length) return;
+                    html += '<div class="bom-cat"><h3>' + c + ' <span class="cnt">(' + items.length + ')</span></h3>' +
+                        items.map(d => '<div class="bom-item"><span class="bi-id">#' + d.id + '</span><span class="bi-name">' + esc(d.n) + '</span><span class="badge ' + REL_CLASS[d.r] + '">' + REL[d.r] + '</span></div>').join('') + '</div>';
+                });
+                $('bom-groups').innerHTML = html;
+                $('bom-ties').innerHTML = 'BOM ties to canonical specs (📐 Specs): <b>1550 nm</b> C-band carrier · <b>64×64 OPA</b> fine steerer · <b>SDA 3.1 modem</b> (OOK 0.1–100 Gbps + LDPC, 400G coherent roadmap) · <b>TFLN dual-source</b> modulator strategy (US/EU + CN ecosystem) · <b>passive alignment</b> fiber-attach manufacturing · bus limits <b>≤45 W / 12 kg</b> · Rx sensitivity target <b>−50 dBm</b>.';
+                $('picks-list').innerHTML = PICKS.map(p => '<li><b>' + esc(p[0]) + '</b> — ' + esc(p[1]) + '</li>').join('');
+            }
+
+            // Regional bars: count of device classes with a real supplier per region
+            const regCounts = REGIONS.map(r => D.filter(d => { const v = d.u[r[0]]; return v && v !== '—' && !/^(—|none)/.test(v) && v.indexOf('(assembly only)') === -1; }).length);
+            const maxC = Math.max.apply(null, regCounts);
+            const barColors = ['#00d4aa', '#2a9d8f', '#e63946', '#778da9'];
+            $('bars').innerHTML = REGIONS.map((r, i) =>
+                '<div class="bar-row"><span class="bl">' + r[1] + '</span>' +
+                '<div class="bar-track"><div class="bar-fill" style="width:' + Math.max(2, Math.round(regCounts[i] / maxC * 100)) + '%;background:' + barColors[i] + '"></div></div>' +
+                '<span class="bar-num">' + regCounts[i] + '</span></div>').join('');
+
+            render();
+
+            // Hamburger nav
+            const hamBtn = $('nav-hamburger'), navOverlay = $('nav-overlay'), navClose = $('nav-close');
+            hamBtn.addEventListener('click', () => navOverlay.classList.add('active'));
+            navClose.addEventListener('click', () => navOverlay.classList.remove('active'));
+            navOverlay.querySelectorAll('a').forEach(a => a.addEventListener('click', () => navOverlay.classList.remove('active')));
+        }
+    </script>
+</body>
+</html>
