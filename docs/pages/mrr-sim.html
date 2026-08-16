@@ -49,6 +49,7 @@
             <a href="../pages/ppln-calculator.html">🔢 PPLN</a>
             <a href="../pages/research-gaps.html">🔬 Gaps</a>
             <a href="../pages/specifications.html">📐 Specs</a>
+            <a href="../pages/components.html">🧩 Components</a>
             <a href="../pages/foundry.html">🏭 Foundry</a>
             <a href="../pages/foundry-cleanroom.html">🏭 Clean Room</a>
         </nav>
@@ -165,7 +166,7 @@
             const t = Math.exp(-alpha / 2); // Transmission per round trip
             
             // Q-factor
-            const Q = (2 * Math.PI * n_eff * L) / (lambda0 * (1 - t * Math.sqrt(1 - kappa * kappa)));
+            const Q = (2 * Math.PI * n_eff * L) / (lambda0 * (1 - t * Math.sqrt(1 - kappa * kappa))));
             
             // Finesse
             const finesse = fsr / (lambda0 * c / (2 * Math.PI * n_eff * L * Q));
