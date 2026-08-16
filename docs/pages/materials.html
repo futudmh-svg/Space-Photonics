@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Materials — 100 Space Photonics Materials — Space Photonics</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #050811; color: #e0e6ed; line-height: 1.6; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 16px; }
+        nav { background: #1b263b; padding: 12px; border-radius: 10px; margin-bottom: 16px; display: flex; flex-wrap: wrap; gap: 8px; }
+        nav a { color: #e0e6ed; text-decoration: none; padding: 8px 14px; border-radius: 6px; font-size: 0.9em; background: #0d1b2a; }
+        nav a:hover, nav a.active { background: #00d4aa; color: #050811; }
+        h1 { font-size: 1.5em; color: #00d4aa; margin: 16px 0 8px; }
+        .subtitle { color: #778da9; font-size: 0.9em; margin-bottom: 16px; }
+        .card { background: #1b263b; border-radius: 12px; padding: 18px; margin-bottom: 16px; border: 1px solid #415a77; }
+        .card h2 { font-size: 1.15em; color: #00d4aa; margin-bottom: 12px; }
+        .hud { background: rgba(5,8,17,0.88); border: 1px solid rgba(65,90,119,0.5); border-radius: 10px; backdrop-filter: blur(12px); padding: 18px; margin-bottom: 16px; }
+        footer { text-align: center; padding: 30px; color: #778da9; font-size: 0.8em; }
+
+        .sec-marker { font-family: 'SF Mono', ui-monospace, Menlo, monospace; font-size: 0.7em; letter-spacing: 0.25em; color: #ffd166; text-transform: uppercase; margin-bottom: 4px; }
+        .sec-marker::before { content: ''; display: inline-block; width: 22px; height: 1px; background: #ffd166; vertical-align: middle; margin-right: 8px; }
+
+        /* ─── Asymmetric hero ─── */
+        .hero { display: grid; grid-template-columns: 1.4fr 1fr; gap: 20px; align-items: end; margin: 20px 0 24px; }
+        .hero h1 { font-size: 2.1em; line-height: 1.25; color: #e0e6ed; margin: 6px 0 10px; }
+        .hero h1 .tag { display: inline-block; padding: 1px 10px; border-radius: 6px; font-size: 0.55em; vertical-align: middle; font-family: ui-monospace, Menlo, monospace; }
+        .tag-teal { background: rgba(0,212,170,0.15); color: #00d4aa; border: 1px solid rgba(0,212,170,0.4); }
+        .tag-amber { background: rgba(255,209,102,0.12); color: #ffd166; border: 1px solid rgba(255,209,102,0.4); }
+        .stat-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+        .stat-chip { font-family: ui-monospace, Menlo, monospace; font-size: 0.72em; padding: 4px 12px; border-radius: 999px; background: #0d1b2a; border: 1px solid rgba(65,90,119,0.6); color: #90e0ef; }
+        .stat-chip b { color: #ffd166; font-weight: 600; }
+
+        /* ─── Filter bar ─── */
+        .filter-bar { position: sticky; top: 8px; z-index: 100; background: rgba(5,8,17,0.92); backdrop-filter: blur(12px); border: 1px solid rgba(65,90,119,0.5); border-radius: 10px; padding: 12px 14px; margin-bottom: 16px; }
+        .filter-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 6px; }
+        .filter-row:last-child { margin-bottom: 0; }
+        .filter-label { font-family: ui-monospace, Menlo, monospace; font-size: 0.65em; letter-spacing: 0.15em; color: #415a77; text-transform: uppercase; min-width: 74px; }
+        .fchip { font-size: 0.74em; padding: 4px 11px; border-radius: 999px; border: 1px solid #415a77; background: #0d1b2a; color: #778da9; cursor: pointer; font-family: ui-monospace, Menlo, monospace; }
+        .fchip:hover { border-color: #00d4aa; color: #00d4aa; }
+        .fchip.on { background: #00d4aa; color: #050811; border-color: #00d4aa; font-weight: 600; }
+        .fchip.on.amber { background: #ffd166; border-color: #ffd166; }
+        .fchip.on.ice { background: #90e0ef; border-color: #90e0ef; }
+        .fchip.on.dim { background: #778da9; border-color: #778da9; }
+        #search { flex: 1; min-width: 180px; background: #0d1b2a; border: 1px solid #415a77; border-radius: 8px; color: #e0e6ed; padding: 7px 12px; font-size: 0.85em; font-family: ui-monospace, Menlo, monospace; }
+        #search:focus { outline: none; border-color: #00d4aa; }
+        #counter { font-family: ui-monospace, Menlo, monospace; font-size: 0.75em; color: #ffd166; white-space: nowrap; }
+
+        /* ─── Device cards ─── */
+        #grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 12px; }
+        .dev { background: #1b263b; border: 1px solid rgba(65,90,119,0.5); border-radius: 10px; padding: 14px 16px; display: flex; flex-direction: column; gap: 7px; }
+        .dev:hover { border-color: rgba(0,212,170,0.5); }
+        .dev-head { display: flex; align-items: baseline; gap: 8px; }
+        .dev-id { font-family: ui-monospace, Menlo, monospace; font-size: 0.72em; color: #415a77; }
+        .dev-name { font-size: 0.95em; font-weight: 600; color: #e0e6ed; flex: 1; }
+        .badge { font-family: ui-monospace, Menlo, monospace; font-size: 0.62em; padding: 2px 9px; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.08em; white-space: nowrap; }
+        .b-critical { background: #00d4aa; color: #050811; font-weight: 700; }
+        .b-important { background: rgba(255,209,102,0.15); color: #ffd166; border: 1px solid rgba(255,209,102,0.5); }
+        .b-optional { background: rgba(144,224,239,0.1); color: #90e0ef; border: 1px solid rgba(144,224,239,0.4); }
+        .b-notneeded { background: rgba(119,141,169,0.1); color: #778da9; border: 1px solid rgba(119,141,169,0.3); }
+        .cat-tag { font-family: ui-monospace, Menlo, monospace; font-size: 0.66em; color: #2a9d8f; }
+        .dev-specs { font-size: 0.76em; color: #ffd166; font-family: ui-monospace, Menlo, monospace; line-height: 1.45; }
+        .dev-sups { display: flex; flex-direction: column; gap: 2px; font-size: 0.72em; }
+        .dev-sups .sr { display: flex; gap: 6px; }
+        .dev-sups .rg { min-width: 30px; font-family: ui-monospace, Menlo, monospace; color: #778da9; font-size: 0.9em; }
+        .dev-sups .sv { color: #90e0ef; }
+        .dev-line { font-size: 0.74em; color: #778da9; }
+        .dev-line b { color: #90e0ef; font-weight: 600; }
+        .why-toggle { align-self: flex-start; background: none; border: 1px solid #415a77; color: #00d4aa; border-radius: 6px; padding: 3px 10px; font-size: 0.7em; cursor: pointer; font-family: ui-monospace, Menlo, monospace; }
+        .why-toggle:hover { border-color: #00d4aa; }
+        .why { display: none; font-size: 0.76em; color: #e0e6ed; background: rgba(13,27,42,0.7); border-left: 2px solid #00d4aa; border-radius: 0 6px 6px 0; padding: 7px 10px; }
+        .why.open { display: block; }
+
+        /* ─── BOM view ─── */
+        #bom-view { display: none; }
+        #bom-view.on { display: block; }
+        #grid-wrap.off { display: none; }
+        .bom-summary { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
+        .bom-box { flex: 1; min-width: 130px; background: rgba(13,27,42,0.7); border: 1px solid rgba(65,90,119,0.4); border-radius: 8px; padding: 10px 12px; }
+        .bom-box .k { font-size: 0.66em; color: #778da9; text-transform: uppercase; letter-spacing: 0.08em; }
+        .bom-box .v { font-size: 1.35em; color: #00d4aa; font-family: ui-monospace, Menlo, monospace; font-weight: 600; }
+        .bom-box.warn .v { color: #ffd166; }
+        .bom-cat { margin-bottom: 12px; }
+        .bom-cat h3 { font-size: 0.88em; color: #90e0ef; font-family: ui-monospace, Menlo, monospace; margin: 10px 0 5px; }
+        .bom-cat h3::before { content: '▸ '; color: #00d4aa; }
+        .bom-cat h3 .cnt { color: #ffd166; }
+        .bom-item { display: flex; gap: 8px; align-items: baseline; font-size: 0.78em; padding: 3px 0; border-bottom: 1px dashed rgba(65,90,119,0.35); }
+        .bom-item .bi-id { font-family: ui-monospace, Menlo, monospace; color: #415a77; min-width: 28px; }
+        .bom-item .bi-name { flex: 1; }
+        .bom-ties { font-size: 0.76em; color: #778da9; margin-top: 12px; font-family: ui-monospace, Menlo, monospace; }
+        .bom-ties b { color: #ffd166; }
+        .picks-box { background: rgba(0,212,170,0.06); border: 1px solid rgba(0,212,170,0.35); border-radius: 10px; padding: 14px 16px; margin-top: 14px; }
+        .picks-box h3 { color: #00d4aa; font-size: 0.95em; margin-bottom: 8px; }
+        .picks-box li { font-size: 0.78em; color: #e0e6ed; margin: 5px 0 5px 18px; }
+        .picks-box li b { color: #ffd166; }
+
+        /* ─── Regional strip ─── */
+        .bars { display: flex; flex-direction: column; gap: 8px; margin: 12px 0; }
+        .bar-row { display: flex; align-items: center; gap: 10px; font-size: 0.78em; }
+        .bar-row .bl { width: 110px; font-family: ui-monospace, Menlo, monospace; color: #90e0ef; font-size: 0.85em; }
+        .bar-track { flex: 1; background: #0d1b2a; border-radius: 5px; height: 18px; position: relative; overflow: hidden; }
+        .bar-fill { height: 100%; border-radius: 5px; }
+        .bar-num { font-family: ui-monospace, Menlo, monospace; color: #ffd166; min-width: 30px; text-align: right; }
+
+        /* ─── Hamburger Navigation ─── */
+        .nav-hamburger { display: none; position: fixed; top: 8px; left: 8px; z-index: 300; background: rgba(5,8,17,0.92); border: 1px solid #00d4aa; color: #00d4aa; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 1.2em; }
+        .nav-overlay { display: none; position: fixed; inset: 0; z-index: 250; background: rgba(5,8,17,0.95); backdrop-filter: blur(12px); flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 20px; overflow-y: auto; }
+        .nav-overlay.active { display: flex; }
+        .nav-overlay a { color: #90e0ef; text-decoration: none; padding: 10px 20px; font-size: 1.1em; border-radius: 8px; background: rgba(13,27,42,0.7); border: 1px solid rgba(65,90,119,0.3); width: 200px; text-align: center; }
+        .nav-overlay a:hover, .nav-overlay a.active { background: #00d4aa; color: #050811; }
+        .nav-close { position: absolute; top: 8px; right: 8px; color: #e63946; font-size: 1.5em; cursor: pointer; background: none; border: none; padding: 8px; }
+
+        @media (max-width: 900px) { .hero { grid-template-columns: 1fr; } }
+        @media (max-width: 768px) {
+            nav { display: none; }
+            .nav-hamburger { display: block; }
+            .hero h1 { font-size: 1.5em; }
+            .filter-bar { position: static; }
+            #grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <button class="nav-hamburger" id="nav-hamburger">☰</button>
+    <div class="nav-overlay" id="nav-overlay">
+        <button class="nav-close" id="nav-close">✕</button>
+        <a href="../index.html">🏠 Dashboard</a>
+        <a href="../pages/architecture.html">🏛️ Architecture</a>
+        <a href="../pages/digital-twin.html">🎮 3D Twin</a>
+        <a href="../pages/opa-analysis.html">📡 OPA</a>
+        <a href="../pages/link-budget.html">📊 Link Budget</a>
+        <a href="../pages/hypersonic.html">🚀 Hypersonic</a>
+        <a href="../pages/vleo-constellation.html">🌐 VLEO</a>
+        <a href="../pages/mapper-3d.html">🗺️ Mapper</a>
+        <a href="../pages/satellite-digital-twin.html">🛰️ Sat Twin</a>
+        <a href="../pages/interception-mission.html">🎯 Intercept</a>
+        <a href="../pages/vehicle-terminal.html">🛰️ Terminal</a>
+        <a href="../pages/ehf-optical-trade.html">📡 EHF vs Opt</a>
+        <a href="../pages/ppln-calculator.html">🔢 PPLN</a>
+        <a href="../pages/research-gaps.html">🔬 Gaps</a>
+        <a href="../pages/specifications.html">📐 Specs</a>
+        <a href="../pages/components.html">🧩 Components</a>
+        <a href="../pages/materials.html" class="active">🧪 Materials</a>
+        <a href="../pages/photonics-lab.html">🎛️ Sim Lab</a>
+        <a href="../pages/foundry.html">🏭 Foundry</a>
+        <a href="../pages/foundry-cleanroom.html">🏭 Clean Room</a>
+    </div>
+
+    <div class="container">
+        <nav>
+            <a href="../index.html">🏠 Dashboard</a>
+            <a href="../pages/architecture.html">🏛️ Architecture</a>
+            <a href="../pages/digital-twin.html">🎮 3D Twin</a>
+            <a href="../pages/opa-analysis.html">📡 OPA</a>
+            <a href="../pages/link-budget.html">📊 Link Budget</a>
+            <a href="../pages/hypersonic.html">🚀 Hypersonic</a>
+            <a href="../pages/vleo-constellation.html">🌐 VLEO</a>
+            <a href="../pages/mapper-3d.html">🗺️ Mapper</a>
+            <a href="../pages/satellite-digital-twin.html">🛰️ Sat Twin</a>
+            <a href="../pages/interception-mission.html">🎯 Intercept</a>
+            <a href="../pages/vehicle-terminal.html">🛰️ Terminal</a>
+            <a href="../pages/ehf-optical-trade.html">📡 EHF vs Opt</a>
+            <a href="../pages/ppln-calculator.html">🔢 PPLN</a>
+            <a href="../pages/research-gaps.html">🔬 Gaps</a>
+            <a href="../pages/specifications.html">📐 Specs</a>
+            <a href="../pages/components.html">🧩 Components</a>
+            <a href="../pages/materials.html" class="active">🧪 Materials</a>
+            <a href="../pages/photonics-lab.html">🎛️ Sim Lab</a>
+            <a href="../pages/foundry.html">🏭 Foundry</a>
+            <a href="../pages/foundry-cleanroom.html">🏭 Clean Room</a>
+        </nav>
+
+        <!-- HERO -->
+        <div class="hero">
+            <div>
+                <div class="sec-marker">19 / Materials Cross-Reference</div>
+                <h1>🧪 Space Photonics Materials Library — <span class="tag tag-teal">100 materials</span> · 10 categories · 4 regions · <span class="tag tag-amber">one Photon-1 material stack</span></h1>
+                <p class="subtitle" style="margin-bottom:10px">Every material class in the space-photonics supply chain — nonlinear/EO crystals, III-Vs, IR semiconductors, glasses, dielectric films, 2D materials, polymers, magneto/acousto-optics, gain media and engineered stacks — cross-referenced by region, heritage, 2023–2026 innovation and Photon-1 relevance. Data condensed from the four materials research briefs.</p>
+                <div class="stat-chips" id="stat-chips"></div>
+            </div>
+            <div class="hero-meta" style="font-family:ui-monospace,Menlo,monospace;font-size:0.72em;color:#778da9">
+                <div style="display:flex;justify-content:space-between;border-bottom:1px dashed rgba(65,90,119,0.5);padding:4px 0"><span>λ carrier</span><span style="color:#90e0ef">1550 nm C-band</span></div>
+                <div style="display:flex;justify-content:space-between;border-bottom:1px dashed rgba(65,90,119,0.5);padding:4px 0"><span>Modem</span><span style="color:#90e0ef">SDA 3.1 OOK + 400G coherent</span></div>
+                <div style="display:flex;justify-content:space-between;border-bottom:1px dashed rgba(65,90,119,0.5);padding:4px 0"><span>Steerer</span><span style="color:#90e0ef">64×64 TFLN OPA</span></div>
+                <div style="display:flex;justify-content:space-between;border-bottom:1px dashed rgba(65,90,119,0.5);padding:4px 0"><span>Bus</span><span style="color:#90e0ef">12U · 45 W · 12 kg</span></div>
+                <div style="display:flex;justify-content:space-between;border-bottom:1px dashed rgba(65,90,119,0.5);padding:4px 0"><span>Sensitivity</span><span style="color:#90e0ef">−50 dBm target</span></div>
+                <div style="display:flex;justify-content:space-between;padding:4px 0"><span>Regions</span><span style="color:#90e0ef">US · EU · CN · ME</span></div>
+            </div>
+        </div>
+
+        <!-- BOM VIEW -->
+        <div class="hud" id="bom-view">
+            <div class="sec-marker">BOM / Critical + Important</div>
+            <h2 style="font-size:1.15em;color:#00d4aa;margin-bottom:12px">🔧 Photon-1 Materials BOM View</h2>
+            <div class="bom-summary" id="bom-summary"></div>
+            <div id="bom-groups"></div>
+            <div class="bom-ties" id="bom-ties"></div>
+            <div class="picks-box">
+                <h3>⭐ Photon-1 Material Stack — Critical/Important top picks, merged from all 4 briefs</h3>
+                <ul id="picks-list"></ul>
+            </div>
+        </div>
+
+        <!-- FILTER BAR -->
+        <div class="filter-bar">
+            <div class="filter-row">
+                <input type="text" id="search" placeholder="🔍 Search materials, suppliers, specs…" aria-label="Search materials">
+                <span id="counter">100 / 100</span>
+                <button class="fchip" id="bom-toggle">🔧 BOM view</button>
+            </div>
+            <div class="filter-row"><span class="filter-label">Category</span><span id="cat-chips" style="display:flex;flex-wrap:wrap;gap:6px"></span></div>
+            <div class="filter-row"><span class="filter-label">Region</span><span id="reg-chips" style="display:flex;flex-wrap:wrap;gap:6px"></span></div>
+            <div class="filter-row"><span class="filter-label">Relevance</span><span id="rel-chips" style="display:flex;flex-wrap:wrap;gap:6px"></span></div>
+        </div>
+
+        <!-- GRID -->
+        <div id="grid-wrap">
+            <div id="grid"></div>
+        </div>
+
+        <!-- REGIONAL INSIGHT -->
+        <div class="card" style="margin-top:16px">
+            <div class="sec-marker">Supply Chain / Regional Density</div>
+            <h2>🌍 Regional Supply-Chain Insight</h2>
+            <div class="bars" id="bars"></div>
+            <p style="font-size:0.78em;color:#778da9">Bar = number of material classes with at least one credible supplier in the region. <b style="color:#ffd166">Middle East: near-total whitespace</b> — only Raicol Crystals (IL, RTP/KTP), SCD (IL, InSb/HgCdTe IR FPAs), Tower (IL, SiGe fab) and KAUST/KACST research labs; no crystal growth or wafer supply. <b style="color:#e63946">China export-control flags:</b> Ge (Dec 2024 US ban), GaAs (Aug 2023 permits), InP (Feb 2025), CdTe/HgCdTe (Feb 2025) — plus NanoLN ≈68% LNOI wafer chokepoint.</p>
+        </div>
+
+        <footer><p>Space Photonics Digital Twin — Materials Library (page 19)</p></footer>
+    </div>
+
+    <script>
+        'use strict';
+        // ─── DATA: 100 devices, condensed from the 5 component-library briefs ───
+                const CATS = ["I. Nonlinear & EO Crystals", "II. III-V Semiconductors", "III. Group IV / II-VI Semiconductors", "IV. Specialty Glasses", "V. Dielectric Films & Claddings", "VI. 2D & Topological Materials", "VII. Polymers & Perovskites", "VIII. Magneto / Acousto-Optic & Ferroelectric", "IX. Rare-Earth Gain Media", "X. Heterogeneous Substrates & Stacks"];
+const D = [
+{id:1,n:"Lithium Niobate / TFLN",f:"LiNbO3",c:0,r:0,s:"r33 ≈ 30.8–32 pm/V; 0.35–5.5 µm; n_o 2.211/n_e 2.138 @1550; LNOI WG loss 0.05 dB/cm, Q≈6e6; LIDT 100–250 MW/cm²",u:{us:"SRICO, HyperLight ($80M C 2026), QCi TFLN foundry",eu:"ELENA consortium (first EU LNOI substrates), LioniX, Covesion",cn:"NanoLN (~68% LNOI wafer chokepoint), Sinolight, CASIX",me:"—"},h:"Bulk LN modulators space-qualified for decades (Exail GRACE-FO, LISA); TFLN pre-flight",i:"TFLN wafer scale-up to 4–6 in; MIL-SPEC TFLN from G&H/Teledyne; cryo-qualified TFLN PIC packaging",w:"TFLN/LNOI is the literal 64×64 OPA and high-speed modulator substrate — Photon-1's #1 materials risk."},
+{id:2,n:"MgO-doped Lithium Niobate",f:"MgO:LiNbO3",c:0,r:1,s:"r33 ≈ 31 pm/V; 0.4–5 µm; ~5 mol% MgO raises photorefractive threshold ~100×",u:{us:"Thorlabs, SRICO",eu:"Covesion (MgO:PPLN), G&H",cn:"NanoLN (MgO:LNOI), CASTECH, Shalom EO",me:"—"},h:"MgO:PPLN space-grade frequency converters for quantum/FSO links",i:"MgO-doped TFLN wafers for high on-chip power handling (2024–26)",w:"Photorefractive-resistant LN variant for where the 1 W EDFA drives high intra-chip intensity on the TFLN OPA."},
+{id:3,n:"Barium Titanate",f:"BaTiO3",c:0,r:2,s:"bulk r42 up to 923–1300 pm/V; thin-film Pockels >180 pm/V; n≈2.4; VπL 0.42 V·cm, loss <2 dB/cm on SOI",u:{us:"La Luce Cristallina (BTO-on-SOI foundry)",eu:"IBM Zurich/Lumiphase heritage, Southampton ORC",cn:"CAS institutes (research)",me:"—"},h:"No flight heritage; TRL 3–4 integrated",i:"Epitaxial BTO-on-SOI modulators; sub-THz Pockels characterization (Nat. Mater. 2025)",w:"Credible future TFLN alternative if the NanoLN chokepoint worsens; not in current BOM."},
+{id:4,n:"Potassium Titanyl Phosphate",f:"KTP",c:0,r:2,s:"d33 ≈ 16.9 pm/V; 0.35–4.5 µm; LIDT >500 MW/cm²; PPKTP standard entangled source",u:{us:"Inrad Optics",eu:"Cristal Laser (FR), EKSMA",cn:"CASTECH (~30% share), HC Photonics",me:"Raicol Crystals (IL, HGTR KTP/PPKTP pioneer)"},h:"KTP SHG flown in space lidar heritage",i:"PPKTP sources for space QKD; flux-growth boule improvements",w:"Not in the 1550 nm BOM; standard entangled-photon material if a quantum/SDA upgrade is added."},
+{id:5,n:"Beta-Barium Borate",f:"BBO",c:0,r:3,s:"0.19–3.5 µm; d22 ≈ 2.2 pm/V; LIDT ~1 GW/cm² @1064 nm",u:{us:"Inrad, Newlight Photonics",eu:"EKSMA, Cristal Laser, ALPHALAS",cn:"CASTECH (~31–40% share)",me:"Raicol (IL)"},h:"Deep-UV/SHG heritage in lasers",i:"High-LIDT coatings; thin BBO Pockels cells for high-rep Q-switching",w:"UV/visible SHG strength is irrelevant to a 1550 nm OISL modem with no frequency-conversion stage."},
+{id:6,n:"Lithium Triborate",f:"LBO",c:0,r:3,s:"0.16–2.6 µm; d31 ≈ 1.05 pm/V; LIDT ~2.5 GW/cm²; NCPM high thermal acceptance",u:{us:"Inrad, Newlight",eu:"Cristal Laser, EKSMA",cn:"CASTECH (60% global share)",me:"—"},h:"High-power SHG heritage in ground lasers",i:"CN automated growth lines cut LBO cost ~30%",w:"Serves high-power visible/green doubling — no role in the eye-safe 1550 nm link."},
+{id:7,n:"Potassium Dihydrogen Phosphate",f:"KDP",c:0,r:3,s:"r63 ≈ 10.5 pm/V; 0.2–1.5 µm; only EO crystal growable >40 cm aperture",u:{us:"G&H (Cleveland Crystals), Inrad",eu:"EKSMA",cn:"CASTECH, Thatshigh",me:"—"},h:"NIF/ICF fusion optics heritage",i:"Rapid-growth KDP for fusion-class optics",w:"Large-aperture Pockels cells are fusion hardware; Photon-1 uses chip-scale TFLN instead."},
+{id:8,n:"Deuterated KDP",f:"DKDP",c:0,r:3,s:"r63 ≈ 26.4 pm/V; >99% deuteration; λ/4 ~3.0 kV @1064; LIDT ~750 MW/cm²; apertures to 50 mm",u:{us:"G&H",eu:"EKSMA, ALPHALAS",cn:"Shalom EO, Thatshigh, CASTECH",me:"—"},h:"Aerospace Q-switches, ER >7000:1 sealed cells",i:"Sealed DKDP cells for aerospace; CERN/fusion demand",w:"Bulk pulsed-laser Q-switch — Photon-1 runs a CW EDFA + TFLN chain with no Q-switch."},
+{id:9,n:"Rubidium Titanyl Phosphate",f:"RTP",c:0,r:2,s:"r33 ≈ 35 pm/V; 0.5–3.0 µm; LIDT >1 GW/cm²; no piezo ringing to ≥350 kHz",u:{us:"G&H (US ops)",eu:"ALPHALAS, EKSMA",cn:"Thatshigh",me:"Raicol Crystals (IL — sole ME volume EO-crystal maker)"},h:"RTP Pockels cells adopted in space-qualified laser rangefinders",i:"iRTP industrial cells (<6 pF, <1 ns rise, 10–50 °C stable)",w:"Candidate for compact ringing-free EO gating (beacon/acquisition); not in the primary data chain."},
+{id:10,n:"DAST",f:"C17H26N2O4S",c:0,r:3,s:"organic salt; d111 ≈ 290 pm/V; r111 ≈ 47–92 pm/V; 0.55–2.2 µm; 0.1–20 THz generation",u:{us:"research only",eu:"Swiss Terahertz, GMP SA",cn:"CAS research labs",me:"—"},h:"None — lab THz material",i:"DSTMS/OH1 successors; DAST waveguide THz emitters",w:"THz-lab material with poor space robustness — no role in a 1550 nm comm terminal."},
+{id:11,n:"Gallium Arsenide",f:"GaAs",c:1,r:1,s:"Eg 1.42 eV; n≈3.5 @1550; 0.9–18 µm; r41 ≈ 1.5 pm/V; Ed 9.8 eV (less rad-hard than GaN)",u:{us:"AXT (hit by CN Aug-2023 export permits), Coherent, IQE",eu:"Freiberger (Ga recovery line), IQE UK",cn:"Vital Materials, Xiamen Powerway",me:"—"},h:"GaAs VCSELs/EAMs flown; deep space epi heritage",i:"$345M 6-in GaAs expansion (>1.5M wafers/yr); export-control price rises 2025–26",w:"Substrate/epi basis for acquisition VCSELs and EAM spares around the 1550 nm terminal."},
+{id:12,n:"Indium Phosphide",f:"InP",c:1,r:0,s:"Eg 1.34 eV; n≈3.17 @1550; substrate for 1.3–1.65 µm lasers/SOAs/PICs; 28 Gb/s foundry APDs",u:{us:"Coherent, Lumentum, AXT (CN Feb-2025 export controls; first permit Jun 2025)",eu:"SMART Photonics (pure-play InP foundry), JePPIX, EFFECT",cn:"CETC 13th, Wuhan Yunling, Hisense",me:"—"},h:"InP DFBs/PICs fly on EDRS, LCRD, SDA terminals; TRL 9",i:"InP MPW to 650-component PICs; 300 mm InP-on-SOI lasers (imec); AXT doubling capacity 2026",w:"Hosts the 1550 nm DFB/EML seed lasers and SOA/PIC gain feeding the EDFA and SDA OISL 3.1 modem."},
+{id:13,n:"Gallium Nitride",f:"GaN",c:1,r:1,s:"Eg 3.4 eV; n≈2.3; 0.37–7 µm; r33 ≈ 1.9 pm/V; Ed(Ga) 20.5 eV → ~100× GaAs rad onset",u:{us:"EPC/Renesas, Raytheon/MACOM",eu:"Infineon, STMicro, UMS",cn:"Innoscience, SICC",me:"KAUST Photonics Lab (research only)"},h:"eGaN immune to single-event gate rupture; minimal degradation at 4e15 n/cm²",i:"GaN power stages and blue LDs qualified for satellite payloads",w:"Rad-hard GaN power conversion fits the ≤45 W EPC budget; data chain stays InP."},
+{id:14,n:"Indium Gallium Arsenide",f:"InGaAs",c:1,r:0,s:"Eg 0.74 eV; 0.9–1.7 µm; APD QE ~70%, M=10–50; NEP ~120 fW/√Hz; Phlux Aura 30 µm 3.5 GHz",u:{us:"Excelitas, Teledyne, Coherent, Freedom",eu:"Laser Components, Phlux (UK 'Noiseless' APD, MIL-STD-883 Jun 2025)",cn:"CSRayzer, AOE",me:"—"},h:"InGaAs PINs/APDs qualified on ISL terminals and altimeters",i:"Phlux Aura APDs: excess noise <3.5 @ M=100, +85 °C, for FSO gigabit links",w:"The APD receiver front end delivering Photon-1's −50 dBm sensitivity at 1550 nm."},
+{id:15,n:"Indium Arsenide",f:"InAs",c:1,r:2,s:"Eg 0.36 eV; cutoff ~3.8 µm; mobility ~40,000 cm²/V·s; T2SL base",u:{us:"IQE/Galaxy (Spokane), Teledyne Judson",eu:"Wafer Technology (UK)",cn:"Western Minmetals, PAM-XIAMEN",me:"—"},h:"InAs/InAsSb T2SL detectors for space MWIR imaging",i:"InAs QD lasers on Si for harsh environments",w:"Only relevant for a MWIR co-boresight channel tracking HGV plumes; not in the 1550 nm chain."},
+{id:16,n:"Gallium Antimonide",f:"GaSb",c:1,r:2,s:"Eg 0.73 eV; n≈3.8 @2 µm; 2–4 µm ICL/T2SL substrate; 2–4 in wafers",u:{us:"IQE/Galaxy (world-leading Cz boules), AXT",eu:"Wafer Technology, Freiberger (6-in pilot)",cn:"PAM-XIAMEN, Vital Materials",me:"—"},h:"GaSb-based IR detectors on defense programs",i:"3-in GaSb qualification (~31.5% of 2025 volume); 4-in defect reduction",w:"Candidate HGV thermal-tracking aids; 1550 nm tracking doesn't require them."},
+{id:17,n:"Aluminum Gallium Arsenide",f:"AlGaAs",c:1,r:1,s:"Eg 1.42–2.16 eV; n 3.0–3.5; d36 ≈ 100–170 pm/V; lattice-matched DBRs on GaAs",u:{us:"Coherent, Lumentum (VCSEL epi), IQE",eu:"IQE UK, VPEC (TW)",cn:"IntelliEPI, Vital Materials",me:"—"},h:"DBR/cladding in all flown VCSEL/pump stacks",i:"AlGaAs-on-insulator nonlinear PICs (combs, OPOs); 850–980 nm VCSEL arrays",w:"DBR/cladding underpins the VCSEL/EAM and pump supply chain; AlGaAs-OI candidate conversion layer."},
+{id:18,n:"Indium Gallium Arsenide Phosphide",f:"InGaAsP",c:1,r:0,s:"Eg 0.74–1.34 eV on InP; 1.3–1.55 µm MQW; n 3.3–3.5; telecom laser/EAM active layer",u:{us:"Lumentum, Coherent, Freedom",eu:"SMART Photonics / JePPIX PDK stacks, Fraunhofer HHI",cn:"Hisense Broadband, Wuhan Yunling",me:"—"},h:"MQW active layers in every flown 1550 nm telecom laser",i:"200G/lane EMLs; InP PICs with InGaAsP SOA arrays for coherent LEO terminals",w:"The active material of the 1550 nm laser/SOA/EAM dies in the SDA OISL 3.1 modem BOM."},
+{id:19,n:"Gallium Phosphide",f:"GaP",c:1,r:2,s:"Eg 2.26 eV (indirect); n≈3.0; 0.45–14 µm; d36 ≈ 70 pm/V; high thermal conductivity",u:{us:"AXT, MSE Supplies",eu:"Freiberger (LEC/VGF)",cn:"Western Minmetals, PAM-XIAMEN",me:"—"},h:"Bulk optics heritage only",i:"GaP-on-insulator integrated photonics; GaP metasurfaces for space optics",w:"Strong χ² wide-window platform, but nothing in the 1550 nm chain needs it today."},
+{id:20,n:"Aluminum Nitride",f:"AlN",c:1,r:2,s:"Eg 6.2 eV (DUV to ~200 nm); n≈2.1–2.2; 0.2–13.6 µm; piezo d33 ≈ 5 pm/V; k ~285 W/m·K; rad-tolerant",u:{us:"Uviquity (AlN PIC platform, BluGlass JDA), Kyma/HexaTech",eu:"Fraunhofer IAF, EPFL research",cn:"UCAS/CAS (SiN-AlN 3D PICs, SHG 12,598%/W)",me:"—"},h:"Piezo AlN actuators in MEMS heritage",i:"First AlN-PIC DUV SHG records; UV→IR 3D heterogeneous PICs",w:"Piezo+EO platform for future chip-scale atomic-clock/quantum payloads; not required at 1550 nm."},
+{id:21,n:"Silicon",f:"Si",c:2,r:0,s:"Eg 1.12 eV; 1.2–8 µm transparent; n≈3.48 @1550; Si photonics tolerates >Mrad gamma",u:{us:"GlobalFoundries, Intel, AIM Photonics, Ayar",eu:"imec, CEA-Leti, IHP, STMicro",cn:"SMIC, Hua Hong, SIMIT",me:"—"},h:"SOI photonics flown on CubeSat optical links; CMOS deep heritage",i:"Ge-on-Si APDs: gain 101, excess noise 3.1 @ M=20 (Opt. Express 2024); Ge/Si APD GBP >1 THz (Nat. Photon. 2024)",w:"SOI carrier wafer for the whole PIC — OPA driver integration, Ge detectors, fiber attach backbone."},
+{id:22,n:"Germanium",f:"Ge",c:2,r:0,s:"Eg 0.66 eV; cutoff ~1.6–1.7 µm → detects 1550; n≈4.2; PDs rad-tol to 100 krad class",u:{us:"Umicore EO Materials (US sites), 5N Plus, Coherent",eu:"Umicore (BE), Freiberger",cn:"Yunnan Germanium, GRINM — CN ~60% of world Ge; US export ban Dec 2024",me:"—"},h:"Ge PDs flight-proven on ISL PICs",i:"GeSn-on-Si APDs 1.12 A/W @1550/77 K (2024); 1×10 Ge-on-Si SWIR APD arrays stable to 378 K (2025)",w:"The only CMOS-compatible 1550 nm absorber — baseline on-chip receiver detector (Ge-on-Si APD/PIN)."},
+{id:23,n:"Silicon Carbide",f:"SiC",c:2,r:1,s:"4H-SiC Eg 3.26 eV; 0.3–5 µm; n≈2.7; breakdown 2–5 MV/cm; k 3.5 W/cm·K; Mrad-class hard",u:{us:"Wolfspeed, onsemi, Coherent",eu:"STMicro (Catania), Infineon, SiCrystal",cn:"SICC, TankeBlue",me:"—"},h:"Rad-hard SiC power MOSFETs adopted for satellite power conditioning",i:"SiC-on-insulator WDM and high-Q Kerr combs (2024–26); color-center emitters + SNSPD on SiC",w:"Rad-hard power devices for the ≤45 W EPC; SiCOI is a future quantum/robust photonics option."},
+{id:24,n:"Cadmium Telluride",f:"CdTe",c:2,r:3,s:"Eg 1.45 eV; 0.86–25 µm; X/γ detector and HgCdTe epi substrate",u:{us:"First Solar, Kromek (CdZnTe)",eu:"Redlen (CA/Canon), Baltic/UK niche",cn:"CN ~76.5% Te refining; Feb 2025 CdTe/CdZnTe export controls",me:"—"},h:"CdZnTe room-temperature spectrometers flying on smallsats (Kromek)",i:"CN Feb-2025 export control headline; thin-film space PV programs",w:"Neither transmits nor detects at 1550 nm; detector/PV roles don't map onto the Photon-1 BOM."},
+{id:25,n:"Mercury Cadmium Telluride",f:"HgCdTe",c:2,r:2,s:"tunable Eg 0–1.5 eV; SWIR–LWIR cutoffs 1.7 to >14 µm; HOT variants 150–200 K",u:{us:"Teledyne Imaging Sensors (JWST H2RG), RTX, L3Harris, DRS",eu:"Lynred (>50 space programs), Leonardo UK",cn:"Kunming Inst. Physics, IRay (CN Feb-2025 controlled)",me:"SCD (IL) — space/defense IR FPAs"},h:"JWST NIRSpec H2RG; decades of space FPA heritage",i:"HOT MCT modules; nBn/XBn barrier detectors (SCD); Lynred space-qualified line expansion",w:"Only if Photon-1 grows a thermal-IR payload; at 1550 nm Ge-on-Si/InGaAs are cheaper and uncooled."},
+{id:26,n:"Zinc Selenide",f:"ZnSe",c:2,r:3,s:"Eg 2.7 eV; 0.5–22 µm; n≈2.40 @10.6 µm; classic CO2-laser CVD window",u:{us:"Coherent (historic CVD leader), Zygo",eu:"Crystran, UQG Optics",cn:"Vital Materials and CVD houses",me:"—"},h:"CVD ZnSe optics on airborne pods",i:"Multispectral ZnS/ZnSe common-aperture windows (Zygo 2025)",w:"A LWIR/CO2 window has no function in a 1550 nm 5 cm terminal."},
+{id:27,n:"Zinc Sulfide",f:"ZnS / Cleartran",c:2,r:3,s:"Eg 3.6 eV; 0.37–14 µm; n≈2.19 @10.5 µm; standard IR dome",u:{us:"Coherent, Zygo",eu:"Crystran, Hellma",cn:"Vital Materials",me:"—"},h:"IR domes on aerospace platforms",i:"Multispectral common-aperture windows for SWaP-constrained sensors",w:"Excellent MWIR dome — unnecessary for a 1550 nm telecom aperture."},
+{id:28,n:"Cadmium Sulfide",f:"CdS",c:2,r:3,s:"Eg 2.42 eV (cutoff ~515 nm); visible photoconductor; PV buffer layer",u:{us:"First Solar ecosystem, Stanford Adv. Materials",eu:"5N Plus (Montreal/DE)",cn:"CN dominant in Cd-compound powders",me:"—"},h:"Thin-film PV heritage only",i:"QD photocatalysis/displays; no telecom breakthroughs 2023–26",w:"Blind at 1550 nm; no role in Photon-1."},
+{id:29,n:"Lead Sulfide",f:"PbS",c:2,r:2,s:"Eg 0.41 eV bulk (~3 µm); CQD tunable 0.9–2 µm; uncooled SWIR detection; rad-tolerant CQDs",u:{us:"SWIR Vision Systems (onsemi, Jul 2024)",eu:"Emberion (VS17 1550 nm-optimized), STMicro CQD, Qurv",cn:"Quantum Solutions spin-offs, Zhongxin Recheng",me:"—"},h:"CQD PbS detectors in UAV/smallsat trials",i:"onsemi acquisition (Jul 2024); Emberion €50 CQD SWIR sensor; ST 1.62 µm-pitch CQD roadmap",w:"Possible low-SWaP 1550 nm acquisition camera, but the APD-pointing architecture doesn't need an imager."},
+{id:30,n:"Lead Selenide",f:"PbSe",c:2,r:3,s:"Eg 0.27 eV (~4.5 µm); CQD 1–4 µm; uncooled MWIR; n≈4.6",u:{us:"Teledyne Judson, Infrared Materials",eu:"Laser Components, NIT (ES)",cn:"HUST/BIT research groups",me:"—"},h:"Legacy uncooled IR sensor heritage",i:"PbSe CQD MWIR imagers (2023–25)",w:"Uncooled 3–5 µm imaging has no requirement; at 1550 nm InGaAs/Ge win decisively."},
+{id:31,n:"Arsenic Trisulfide glass",f:"As2S3",c:3,r:2,s:"0.6–11 µm; n≈2.41 @1550; Kerr ~100× silica; Tg ~180 °C; rad-tolerant passive",u:{us:"LightPath (AMI acq. Jan 2026, 17 in plates), IRradiance",eu:"Umicore IR Glass (GASIR), Vitron",cn:"NXG (IR glass lines expanding post-Ge-controls)",me:"—"},h:"Chalcogenide molded optics on space/defense sensors",i:"LightPath–AMI consolidation of NDAA-compliant chalcogenide (Golden Dome sensors)",w:"Workhorse mid-IR nonlinear/molded glass — only for a mid-IR Photon-1 variant."},
+{id:32,n:"Arsenic Triselenide glass",f:"As2Se3",c:3,r:2,s:"~1–14 µm; n≈2.8; Kerr n₂ ~500× silica; high-nonlinearity fiber",u:{us:"Coractive, LightPath",eu:"SelenOptics niche, Umicore",cn:"NXG, BIT-affiliated lines",me:"—"},h:"Supercontinuum fiber heritage",i:"Mid-IR Kerr comb / supercontinuum chip waveguides (2023–25)",w:"Could generate mid-IR combs on-chip for a spectroscopy payload; no baseline need."},
+{id:33,n:"GeSbSe glass",f:"Ge22Sb20Se58",c:3,r:2,s:"~1.5–14 µm; n≈2.6–2.7; As-free; demonstrated in MIR microresonator combs",u:{us:"Clemson/ORNL research",eu:"Southampton ORC research",cn:"Sun Yat-sen group (MIR comb 6.94–12.04 µm, 2023)",me:"—"},h:"None — research-scale only",i:"5.1 µm-span all-chalcogenide MIR Kerr comb (2023); Ge-Sb-Se AOM 73.4% eff @1550",w:"As-free chalcogenide of choice for on-chip mid-IR comb spectroscopy in a dual-band variant."},
+{id:34,n:"Ge-As-Se glass",f:"Ge-As-Se",c:3,r:2,s:"~1–15 µm; n 2.5–2.7; very high nonlinearity IR fiber; Ge supply-risk flag",u:{us:"Amorphous Materials (LightPath), Coractive",eu:"Umicore GASIR, Perfos, Univ. Rennes ISCR",cn:"JIRI and IR fiber labs",me:"—"},h:"IR fiber heritage",i:"Mid-IR supercontinuum fibers and AO devices @1060 nm (2023)",w:"Mid-IR fiber rationale as #31–33; nothing in the 1550 nm BOM."},
+{id:35,n:"Gallium Lanthanum Sulfide glass",f:"GaLaS",c:3,r:2,s:"0.5–10 µm; n≈2.4; As-free and Ge-free; RE-dopable for mid-IR fiber lasers",u:{us:"essentially absent",eu:"Southampton (Hewak group heritage), Fraunhofer exploratory",cn:"SCUT/Wuhan lab-scale",me:"—"},h:"None — low TRL",i:"RE-doped GaLaS fiber laser research; post-Ge-controls defense-optics interest",w:"RE-doped mid-IR gain glass without As/Ge; low TRL and off-baseline."},
+{id:36,n:"ZBLAN fluoride glass",f:"ZrF4-BaF2-LaF3-AlF3-NaF",c:3,r:2,s:"0.3–7 µm; theoretical loss ~0.01 dB/km (10× silica); n≈1.50; mid-IR fiber lasers 2–4 µm",u:{us:"Flawless Photonics (ISS manufacturing), Thorlabs",eu:"Le Verre Fluoré (FR)",cn:"SIT Shanghai, Zhejiang labs",me:"—"},h:"ISS manufacturing: 11.9 km drawn Feb–Mar 2024, longest 1,141 m (NASA/ESA funded)",i:">7 miles in-space-manufactured FY2024; single-day record 2,200 ft vs 82 ft prior",w:"Mid-IR / in-space-manufacturing story — strategic adjacent tech, no 1550 nm gain."},
+{id:37,n:"Tellurite glass",f:"TeO2-based",c:3,r:3,s:"0.4–6 µm; n 2.0–2.2; Raman gain ~30× silica; high RE solubility",u:{us:"NP Photonics, AdValue Photonics",eu:"Southampton ORC, IPHT Jena",cn:"Jilin, SCUT labs",me:"—"},h:"Tellurite fiber amplifier R&D heritage",i:"Tellurite Raman lasers and mid-IR supercontinuum (2023–25)",w:"Raman/mid-IR gain glass with no advantage over flight-standard Er-fiber EDFA."},
+{id:38,n:"Phosphate glass",f:"Er/Yb phosphate",c:3,r:1,s:"0.35–3 µm; n 1.5–1.6; highest RE solubility → short high-gain EDFAs",u:{us:"NP Photonics (space-flown phosphate amps), Kigre",eu:"Schott, Le Verre Fluoré niche",cn:"CDGM, CAS SIOM laser glass",me:"—"},h:"NP Photonics space-flown phosphate fiber amplifiers; NIF slabs",i:"Compact high-power Er/Yb phosphate amplifiers for FSO/OISL terminals",w:"Leading technology for compact, high-gain, space-qualified 1 W-class EDFAs — Photon-1's amplifier."},
+{id:39,n:"Germanate glass",f:"GeO2-based",c:3,r:3,s:"0.35–6 µm; n 1.6–1.8; Ho/Tm-dopable 2–3 µm lasers; Ge supply-risk flag",u:{us:"Coractive, Clemson COMSET",eu:"IPHT Jena, Univ. Rennes",cn:"SCUT, SIOM labs",me:"—"},h:"Research fibers only",i:"Ho:germanate 2.8–3 µm fiber lasers; Tm amplifiers (2023–25)",w:"2–3 µm gain medium — redundant at 1550 nm and exposed to the Ge chokepoint."},
+{id:40,n:"Borate glass",f:"B2O3-based",c:3,r:3,s:"0.2–3 µm; n 1.5–1.6; high RE solubility; hygroscopic unless stabilized",u:{us:"Schott NA, Kigre",eu:"Schott, Hoya heritage",cn:"CDGM",me:"—"},h:"RE borate laser glass heritage",i:"Incremental scintillator/UV work only",w:"Niche UV/low-dispersion glass; silica and phosphate cover every Photon-1 glass function."},
+{id:41,n:"Silicon Nitride",f:"Si3N4",c:4,r:0,s:"n≈2.00 @1550; 0.25–8 µm; Eg 5 eV; loss <0.5 dB/m (LIGENTEC AN800, Q>20M); DUV 1.4 dB/m record 2024",u:{us:"AIM Photonics, Ligentec NA, UCSB-derived fabs",eu:"LIGENTEC, LioniX, imec, VLC",cn:"Guangzi Tech/SITRI, IMECAS MPW",me:"—"},h:"SiN PICs flown on CubeSat links; telecom TRL 9",i:"TFLN-on-SiN >100 GHz heterogeneous (2023); visible-platform Q 3.7e6 @635 nm (2023)",w:"Ultra-low-loss PIC platform for the delay-line/feed network behind the 64×64 OPA within 12 kg."},
+{id:42,n:"Silicon Dioxide / Fused Silica",f:"SiO2",c:4,r:0,s:"n≈1.44–1.46 @1550; 0.13–3.5 µm; fiber 0.2 dB/km; planar WG <0.1 dB/m; LIDT ~10 J/cm²; zero outgassing",u:{us:"Corning, Heraeus Conamic US, Coherent, Thorlabs",eu:"Heraeus Quarzglas, Hellma, SQS",cn:"Feilihua, Pacific Quartz, CDGM",me:"—"},h:"Every flown optical fiber/lens; rad-hard pure-silica-core fiber qualified for LEO (2023–24)",i:"Bonded SiO2 <0.1 dB/m waveguides productionized for aerospace gyros",w:"Unavoidable cladding/substrate and fiber material in every optical path from EDFA to aperture."},
+{id:43,n:"Aluminum Oxide / Sapphire",f:"Al2O3",c:4,r:1,s:"n 1.62 film / 1.75 sapphire; 0.2–5.5 µm; HfO2/Al2O3 hybrids beat pure HfO2 LIDT at ps; sapphire LIDT >20 J/cm²",u:{us:"Coherent, Kyocera US, Materion",eu:"Hellma, CRYTUR, Layertec",cn:"Shanghai Daheng, CASTECH",me:"—"},h:"Sapphire windows and ALD passivation flown widely",i:"HfO2–Al2O3 nanolaminate mirrors with top LIDT at 0.5–8 ps (2024); ALD hermetic PIC seals",w:"Adds LIDT margin and moisture hardness to the HfO2/SiO2 mirror train and PIC facet seals."},
+{id:44,n:"Tantalum Pentoxide",f:"Ta2O5",c:4,r:2,s:"n 2.05–2.15 @1550; 0.3–8 µm; WG loss 3 dB/m C-band (UCSB); AR LIDT ~44 J/cm² (150 fs); thermo-optic 2.25e-6/K",u:{us:"Materion, Coherent, NIST ecosystem",eu:"Layertec, Laseroptik, OPTOMAN",cn:"OPTRON-TECH, CDGM",me:"—"},h:"Tantala coatings in precision optics heritage",i:"Athermal tantala MZIs (IPC 2024); low-temperature platform (OFC 2024)",w:"Near-zero thermo-optic drift offers drift-free routing if SiN tuning power exceeds the 45 W budget."},
+{id:45,n:"Titanium Dioxide",f:"TiO2",c:4,r:2,s:"n 2.4–2.6 @550 nm; 0.4 µm–mid-IR; WG loss 0.5 dB/cm @1550; thermo-optic −1e-4/°C",u:{us:"Materion, Coherent, Denton",eu:"Layertec, Chroma",cn:"Shanghai Optics, CDGM",me:"—"},h:"Standard high-index AR/mirror layer",i:"TiO2 metasurface spectrometer-on-CMOS (2024, 1.7 nm res); 589 nm integrated photonics (2025)",w:"Only matters for a visible acquisition beacon/meta-optic; the 1550 nm link doesn't need it."},
+{id:46,n:"Hafnium Dioxide",f:"HfO2",c:4,r:0,s:"n 1.9–2.0; 0.6–12 µm; hydrophobic; HfO2/SiO2 HR mirrors 31–46 J/cm² @1064 ns",u:{us:"Materion Balzers, Coherent, Optimax",eu:"Layertec, Laseroptik, Artifex",cn:"Shanghai Optics, Kingwin",me:"—"},h:"Standard high-index layer of space-grade dielectric mirrors",i:"EB-IAD mid-IR AR (4.81 J/cm², 2025); ion-cleaning raises LIDT to 46 J/cm²",w:"Only mature high-index material with LIDT headroom and vacuum stability for the 1 W TX mirror train."},
+{id:47,n:"Zirconium Dioxide",f:"ZrO2",c:4,r:3,s:"n 2.1–2.2; ~0.3–7 µm; ZrO2/SiO2 20-layer sol-gel HR 99% @1064",u:{us:"Materion, ESK distribution",eu:"Tosoh EU, Layertec",cn:"CDGM, Jiujiang",me:"—"},h:"Thermal-barrier heritage",i:"Mixed-oxide/sol-gel space mirror research (2024–26); amorphous mixtures for high-Q resonators",w:"Backup high-index coating with no advantage over baselined HfO2."},
+{id:48,n:"Niobium Pentoxide",f:"Nb2O5",c:4,r:3,s:"n 2.2–2.3; ~0.35–8 µm; LIDT <0.4 J/cm² @1030/150 ps — poor ps tolerance",u:{us:"Materion, Coherent",eu:"Layertec, Laseroptik",cn:"CDGM, Shanghai Optics",me:"—"},h:"Coating heritage",i:"Nb–Ta alloy waveguide platform; stress-compensated mixed-oxide mirrors",w:"Low ps-regime LIDT disqualifies it from the optical train; HfO2/Ta2O5 cover the role."},
+{id:49,n:"Magnesium Fluoride",f:"MgF2",c:4,r:0,s:"n≈1.38 @550 nm; 0.12–8 µm; standard single-layer AR (R ~1.3%/surface); Nd2O3/MgF2 LIDT 24–34 J/cm² (150 fs)",u:{us:"Edmund, Thorlabs, Lambda Research",eu:"Layertec, Artifex, Knight Optical",cn:"Shanghai Optics, Crylink",me:"—"},h:"Space-qualified AR on lunar/deep-space instruments; every major telescope",i:"Durability-hardened MgF2 + overcoat stacks for LEO atomic-oxygen (2023–24 qual programs)",w:"Baselined broadband AR on aperture window/lenses — protects the −50 dBm RX link budget."},
+{id:50,n:"Calcium Fluoride",f:"CaF2",c:4,r:2,s:"n≈1.43 @1 µm; 0.13–10 µm; low dispersion/birefringence; excimer-durable bulk optics",u:{us:"Thorlabs, Edmund, Hellma USA",eu:"Hellma, Crystran, Korth Kristalle",cn:"Crylink, CDGM",me:"—"},h:"Space coronagraph blanks; UV instrument heritage",i:"Rad-darkening-resistant grades re-qualified for EUV/space (2024)",w:"Relevant only for a wideband calibration or dual-band optic; fused silica covers baseline."},
+{id:51,n:"Graphene",f:"C (monolayer)",c:5,r:3,s:"zero-gap semimetal; 2.3% absorption/layer; mobility >100,000 cm²/V·s; EO modulators 30 GHz; >100 GHz-class PDs",u:{us:"Graphenea US, ACS Material, General Graphene",eu:"Graphenea (ES), BeDimensional (IT)",cn:"Sixcarbon, XFNANO, Tanfeng",me:"KAUST/Khalifa Univ. research only"},h:"No space heritage; CVD transfer yields >95% wafer-scale (2024)",i:"Graphene/Si EAM & phase modulators (2024); graphene/BP metasurface IR detectors",w:"Watch item only — SDA modem and TFLN OPA leave no slot for graphene."},
+{id:52,n:"Molybdenum Disulfide",f:"MoS2",c:5,r:3,s:"monolayer Eg 1.8 eV; excitonic absorption ~1e6 cm⁻¹; PDs to 1.2e7 A/W (gain arch)",u:{us:"2D Semiconductors/HQ Graphene, ACS",eu:"Graphenea, 2DLayer",cn:"Sixcarbon, XFNANO, MKNANO",me:"—"},h:"None — research devices",i:"Meter-scale roll-printed vdW films (2024); MoS2/WS2 detectors 1e13 Jones (2025)",w:"Visible-band devices don't serve a 1550 nm terminal; watch for on-chip power monitors."},
+{id:53,n:"Tungsten Disulfide",f:"WS2",c:5,r:3,s:"monolayer Eg ~2.0 eV; saturable absorber 1–2 µm mode-locking; large χ² among TMDs",u:{us:"2D Semiconductors/HQ Graphene",eu:"Graphenea",cn:"XFNANO, Sixcarbon",me:"—"},h:"None",i:"WS2 SAs for 2 µm lasers (2023–24); Gr/WS2/Gr detectors 583 A/W @2.5 µm (2024)",w:"Saturable absorbers suit pulsed TX variants, not the CW 1 W EDFA link."},
+{id:54,n:"Tungsten Diselenide",f:"WSe2",c:5,r:3,s:"Eg ~1.65 eV monolayer; ambipolar p-type; strain-engineered single-photon emitters >90% purity",u:{us:"2D Semiconductors/HQ Graphene",eu:"HQ Graphene (NL), Graphenea",cn:"XFNANO, MKNANO",me:"—"},h:"None",i:"Cavity-integrated WSe2 single-photon emitters (2023–24)",w:"Quantum-source research material; no QKD payload baselined."},
+{id:55,n:"Black Phosphorus",f:"BP",c:5,r:2,s:"layer-tunable Eg 0.3–2 eV; strong in-plane anisotropy; BP-on-LNOI detector 657 mA/W, 100 ns @1.55 µm (2023); air-unstable",u:{us:"2D Semiconductors/HQ Graphene",eu:"HQ Graphene",cn:"XFNANO, MKNANO",me:"—"},h:"None — requires encapsulation",i:"BP/LNOI waveguide detectors (2023); BP/PtSe2 Schottky detectors to 470 K (2023)",w:"Candidate polarization-diverse monitor photodiode on the TFLN OPA chip; encapsulation keeps it off baseline."},
+{id:56,n:"Platinum Diselenide",f:"PtSe2",c:5,r:2,s:"gap 1.2 eV→semimetal with thickness; Se-vacancy tuning to 0.11 eV (10 µm, 4.5 A/W); air-stable; BEOL-compatible",u:{us:"2D Semiconductors/HQ Graphene",eu:"HQ Graphene, Tyndall ecosystem",cn:"XFNANO, Sixcarbon",me:"—"},h:"None — pre-flight TRL",i:"Wafer-scale PtSe2 growth for IR imagers (2024); 470 K broadband detectors",w:"Most space-practical 2D detector for an on-chip 1550 nm diagnostic photodiode."},
+{id:57,n:"Tin Selenide",f:"SnSe",c:5,r:3,s:"layered IV-VI; Eg 0.9–1.3 eV; record ZT ~2.6; anisotropic optical response",u:{us:"2D Semiconductors",eu:"HQ Graphene",cn:"XFNANO, MKNANO",me:"—"},h:"None",i:"Polarization-sensitive SnSe photodetectors (2024)",w:"Thermoelectric/NIR profile has no interface with the telecom-band optical train."},
+{id:58,n:"Hexagonal Boron Nitride",f:"h-BN",c:5,r:2,s:"Eg ~6 eV; VIS–mid-IR transparent; n 1.8–2.1; atomically smooth 2D encapsulant; DUV emitter ~215 nm",u:{us:"2D Semiconductors, Momentive",eu:"HQ Graphene, NIMS-collab suppliers",cn:"XFNANO, MKNANO",me:"—"},h:"None",i:"Wafer-scale CVD h-BN encapsulation films (2023–24); h-BN emitters in PICs",w:"The enabling encapsulant that would make a 2D monitor diode vacuum-survivable aboard Photon-1."},
+{id:59,n:"Antimony Telluride",f:"Sb2Te3",c:5,r:3,s:"topological insulator; bulk gap 0.2–0.3 eV; broadband saturable absorption 400–1550+ nm",u:{us:"2D Semiconductors/HQ Graphene",eu:"HQ Graphene",cn:"XFNANO, MKNANO",me:"—"},h:"None",i:"TI saturable absorbers for mid-IR mode-locked lasers (2023–24)",w:"Pre-TRL all-optical switching that duplicates TFLN OPA functions."},
+{id:60,n:"Bismuth Selenide",f:"Bi2Se3",c:5,r:3,s:"TI; bulk gap ~0.3 eV; high nonlinear Kerr index; saturable absorption 800 nm–3 µm",u:{us:"2D Semiconductors/HQ Graphene",eu:"HQ Graphene",cn:"XFNANO, MKNANO",me:"—"},h:"None",i:"Bi2Se3 MIR photodetectors and TI nonlinear photonics reviews (2025)",w:"Lab-scale nonlinear/MIR promise — off-BOM for a 1550 nm comms terminal."},
+{id:61,n:"PMMA",f:"(C5O2H8)n",c:6,r:3,s:"n 1.48–1.505; visible transparent, C–H absorption at 1550; WG loss ~2.5 dB/cm; TML ~1% marginal, UV-degrades in LEO",u:{us:"Kayaku (e-beam resist), Evonik US, Plaskolite",eu:"Röhm (Plexiglas), Evonik",cn:"Zhongshan Aoke, CSG resins",me:"SABIC (commodity lines only)"},h:"E-beam resist heritage; no space optical role",i:"PMMA-encapsulated CsPbBr3 gain films (ASE >110k shots)",w:"1550 nm absorption and mediocre ECSS outgassing keep it out of the BOM."},
+{id:62,n:"SU-8",f:"epoxy resist",c:6,r:2,s:"n ~1.57 @1550; >20:1 aspect molding; WG loss 1.36–2.01 dB/cm; TML 2.71% — FAILS ECSS 1% (NASA/ESA db)",u:{us:"Kayaku Advanced Materials (sole primary)",eu:"micro resist technology (DE)",cn:"Suzhou research-grade",me:"—"},h:"CubeSat optics experiments; low-outgassing cures screened case-by-case",i:"SU-8 interposer molds for PIC packaging (2023–24)",w:"Attractive for monolithic micro-optic mounts in the OPA module pending a qualified low-TML cure."},
+{id:63,n:"Polystyrene",f:"(C8H8)n",c:6,r:3,s:"n≈1.59 @589 nm; 400–900 nm; visible MRR demos; poor UV/rad stability; outgassing marginal",u:{us:"Goodfellow, Sigma/Merck",eu:"BASF commodity",cn:"Sinopec, XFNANO microspheres",me:"SABIC (commodity only)"},h:"None",i:"PS micro-ring resonators and nanosphere lenses (2023–24)",w:"Fails both 1550 nm transparency and radiation/outgassing screens."},
+{id:64,n:"Polydimethylsiloxane",f:"PDMS",c:6,r:2,s:"n≈1.41; 400–1600 nm; WG loss 0.027 dB/cm; elastic 1.3–3 MPa; space grades (CV-series) pass TML/CVCM; siloxane CVCM risk",u:{us:"Dow (Sylgard), NuSil/Avantor space-grade",eu:"Elkem Silicones, Wacker",cn:"Shenzhen Hong Ye Jie, Bluestar",me:"—"},h:"Space-grade silicones flown as potting/gasketing",i:"Low-CVCM space silicones re-qualified vs ECSS-Q-ST-70 updates",w:"Gasketing/damping potting only, in CVCM-controlled grades, away from the −50 dBm RX optics."},
+{id:65,n:"Methylammonium Lead Iodide",f:"MAPbI3",c:6,r:3,s:"Eg 1.55–1.64 eV; edge ~800 nm; tolerates 50 keV protons to 1e14 cm⁻² BUT MA volatilizes at +100 °C vacuum — hermetic seal mandatory",u:{us:"Ossila US, Greatcell US, TCI America",eu:"Ossila, Saule Technologies",cn:"Xi'an Polymer Light Tech",me:"KAUST perovskite program (research)"},h:"ISS MISSE / CubeSat on-orbit perovskite demos (2023–24)",i:"LEO radiation-tolerance studies confirm intrinsic hardness; thermal-vacuum MA loss is the dominant failure mode",w:"A space-solar-power story, not a comms-terminal material."},
+{id:66,n:"Cesium Lead Bromide",f:"CsPbBr3",c:6,r:3,s:"Eg ~2.3 eV (~520 nm); all-inorganic, far better stability than MAPbI3; ASE >110k shots in PMMA; Pb content note",u:{us:"Ossila US, Quantum Solutions",eu:"Ossila, Avantama",cn:"Xi'an PLT, MKNANO QD vendors",me:"research only"},h:"None",i:"CsPbBr3 nanocomposites with 192 h structural stability (2024–25); green scintillator dosimetry",w:"Green emission has no interface with a 1550 nm link; visible-beacon watch item."},
+{id:67,n:"Parylene C / N / HT",f:"poly(p-xylylene)",c:6,r:0,s:"n≈1.66 (C); conformal vapor barrier; TML 0.07%/CVCM 0.0003% (C), TML 0.03% (HT); gamma-stable to 1,000 kGy; HT survives 2,000 h UV",u:{us:"SCS (dominant), ParaTech, Curtiss-Wright",eu:"SCS Europe, Diamond-MT, VSi",cn:"Suzhou/Dongguan houses (no flight heritage)",me:"—"},h:"JunoCam & Hayabusa2 heritage; NASA outgassing database (10 variants); standard on 2023–25 smallsat PCBs",i:"Parylene HT UV-stable grades expanding LEO use; microRESIST variants",w:"Only drop-in conformal coating passing ECSS outgassing + 1 MGy vacuum radiation for Photon-1's avionics/OPA driver boards."},
+{id:68,n:"Polycarbonate",f:"PC",c:6,r:3,s:"n≈1.585; 380–900 nm (absorbs 1550); TML 0.3–0.5%; severe LEO UV yellowing without hard coats",u:{us:"Covestro US, SABIC US, Trinseo",eu:"Covestro (DE)",cn:"Wanhua, Luxi",me:"SABIC (KSA — major global PC producer)"},h:"Smallsat camera windows with silicone hard coats (2023–24)",i:"UV/ATOX-protected PC windows; deployable-optics films",w:"1550 nm absorption and UV yellowing rule it out of the optical path."},
+{id:69,n:"MEH-PPV",f:"conjugated polymer",c:6,r:3,s:"abs ~500 nm / emit ~590 nm; polymer OLED/laser gain; photo-bleaches; no NASA E595 listing",u:{us:"Sigma/Merck, Ossila US, 1-Material",eu:"Ossila, Sigma-Aldrich DE",cn:"Xi'an PLT, SunaTech",me:"—"},h:"None",i:"MEH-PPV:CsPbBr3 nanocomposites (2024–25); polymer waveguide amps research",w:"Visible gain medium with no space qualification and no 1550 nm function."},
+{id:70,n:"F8BT",f:"fluorene copolymer",c:6,r:3,s:"green-yellow emitter ~540–560 nm; PLQY ~60%; photo-oxidation caveats; no ECSS outgassing data",u:{us:"Ossila US, 1-Material, Merck",eu:"Ossila, CDT heritage",cn:"SunaTech, Xi'an PLT",me:"—"},h:"None",i:"F8BT DFB polymer lasers (2023–24); VLC transmitter blends",w:"Visible emission and unqualified vacuum behavior keep it off Photon-1."},
+{id:71,n:"Yttrium Iron Garnet",f:"YIG",c:7,r:1,s:"Faraday ~250°/cm @1550 on Si; Ms 140 emu/cm³; 1.1–5.5 µm; Verdet ~−170 rad/(T·m) @1310",u:{us:"Northrop Grumman SYNOPTICS, MTI",eu:"FEE GmbH (Cz YIG)",cn:"Granopt/FLXT, CASTECH",me:"—"},h:"YIG/GGG bonded isolator films in telecom heritage",i:"YIG seed layers enabling Ce:YIG crystallization on Si/SiN (CO2 laser anneal, 2026)",w:"Baseline Faraday material for free-space 1550 nm isolators and seed layer for on-chip MO isolators."},
+{id:72,n:"Terbium Gallium Garnet",f:"TGG",c:7,r:0,s:"Verdet ~39 rad/(T·m) @1 µm; absorption ~1e-3 cm⁻¹; 400–1100 nm; LIDT >10 J/cm²; kW-class isolators",u:{us:"NG SYNOPTICS, EOT, Coherent",eu:"FEE GmbH, Eksma",cn:"CASTECH, HGO, Shalom EO",me:"—"},h:"Space-rated TGG isolator assemblies (EOT/G&H flight programs)",i:"Thin-disk multipass TGG rotators >100 W; KTF rival emerging",w:"Flight-proven crystal protecting the 1 W seed/EDFA chain from back-reflections — single-point-failure part."},
+{id:73,n:"Bismuth-substituted YIG",f:"Bi:YIG",c:7,r:2,s:"Faraday up to −1000 to −2500°/cm @1550; LPE/PLD on GGG; lower Curie T than YIG",u:{us:"Integrated Photonics (LPE Bi:RIG, industry standard)",eu:"FEE GmbH",cn:"Granopt (Bi:RIG)",me:"—"},h:">30 dB commercial telecom isolators",i:"Dy:CeIG/Bi garnets for temperature-stable on-chip isolators (2022–25)",w:"Higher rotation enables shorter isolators, but TGG heritage keeps Bi:YIG a shrink-path option."},
+{id:74,n:"Cerium-doped YIG",f:"Ce:YIG",c:7,r:1,s:"−4500°/cm on GGG, to −6950°/cm @1310; −2317 to −3000°/cm on Si; loss 10–15 dB/cm bonded on Si rings",u:{us:"UCSB R&D (no merchant supply)",eu:"CompoundTek (SG) sputtered isolator chips",cn:"SIOM institutes",me:"—"},h:"No flight heritage — R&D material",i:"2026: CO2-annealed Ce:YIG-on-SiN MZI isolator, 27.1 dB isolation, 10.1 dB IL @1552.7 nm",w:"Leading candidate for an integrated isolator on the LNOI/Si OPA chip, removing discrete Faraday optics."},
+{id:75,n:"Tellurium Dioxide",f:"TeO2",c:7,r:0,s:"M2 = 793e-18 s³/g (slow-shear); n_o 2.26/n_e 2.14; v_ac 616 m/s; 0.35–5.0 µm",u:{us:"G&H (OH), Brimrose, IntraAction, Isomet",eu:"AA Opto-Electronic (FR), G&H UK",cn:"Shalom EO, FineWin, MetaLaser (4-in ingots)",me:"—"},h:"TeO2 AOMs space-qualified (G&H), multiple missions",i:"Mn-doped TeO2 (M2 832e-18, reduced thermal anisotropy, 2024); large-aperture AOMs (2025)",w:"AOM frequency shifting/heterodyne offset and fast deflection assumed by the OISL 3.1 modem architecture."},
+{id:76,n:"Lead Molybdate",f:"PbMoO4",c:7,r:2,s:"M2 ≈ 36–55e-18 s³/g; n_o 2.386; 0.42–5.5 µm; v ~3630 m/s",u:{us:"G&H legacy line, Brimrose",eu:"AA Opto-Electronic",cn:"CASTECH, Shalom EO, HGO",me:"—"},h:"Legacy AO heritage",i:"Improved Cz growth of large low-strain boules; multi-channel AODs for quantum control",w:"Backup AO medium if TeO2 aperture/thermal limits bind; TeO2's ~20× M2 wins otherwise."},
+{id:77,n:"Lithium Tantalate",f:"LiTaO3",c:7,r:2,s:"r33 ≈ 30.4 pm/V; pyro −230 µC/m²K; Tc ~610 °C; 3–6 in wafers; LTOI thin-film emerging",u:{us:"Partow-adjacent US ecosystem",eu:"Korth Kristalle bulk wafers",cn:"NanoLN/Jinan Jingzheng (LTOI), PAM Xiamen, Novel Si (top-3 ~97% LNOI/LTOI)",me:"—"},h:"Bulk LT detectors/modulators heritage; LTOI pre-flight",i:"TFLT modulators with lower microwave loss than TFLN (2023–25); LTOI wafer ramp",w:"Credible Plan-B platform to LNOI for OPA/modulator layers if NanoLN supply risk materializes."},
+{id:78,n:"Potassium Niobate",f:"KNbO3",c:7,r:3,s:"d32 ≈ 20.3, d31 ≈ 11 pm/V; r42 ≈ 380 pm/V; 0.35–4.5 µm; blue/green SHG",u:{us:"Moxtek/MTI research quantities",eu:"Korth Kristalle",cn:"CASTECH, Shalom EO",me:"—"},h:"Research-scale only",i:"Thin-film KNbO3 for integrated SHG explored",w:"No blue/green SHG requirement at 1550 nm — no slot in the payload."},
+{id:79,n:"Quartz (crystalline)",f:"SiO2",c:7,r:1,s:"M2 1.51e-18 s³/g; 0.18–3.5 µm; Δn 0.0091 @1550; wafers to 6 in",u:{us:"MTI, Boston Piezo-Optics, Coherent",eu:"Korth Kristalle, SIC",cn:"Zhejiang Jiakang et al.",me:"—"},h:"Etalons/waveplates on every precision space optical bench",i:"Ultra-low-expansion quartz etalons for space frequency references",w:"Waveplates, etalons and polarization optics in the 1550 nm chain — commodity but unavoidable."},
+{id:80,n:"Lithium Iodate",f:"LiIO3",c:7,r:3,s:"d31 ≈ −4.4 pm/V; 0.3–5.5 µm; moderate AO M2 ~7e-18; hygroscopic",u:{us:"G&H (Cleveland legacy)",eu:"Korth Kristalle",cn:"CASTECH historical, SIOM research",me:"—"},h:"Largely discontinued legacy lines",i:"None significant; superseded by LBO/BBO and TeO2",w:"No UV or 532 nm channel in Photon-1 — a legacy material."},
+{id:81,n:"Nd:YAG",f:"Nd:Y3Al5O12",c:8,r:3,s:"1064 nm; σ_em 2.8e-19 cm²; τ_f 230 µs; pump 808 nm; k 14 W/m/K; rods to Ø14×180 mm",u:{us:"NG SYNOPTICS, Coherent, Kentek",eu:"FEE GmbH, Eksma",cn:"CASTECH, Shalom EO, Crylink, HGO",me:"—"},h:"Deep space heritage: ICESat-2 ATLAS, CALIPSO, MLA, Aeolus",i:"Ce:Nd:YAG solar pumping (2024); diffusion-bonded composite rods for space lidar",w:"The optical chain is 1550 nm Er-based; the 1064 nm line has no place in the link budget."},
+{id:82,n:"Er:YLF",f:"Er:YLiF4",c:8,r:2,s:"1609 nm main line; σ_em ≈ 1.0e-20 cm²; τ_f 4.3 ms; low thermal lensing; pump 960–980 nm",u:{us:"NG SYNOPTICS, Scientific Materials",eu:"Eksma, Korth",cn:"CASTECH, Crylink",me:"—"},h:"Space lidar seeder interest",i:"Er:YLF regenerative amplifiers; 2.8 µm defense lasers",w:"Possible alternative 1.6 µm seeder, but the modem and APD are locked to the 1550 nm Er-fiber ecosystem."},
+{id:83,n:"Yb:KGW",f:"Yb:KGd(WO4)2",c:8,r:3,s:"1023–1040 nm broad; σ_em 2.6e-20 cm²; τ_f 330 µs; Yb doping to 20 at%",u:{us:"NG SYNOPTICS",eu:"Eksma (major grower), Altechna",cn:"CASTECH, Crylink",me:"—"},h:"Ultrafast lab systems; EUV drivers",i:"Multi-100 W thin-disk and cryo Yb:KGW systems (2023–25)",w:"Ultrafast 1 µm oscillators don't match a CW 1550 nm comm link."},
+{id:84,n:"Tm:YLF",f:"Tm:YLiF4",c:8,r:3,s:"1880–1908 nm; σ_em 3.6e-20 cm²; τ_f 15 ms; 792 nm pump with 2-for-1 cross-relaxation",u:{us:"NG SYNOPTICS, Scientific Materials",eu:"Eksma, Korth",cn:"CASTECH, Crylink",me:"—"},h:"NASA/ESA 2 µm wind-lidar transmitter development",i:"Tm:YLF MOPA chains >100 mJ class",w:"No 2 µm lidar channel in Photon-1's comm-only payload."},
+{id:85,n:"Er:Glass (Er,Yb:phosphate)",f:"Er:Glass",c:8,r:0,s:"1535 nm; σ_em 0.8e-20 cm²; τ_f 7.7–9.8 ms; n 1.524; 1535 nm σ ~2× the 1550 value",u:{us:"Kigre (heritage Er:glass), Coherent",eu:"Schott melts, Eksma; HOYA/NEG (JP) EDF glass",cn:"MetaLaser (SIOM), Crylink, Digco",me:"—"},h:"Compact EDFA core heritage; NP Photonics space-flown Er/Yb fiber amps",i:"Er,Yb:glass waveguide amplifiers (EYDWA) to 34 W ASE-class; commercialized compact EDFA replacements",w:"Gain medium of the 1 W EDFA — the heart of the Photon-1 transmitter."},
+{id:86,n:"Cr:ZnSe",f:"Cr:ZnSe",c:8,r:3,s:"tunable 2.0–3.1 µm; σ_em 1.3e-18 cm² @2.45 µm; τ_f 5.5 µs; diffusion-doped",u:{us:"IPG Photonics (dominant), Northrop",eu:"Thorlabs, Eksma",cn:"SICCAS research only",me:"—"},h:"Mid-IR defense lasers",i:">10 W CW Cr:ZnSe; multi-µJ fs mid-IR sources (2023–25)",w:"Mid-IR gain is outside the 1550 nm link and APD detection band."},
+{id:87,n:"Ti:Sapphire",f:"Ti:Al2O3",c:8,r:3,s:"tunable 660–1050 nm (peak 795); σ_em 3.8e-19 cm²; τ_f 3.2 µs; FOM >150",u:{us:"NG SYNOPTICS, M2 Optics",eu:"Eksma, Altechna, Roditi",cn:"CASTECH, Crylink, United Crystals",me:"—"},h:"Lab ultrafast standard; ELI/APOLLON PW pumps",i:"Large high-FOM boules for PW lasers; on-chip Ti:sapphire lasers (Stanford 2024)",w:"No ultrafast/visible channel in a 1550 nm OISL terminal."},
+{id:88,n:"Ho:YAG",f:"Ho:Y3Al5O12",c:8,r:3,s:"2090/2120 nm; σ_em 1.1e-20 cm²; τ_f 8 ms; Tm-fiber pumped @1908",u:{us:"NG SYNOPTICS, Scientific Materials",eu:"Eksma, Korth",cn:"CASTECH, Crylink, HGO",me:"—"},h:"Q-switched lidar/medical heritage",i:"Ho:YAG MOPAs for coherent wind lidar; >100 mJ Q-switched demos",w:"No 2.1 µm requirement in Photon-1."},
+{id:89,n:"Nd:YVO4",f:"Nd:YVO4",c:8,r:2,s:"1064/1342 nm; σ_em 25e-19 cm² (π); τ_f 90 µs; absorption 31.4 cm⁻¹ @810 nm",u:{us:"Coherent, Casix",eu:"Eksma",cn:"CASTECH (largest YVO4 grower), Shalom EO, Crylink",me:"—"},h:"Microchip laser heritage",i:"Microchip Nd:YVO4 single-frequency seeders for space lidar/comm",w:"Only a narrow-linewidth seeder building block; Photon-1's seed is already fiber/1550 nm-based."},
+{id:90,n:"Er:YAG",f:"Er:Y3Al5O12",c:8,r:2,s:"1645 nm (low-doped) / 2940 nm (high-doped); σ_em 2.6e-20 cm² @1645; τ_f 7 ms",u:{us:"NG SYNOPTICS, Scientific Materials",eu:"Eksma, Korth",cn:"CASTECH, Crylink, HGO",me:"—"},h:"Medical 2.94 µm volume; DIAL/lidar research",i:"Resonantly pumped 1.6 µm high-energy systems for DIAL",w:"1.6 µm line duplicates Er:glass/fiber capability with worse SWaP."},
+{id:91,n:"Silicon-on-Insulator",f:"SOI",c:9,r:0,s:"200/300 mm wafers; 220 nm Si / 2 µm BOX standard; high-res >5 kΩ·cm RF variants",u:{us:"GlobalWafers US ($400M CHIPS award Jul 2024)",eu:"Soitec (~45% share; first EU 300 mm line Jun 2025, 400k starts/yr)",cn:"Simgui (Soitec licensee)",me:"—"},h:"Carrier of all flown Si-photonics PICs",i:"Soitec Bernin 300 mm line (2025); SOI-Ce:YIG monolithic isolator chips (2026)",w:"Mature silicon-photonics carrier for the modem electronics-photonics co-design and hybrid isolator substrate."},
+{id:92,n:"GaN-on-Silicon",f:"GaN/Si",c:9,r:2,s:"150/200 mm (300 mm in dev); buffer 2–5 µm; breakdown 3.3 MV/cm; dislocations ~1e8–1e9 cm⁻²",u:{us:"MACOM, Qorvo, Wolfspeed",eu:"Infineon, imec",cn:"Innoscience (8-in volume), Enkris",me:"—"},h:"GaN power heritage; visible PICs pre-flight",i:"300 mm GaN-on-Si pilot lines (imec/Infineon 2024–25)",w:"Only relevant for a future visible beacon/alignment channel; nothing at 1550 nm."},
+{id:93,n:"InP-on-Silicon",f:"InP/Si",c:9,r:1,s:"InP 2–4 in bonded on 200/300 mm SiPh; C-band gain 1530–1565 nm; hybrid laser linewidth <100 kHz",u:{us:"Intel (volume heterogeneous III-V/Si), Coherent, Lumentum",eu:"imec, III-V Lab, SMART Photonics",cn:"Innolight, Hisense",me:"—"},h:"Heterogeneous III-V/Si lasers ship in datacom transceivers",i:"InP-on-Si DFB arrays on 300 mm (Intel/imec 2024–25); micro-transfer-printed InP coupons",w:"Could give the terminal an integrated narrow-linewidth 1550 nm source without discrete fiber lasers."},
+{id:94,n:"Lithium Niobate on Insulator",f:"LNOI",c:9,r:0,s:"300–900 nm LN film on SiO2/Si; 3/4/6-in wafers, 8-in emerging; r33 ≈ 30 pm/V; VπL <2 V·cm; loss <0.1 dB/cm",u:{us:"Partow Technologies",eu:"CSEM/Ligentec research-grade only",cn:"NanoLN/Jinan Jingzheng (~68% — chokepoint), Novel Si, PAM Xiamen (top-3 ≈97%)",me:"—"},h:"TFLN modulators shipping in 800G/1.6T transceivers; OPA chips pre-flight",i:"6-in ramp, 8-in announced; market ~36.9% CAGR to $0.77B by 2030; dual-source mandate: qualify NGK or Partow",w:"Substrate of the 64×64 OPA — Photon-1's single largest photonics supply-chain risk."},
+{id:95,n:"Silicon Germanium",f:"SiGe",c:9,r:0,s:"Si1-xGex epi on 200/300 mm; Ge-on-Si APDs 0.8–0.9 A/W @1550, GBW >20 GHz, dark <1 µA; SiGe HBT fT >300 GHz",u:{us:"GlobalFoundries (9SW), Tower (US/IL), Intel",eu:"IHP (SG25), STMicro, imec",cn:"SMIC/Huahong (catching up)",me:"Tower Migdal HaEmek (IL) — SiGe BiCMOS fab"},h:"Ge/Si APDs and SiGe HBTs space-flown; rad-tol SiGe electronics heritage",i:"Ge-on-Si SPADs and 100 GBd Ge PDs for 1.6T links (2024–25); 1,033 GHz GBP record",w:"Ge-on-Si APD receiver front-ends and the modem's TIA/driver electronics ride on this platform."},
+{id:96,n:"Borosilicate Glass",f:"Pyrex / Borofloat 33",c:9,r:1,s:"100–300 mm wafers; CTE 3.25e-6/K (Si-matched); n 1.47 @1550; anodic bonding 300–400 °C; 0.35–2.7 µm",u:{us:"Corning (Pyrex heritage, Eagle XG)",eu:"Schott (Borofloat 33, dominant), Plan Optik",cn:"multiple commodity makers",me:"—"},h:"Wafer-level packaging heritage in space MEMS/optics",i:"300 mm glass-core substrates for advanced packaging (Schott/Corning 2024–25)",w:"Wafer-level hermetic packaging of the OPA and isolator stack depends on CTE-matched borosilicate caps."},
+{id:97,n:"Aluminum Gallium Nitride",f:"AlGaN",c:9,r:3,s:"Eg 3.4–6.2 eV; solar-blind cutoff <280 nm at >45% Al; on sapphire/SiC/GaN, 2–6 in",u:{us:"Northrop, RTX BBN, Crystal IS (AlN substrates)",eu:"FBH Berlin",cn:"multiple MOCVD houses",me:"—"},h:"UV-C detectors on defense programs",i:"AlGaN solar-blind FPAs for missile warning/UV comm (DARPA/ESA 2023–25)",w:"1550 nm comm with InGaAs detection leaves no role for UV-C detectors."},
+{id:98,n:"Indium Antimonide",f:"InSb",c:9,r:3,s:"Eg 0.17 eV (cutoff ~5.5 µm); mobility ~77,000 cm²/V·s; FPAs to 2k×2k",u:{us:"Lockheed Santa Barbara Focalplane, Teledyne FLIR",eu:"Leonardo UK, Lynred",cn:"PAM Xiamen substrates",me:"SCD (IL) — merchant InSb FPAs"},h:"Decades of space IR FPAs; HOT InSb/XBn from SCD",i:"Digital-ROIC InSb FPAs for space IR",w:"No MWIR imaging channel on Photon-1 — thermal-imager material."},
+{id:99,n:"Gallium Indium Arsenide Antimonide",f:"GaInAsSb",c:9,r:3,s:"Eg 0.5–0.7 eV on GaSb; emission 1.9–3.0 µm; Auger-limited at RT",u:{us:"BAE Systems, IQE, Northrop",eu:"nanoplus (DE), ams OSRAM R&D",cn:"PAM Xiamen substrates",me:"—"},h:"GaSb DFB lasers in ICOS instruments",i:"GaInAsSb/GaSb DFB lasers for methane sensing @2.3 µm; NASA GHG-lidar interest",w:"A 2–3 µm source/detector alloy has no slot in a 1550 nm OISL terminal."},
+{id:100,n:"Strontium Barium Niobate",f:"SBN (SrxBa1-xNb2O6)",c:9,r:2,s:"r33 = 460–1400 pm/V (among largest known); Tc 70–80 °C; 0.4–6.0 µm; ε33 ≈ 900; crystals to 20×20 mm",u:{us:"MTI Corp research crystals",eu:"research only (Bonn heritage)",cn:"SRICO legacy lines, SIM-CAS research",me:"—"},h:"None — research material; poling/reliability barriers",i:"SBN thin-film EO modulators revisited (2023–25)",w:"Huge EO coefficient is attractive for fine steering, but LNOI already fills the role with manufacturable wafers."}
+];
+const PICKS = [
+["LiNbO3 / TFLN (#1) + LNOI wafers (#94)","The OPA & modulator substrate. Dual-source mandate: NanoLN (~68% chokepoint) + mitigators ELENA (EU), SRICO/QCi and HyperLight (US), NGK/Partow."],
+["InP (#12) + InGaAsP MQW (#18)","1550 nm DFB/EML seed lasers and SOA/PIC gain for the SDA OISL 3.1 modem; SMART Photonics / Coherent / Lumentum supply."],
+["InGaAs APD (#14)","Receiver front end delivering −50 dBm sensitivity; Phlux Aura-class MIL-STD-883 devices (2025)."],
+["Silicon / SOI (#21/#91)","PIC carrier wafer — OPA drivers, Ge detectors, fiber attach; Soitec 300 mm line (2025) + GF/imec foundries."],
+["Germanium (#22)","Only CMOS-compatible 1550 nm absorber (Ge-on-Si APD/PIN); flagged: CN export ban Dec 2024."],
+["Si3N4 (#41)","<0.5 dB/m ultra-low-loss feed/delay network behind the 64×64 OPA; TFLN-on-SiN heterogeneous path."],
+["SiO2 / fused silica (#42)","Universal cladding, rad-hard fiber, low-index mirror half — in every optical path."],
+["SiGe (#95)","Ge-on-Si APD front-ends + TIA/driver BiCMOS electronics for the modem."],
+["HfO2 (#46) + MgF2 (#49)","Flight-qualified HfO2/SiO2 mirror stack (31–46 J/cm²) and MgF2 broadband AR on the 5 cm aperture optics."],
+["Phosphate glass / Er:Glass (#38/#85)","Compact, space-flown Er/Yb gain medium of the 1 W EDFA — the heart of the transmitter."],
+["TGG (#72) + TeO2 (#75)","Faraday isolator crystal (EOT/G&H space-rated) protecting the laser chain; AOM crystal for heterodyne shifting/deflection."],
+["YIG / Ce:YIG (#71/#74)","Free-space Faraday material plus the leading integrated on-chip isolator for the LNOI OPA (27.1 dB isolation demo 2026)."],
+["Parylene C (#67)","Only conformal coating passing ECSS outgassing (CVCM 0.0003%) + 1 MGy vacuum radiation for avionics/OPA driver boards."],
+["MgO:LN (#2)","Photorefractive-resistant TFLN variant for high intra-chip power from the 1 W EDFA."],
+["Quartz (#79)","Etalons, waveplates, polarization optics — commodity but unavoidable."],
+["InP-on-Si (#93)","Integrated narrow-linewidth 1550 nm source option (Intel/imec heterogeneous, <100 kHz)."],
+["Borosilicate glass (#96)","CTE-matched wafer-level hermetic caps for OPA/isolator packaging."],
+["GaN / SiC (#13/#23)","Rad-hard power electronics for the ≤45 W EPC; GaN beacons optional."],
+["AlGaAs (#17) / GaAs (#11)","DBR/cladding and substrate basis for pumps, VCSELs and EAM spares; flagged: CN GaAs permits Aug 2023, InP Feb 2025."],
+["Al2O3 / sapphire (#43)","LIDT-margin hybrid mirror layers and ALD hermetic PIC facet seals."]
+];
+
+        const REL = ['Critical','Important','Optional','Not-needed'];
+        const REL_CLASS = ['b-critical','b-important','b-optional','b-notneeded'];
+        const REL_CHIP = ['','amber','ice','dim'];
+        const REGIONS = [['us','🇺🇸 US'],['eu','🇪🇺 EU'],['cn','🇨🇳 CN'],['me','🌍 ME']];
+
+        if (typeof document !== 'undefined') {
+            const $ = id => document.getElementById(id);
+            const state = { q: '', cats: new Set(), regs: new Set(), rels: new Set(), bom: false };
+            const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+
+            // Hero stat chips (auto-computed)
+            const counts = [0, 0, 0, 0];
+            D.forEach(d => counts[d.r]++);
+            $('stat-chips').innerHTML =
+                '<span class="stat-chip"><b>' + D.length + '</b> materials</span>' +
+                '<span class="stat-chip"><b>' + CATS.length + '</b> categories</span>' +
+                '<span class="stat-chip"><b>' + counts[0] + '</b> critical</span>' +
+                '<span class="stat-chip"><b>' + counts[1] + '</b> important</span>' +
+                '<span class="stat-chip"><b>' + counts[2] + '</b> optional</span>' +
+                '<span class="stat-chip"><b>' + counts[3] + '</b> not-needed</span>';
+
+            // Chip builders
+            function buildChips(elId, items, set, extraClass) {
+                const el = $(elId);
+                items.forEach((it, i) => {
+                    const b = document.createElement('button');
+                    b.className = 'fchip' + (extraClass && extraClass[i] ? ' ' + extraClass[i] : '');
+                    b.textContent = it.label;
+                    b.addEventListener('click', () => {
+                        if (set.has(i)) { set.delete(i); b.classList.remove('on'); }
+                        else { set.add(i); b.classList.add('on'); }
+                        render();
+                    });
+                    el.appendChild(b);
+                });
+            }
+            buildChips('cat-chips', CATS.map(c => ({ label: c })), state.cats, null);
+            buildChips('reg-chips', REGIONS.map(r => ({ label: r[1] })), state.regs, null);
+            buildChips('rel-chips', REL.map(r => ({ label: r })), state.rels, REL_CHIP);
+
+            $('search').addEventListener('input', e => { state.q = e.target.value.toLowerCase(); render(); });
+
+            // BOM toggle
+            $('bom-toggle').addEventListener('click', () => {
+                state.bom = !state.bom;
+                $('bom-view').classList.toggle('on', state.bom);
+                $('grid-wrap').classList.toggle('off', state.bom);
+                $('bom-toggle').classList.toggle('on', state.bom);
+                if (state.bom) { renderBom(); $('bom-view').scrollIntoView({ behavior: 'smooth' }); }
+            });
+
+            function match(d) {
+                if (state.cats.size && !state.cats.has(d.c)) return false;
+                if (state.regs.size) {
+                    let ok = false;
+                    state.regs.forEach(ri => { const key = REGIONS[ri][0]; if (d.u[key] && d.u[key] !== '—' && !/^(—|none|limited)/.test(d.u[key])) ok = true; });
+                    if (!ok) return false;
+                }
+                if (state.rels.size && !state.rels.has(d.r)) return false;
+                if (state.q) {
+                    const hay = (d.n + ' ' + d.s + ' ' + d.u.us + ' ' + d.u.eu + ' ' + d.u.cn + ' ' + d.u.me + ' ' + d.h + ' ' + d.i + ' ' + CATS[d.c]).toLowerCase();
+                    if (hay.indexOf(state.q) === -1) return false;
+                }
+                return true;
+            }
+
+            function cardHtml(d) {
+                const sups = [['us', '🇺🇸'], ['eu', '🇪🇺'], ['cn', '🇨🇳'], ['me', 'ME']]
+                    .map(p => '<div class="sr"><span class="rg">' + p[1] + '</span><span class="sv">' + esc(d.u[p[0]]) + '</span></div>').join('');
+                return '<div class="dev" data-id="' + d.id + '">' +
+                    '<div class="dev-head"><span class="dev-id">#' + d.id + '</span><span class="dev-name">' + esc(d.n) + '</span>' +
+                    '<span class="badge ' + REL_CLASS[d.r] + '">' + REL[d.r] + '</span></div>' +
+                    '<span class="cat-tag">' + CATS[d.c] + '</span>' +
+                    '<div class="dev-specs">' + esc(d.s) + '</div>' +
+                    '<div class="dev-sups">' + sups + '</div>' +
+                    '<div class="dev-line"><b>Heritage:</b> ' + esc(d.h) + '</div>' +
+                    '<div class="dev-line"><b>2023–26:</b> ' + esc(d.i) + '</div>' +
+                    '<button class="why-toggle" data-id="' + d.id + '">▸ why for Photon-1</button>' +
+                    '<div class="why" id="why-' + d.id + '">' + esc(d.w) + '</div></div>';
+            }
+
+            function render() {
+                const shown = D.filter(match);
+                $('grid').innerHTML = shown.map(cardHtml).join('');
+                $('counter').textContent = shown.length + ' / ' + D.length;
+                $('grid').querySelectorAll('.why-toggle').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const w = $('why-' + btn.dataset.id);
+                        const open = w.classList.toggle('open');
+                        btn.textContent = (open ? '▾' : '▸') + ' why for Photon-1';
+                    });
+                });
+            }
+
+            function renderBom() {
+                const bom = D.filter(d => d.r <= 1);
+                const nc = bom.filter(d => d.r === 0).length, ni = bom.length - nc;
+                const catSet = new Set(bom.map(d => d.c));
+                $('bom-summary').innerHTML =
+                    '<div class="bom-box"><div class="k">Critical</div><div class="v">' + nc + '</div></div>' +
+                    '<div class="bom-box warn"><div class="k">Important</div><div class="v">' + ni + '</div></div>' +
+                    '<div class="bom-box"><div class="k">BOM materials</div><div class="v">' + bom.length + '</div></div>' +
+                    '<div class="bom-box"><div class="k">Categories covered</div><div class="v">' + catSet.size + ' / ' + CATS.length + '</div></div>';
+                let html = '';
+                CATS.forEach((c, ci) => {
+                    const items = bom.filter(d => d.c === ci);
+                    if (!items.length) return;
+                    html += '<div class="bom-cat"><h3>' + c + ' <span class="cnt">(' + items.length + ')</span></h3>' +
+                        items.map(d => '<div class="bom-item"><span class="bi-id">#' + d.id + '</span><span class="bi-name">' + esc(d.n) + '</span><span class="badge ' + REL_CLASS[d.r] + '">' + REL[d.r] + '</span></div>').join('') + '</div>';
+                });
+                $('bom-groups').innerHTML = html;
+                $('bom-ties').innerHTML = 'BOM ties to canonical specs (📐 Specs): <b>1550 nm</b> C-band carrier · <b>64×64 OPA on LNOI</b> · <b>SDA OISL 3.1</b> modem · <b>TFLN dual-source</b> — NanoLN ≈68% chokepoint, mitigators ELENA / SRICO / HyperLight · <b>passive alignment</b> fiber-attach manufacturing · bus limits <b>≤45 W / 12 kg</b> · Rx sensitivity target <b>−50 dBm</b>.';
+                $('picks-list').innerHTML = PICKS.map(p => '<li><b>' + esc(p[0]) + '</b> — ' + esc(p[1]) + '</li>').join('');
+            }
+
+            // Regional bars: count of device classes with a real supplier per region
+            const regCounts = REGIONS.map(r => D.filter(d => { const v = d.u[r[0]]; return v && v !== '—' && !/^(—|none)/.test(v) && v.indexOf('(assembly only)') === -1; }).length);
+            const maxC = Math.max.apply(null, regCounts);
+            const barColors = ['#00d4aa', '#2a9d8f', '#e63946', '#778da9'];
+            $('bars').innerHTML = REGIONS.map((r, i) =>
+                '<div class="bar-row"><span class="bl">' + r[1] + '</span>' +
+                '<div class="bar-track"><div class="bar-fill" style="width:' + Math.max(2, Math.round(regCounts[i] / maxC * 100)) + '%;background:' + barColors[i] + '"></div></div>' +
+                '<span class="bar-num">' + regCounts[i] + '</span></div>').join('');
+
+            render();
+
+            // Hamburger nav
+            const hamBtn = $('nav-hamburger'), navOverlay = $('nav-overlay'), navClose = $('nav-close');
+            hamBtn.addEventListener('click', () => navOverlay.classList.add('active'));
+            navClose.addEventListener('click', () => navOverlay.classList.remove('active'));
+            navOverlay.querySelectorAll('a').forEach(a => a.addEventListener('click', () => navOverlay.classList.remove('active')));
+        }
+    </script>
+</body>
+</html>
