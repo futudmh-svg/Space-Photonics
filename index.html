@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Space Photonics — Interactive 3D Command Center</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #050811;
+            color: #e0e6ed;
+            line-height: 1.6;
+        }
+
+        /* ─── 3D Hero ─── */
+        #hero-container { position: relative; width: 100%; height: 65vh; overflow: hidden; }
+        #hero-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+
+        .hero-overlay {
+            position: absolute; bottom: 20px; left: 20px; right: 20px;
+            background: rgba(5,8,17,0.85); backdrop-filter: blur(10px);
+            border: 1px solid rgba(65,90,119,0.5); border-radius: 12px;
+            padding: 16px; display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between;
+            align-items: center; z-index: 10;
+        }
+        .hero-title { font-size: 1.4em; color: #00d4aa; font-weight: 600; }
+        .hero-stats { display: flex; gap: 20px; flex-wrap: wrap; }
+        .hero-stat { text-align: center; }
+        .hero-stat-value { font-size: 1.1em; color: #ffd166; font-family: monospace; font-weight: bold; }
+        .hero-stat-label { font-size: 0.7em; color: #90e0ef; }
+        .hero-controls { display: flex; gap: 8px; }
+        .hero-btn {
+            background: rgba(13,27,42,0.9); color: #e0e6ed; border: 1px solid rgba(65,90,119,0.5);
+            padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.8em;
+        }
+        .hero-btn:hover { background: #00d4aa; color: #050811; }
+        .hero-btn.active { background: #00d4aa; color: #050811; }
+
+        /* ─── Tooltip ─── */
+        #tooltip {
+            position: absolute; z-index: 20; pointer-events: none;
+            background: rgba(5,8,17,0.92); border: 1px solid #00d4aa; border-radius: 8px;
+            padding: 8px 12px; font-size: 0.75em; display: none; max-width: 220px;
+        }
+        #tooltip h4 { color: #00d4aa; margin-bottom: 4px; font-size: 0.9em; }
+        #tooltip .tt-row { display: flex; justify-content: space-between; gap: 12px; margin: 2px 0; }
+        #tooltip .tt-label { color: #90e0ef; }
+        #tooltip .tt-value { color: #ffd166; font-family: monospace; }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 16px; }
+
+        nav { background: #1b263b; padding: 12px; border-radius: 10px; margin-bottom: 16px; display: flex; flex-wrap: wrap; gap: 8px; }
+        nav a { color: #e0e6ed; text-decoration: none; padding: 8px 14px; border-radius: 6px; font-size: 0.9em; background: #0d1b2a; }
+        nav a:hover, nav a.active { background: #00d4aa; color: #050811; }
+
+        header { text-align: center; padding: 20px 16px; background: linear-gradient(135deg, #0d1b2a 0%, #1b263b 50%, #0d1b2a 100%); border-radius: 16px; margin-bottom: 20px; border: 1px solid #415a77; }
+        h1 { font-size: 1.5em; color: #00d4aa; margin-bottom: 6px; }
+        .subtitle { color: #778da9; font-size: 0.9em; }
+
+        .card { background: #1b263b; border-radius: 12px; padding: 18px; margin-bottom: 16px; border: 1px solid #415a77; }
+        .card h2 { font-size: 1.15em; color: #00d4aa; margin-bottom: 10px; }
+        .card p { font-size: 0.9em; color: #778da9; margin-bottom: 12px; }
+        .badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 0.75em; margin: 2px; }
+        .badge.ok { background: #2a9d8f; color: #fff; }
+        .badge.info { background: #3a86ff; color: #fff; }
+        .badge.warn { background: #ffd166; color: #050811; }
+        .badge.danger { background: #e63946; color: #fff; }
+        .btn { display: inline-block; padding: 10px 20px; background: #00d4aa; color: #050811; text-decoration: none; border-radius: 8px; font-weight: 600; margin: 4px; }
+        .btn:hover { background: #2a9d8f; }
+
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 20px; }
+
+        footer { text-align: center; padding: 20px; color: #778da9; font-size: 0.8em; margin-top: 30px; border-top: 1px solid #1b263b; }
+    </style>
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        }
+    }
+    </script>
+</head>
+<body>
+    <!-- 3D Hero -->
+    <div id="hero-container">
+        <canvas id="hero-canvas"></canvas>
+        <div class="hero-overlay">
+            <div>
+                <div class="hero-title">🛰️ Space Photonics Command Center</div>
+                <div style="font-size:0.8em;color:#90e0ef;margin-top:4px">Real-time VLEO constellation + hypersonic tracking</div>
+            </div>
+            <div class="hero-stats">
+                <div class="hero-stat"><div class="hero-stat-value" id="h-sats">150</div><div class="hero-stat-label">Sats</div></div>
+                <div class="hero-stat"><div class="hero-stat-value" id="h-enemy">M5.2</div><div class="hero-stat-label">Enemy</div></div>
+                <div class="hero-stat"><div class="hero-stat-value" id="h-friendly">M7.8</div><div class="hero-stat-label">Friendly</div></div>
+                <div class="hero-stat"><div class="hero-stat-value" id="h-links">24</div><div class="hero-stat-label">Links</div></div>
+            </div>
+            <div class="hero-controls">
+                <button class="hero-btn active" onclick="setHeroView('orbit')">🌍 Orbit</button>
+                <button class="hero-btn" onclick="setHeroView('enemy')">🔴 Enemy</button>
+                <button class="hero-btn" onclick="setHeroView('friendly')">🛡️ Friendly</button>
+            </div>
+        </div>
+        <div id="tooltip"></div>
+    </div>
+
+    <div class="container">
+        <nav>
+            <a href="index.html" class="active">🏠 Dashboard</a>
+            <a href="pages/architecture.html">🏛️ Architecture</a>
+            <a href="pages/digital-twin.html">🎮 3D Twin</a>
+            <a href="pages/opa-analysis.html">📡 OPA</a>
+            <a href="pages/link-budget.html">📊 Link Budget</a>
+            <a href="pages/hypersonic.html">🚀 Hypersonic</a>
+            <a href="pages/vleo-constellation.html">🌐 VLEO</a>
+            <a href="pages/mapper-3d.html">🗺️ Mapper</a>
+            <a href="pages/satellite-digital-twin.html">🛰️ Sat Twin</a>
+            <a href="pages/interception-mission.html">🎯 Intercept</a>
+            <a href="pages/vehicle-terminal.html">🛰️ Terminal</a>
+            <a href="pages/ehf-optical-trade.html">📡 EHF vs Opt</a>
+            <a href="pages/ppln-calculator.html">🔢 PPLN</a>
+            <a href="pages/research-gaps.html">🔬 Gaps</a>
+            <a href="pages/specifications.html">📐 Specs</a>
+            <a href="pages/components.html">🧩 Components</a>
+            <a href="pages/materials.html">🧪 Materials</a>
+            <a href="pages/photonics-lab.html">🎛️ Sim Lab</a>
+            <a href="pages/foundry.html">🏭 Foundry</a>
+            <a href="pages/foundry-cleanroom.html">🏭 Clean Room</a>
+        </nav>
+
+        <header>
+            <h1>Space Photonics</h1>
+            <p class="subtitle">Multi-Face OPA Digital Twin for Hypersonic Tracking, Control & Interception — v3.5</p>
+            <div style="margin-top:12px">
+                <span class="badge ok">v3.5</span>
+                <span class="badge info">PPLN Receiver</span>
+                <span class="badge ok">6-Face OPA</span>
+                <span class="badge warn">Hypersonic Track</span>
+                <span class="badge info">3D Mapper</span>
+                <span class="badge danger">Interception</span>
+                <span class="badge ok">Clean Room</span>
+            </div>
+        </header>
+
+        <div class="grid">
+            <div class="card">
+                <h2>🌐 VLEO Mega-Constellation v3.0</h2>
+                <p>150 satellites in VLEO as a single photonic fabric. Hypersonic tracking & control — enemy HGV triangulation + friendly two-way comms.</p>
+                <a href="pages/vleo-constellation.html" class="btn">Explore Constellation</a>
+            </div>
+            <div class="card">
+                <h2>🗺️ 3D Orbital Mapper</h2>
+                <p>Real-time 3D visualization of the full VLEO constellation, hypersonic vehicle trajectories, rocket swarm launches, and multi-link optical beams.</p>
+                <a href="pages/mapper-3d.html" class="btn">Open 3D Mapper</a>
+            </div>
+            <div class="card">
+                <h2>🎯 Interception Mission Simulator</h2>
+                <p>Enemy HGV with live camera feed vs. GMD interceptor. Terminal phase, trajectory calculations, end-to-end bandwidth.</p>
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0">
+                    <div style="background:#0d1b2a;padding:10px;border-radius:8px;text-align:center"><div style="font-size:1.2em;color:#e63946;font-weight:bold">HGV-ALPHA</div><div style="font-size:0.7em;color:#778da9">Enemy</div></div>
+                    <div style="background:#0d1b2a;padding:10px;border-radius:8px;text-align:center"><div style="font-size:1.2em;color:#2a9d8f;font-weight:bold">GMD-E1</div><div style="font-size:0.7em;color:#778da9">Interceptor</div></div>
+                    <div style="background:#0d1b2a;padding:10px;border-radius:8px;text-align:center"><div style="font-size:1.2em;color:#ffd166;font-weight:bold">92%</div><div style="font-size:0.7em;color:#778da9">P_kill</div></div>
+                </div>
+                <a href="pages/interception-mission.html" class="btn">Launch Interception Sim</a>
+            </div>
+            <div class="card">
+                <h2>🛰️ Satellite Digital Twin</h2>
+                <p>Interactive cutaway of the 12U CubeSat bus. PPLN receiver, TFLN OPA faces, Si₃N₄ router, animated photon signal flow.</p>
+                <a href="pages/satellite-digital-twin.html" class="btn">Open Satellite Twin</a>
+            </div>
+            <div class="card">
+                <h2>🏭 Foundry Clean Room 3D</h2>
+                <p>Real-time 3D digital twin of the photonic foundry. Walk through lithography, etch, deposition, bonding, and test zones.</p>
+                <a href="pages/foundry-cleanroom.html" class="btn">Enter Clean Room</a>
+            </div>
+            <div class="card">
+                <h2>📡 OPA Beam Steering</h2>
+                <p>Interactive 64-element optical phased array simulation. Real-time far-field pattern, side lobe analysis.</p>
+                <a href="pages/opa-analysis.html" class="btn">Steer Beam</a>
+            </div>
+        </div>
+
+        <footer>
+            Space Photonics — Built with Three.js & WebGL<br>
+            <a href="https://github.com/futudmh-svg/Space-Photonics" style="color:#00d4aa">GitHub Repository</a>
+        </footer>
+    </div>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        const canvas = document.getElementById('hero-canvas');
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x050811);
+
+        const camera = new THREE.PerspectiveCamera(50, canvas.clientWidth / canvas.clientHeight, 0.1, 200);
+        camera.position.set(0, 12, 22);
+
+        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+        renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+        const controls = new OrbitControls(camera, canvas);
+        controls.enableDamping = true;
+        controls.autoRotate = true;
+        controls.autoRotateSpeed = 0.5;
+        controls.enablePan = false;
+        controls.minDistance = 14;
+        controls.maxDistance = 40;
+
+        scene.add(new THREE.AmbientLight(0x404040, 0.5));
+        const sun = new THREE.DirectionalLight(0xffffff, 1.0);
+        sun.position.set(20, 30, 10);
+        scene.add(sun);
+
+        // Earth
+        const EARTH_R = 8;
+        const earth = new THREE.Mesh(
+            new THREE.SphereGeometry(EARTH_R, 48, 48),
+            new THREE.MeshPhongMaterial({ color: 0x1a3a5c, emissive: 0x0a1a2a, shininess: 25 })
+        );
+        scene.add(earth);
+
+        // Atmosphere
+        const atm = new THREE.Mesh(
+            new THREE.SphereGeometry(EARTH_R * 1.06, 32, 32),
+            new THREE.MeshBasicMaterial({ color: 0x4488cc, transparent: true, opacity: 0.05, side: THREE.BackSide })
+        );
+        scene.add(atm);
+
+        // Grid
+        const grid = new THREE.PolarGridHelper(EARTH_R * 1.01, 12, 8, 64, 0x00d4aa, 0x00d4aa);
+        grid.material.transparent = true; grid.material.opacity = 0.08;
+        scene.add(grid);
+
+        // Satellites
+        const SAT_R = EARTH_R * 1.15;
+        const sats = [];
+        for (let p = 0; p < 6; p++) {
+            for (let s = 0; s < 25; s++) {
+                const sat = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.15, 0.1, 0.25),
+                    new THREE.MeshPhongMaterial({ color: 0x888888 })
+                );
+                sat.userData = { type: 'sat', name: `SAT-${p}-${s}`, plane: p, angle: (s/25)*Math.PI*2 + (p/6)*Math.PI };
+                scene.add(sat);
+                sats.push(sat);
+            }
+        }
+
+        // Enemy HGV
+        const enemyG = new THREE.Group();
+        const eBody = new THREE.Mesh(
+            new THREE.ConeGeometry(0.12, 0.5, 8),
+            new THREE.MeshPhongMaterial({ color: 0xe63946, emissive: 0x440000, emissiveIntensity: 0.3 })
+        );
+        eBody.rotation.x = Math.PI/2;
+        enemyG.add(eBody);
+        const ePlasma = new THREE.Mesh(
+            new THREE.SphereGeometry(0.25, 12, 12),
+            new THREE.MeshBasicMaterial({ color: 0xff6600, transparent: true, opacity: 0.12, blending: THREE.AdditiveBlending })
+        );
+        enemyG.add(ePlasma);
+        enemyG.userData = { type: 'enemy', name: 'HGV-ALPHA', mach: 5.2 };
+        scene.add(enemyG);
+
+        // Friendly HGV
+        const friendlyG = new THREE.Group();
+        const fBody = new THREE.Mesh(
+            new THREE.ConeGeometry(0.1, 0.4, 8),
+            new THREE.MeshPhongMaterial({ color: 0x2a9d8f, emissive: 0x004433, emissiveIntensity: 0.2 })
+        );
+        fBody.rotation.x = Math.PI/2;
+        friendlyG.add(fBody);
+        const fPlasma = new THREE.Mesh(
+            new THREE.SphereGeometry(0.2, 12, 12),
+            new THREE.MeshBasicMaterial({ color: 0x00ffaa, transparent: true, opacity: 0.08, blending: THREE.AdditiveBlending })
+        );
+        friendlyG.add(fPlasma);
+        friendlyG.userData = { type: 'friendly', name: 'HGV-FRIEND', mach: 7.8 };
+        scene.add(friendlyG);
+
+        // Rockets
+        const rockets = [];
+        for (let i = 0; i < 2; i++) {
+            const rg = new THREE.Group();
+            const rb = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.06, 0.08, 0.6, 8),
+                new THREE.MeshPhongMaterial({ color: 0xdddddd })
+            );
+            rb.rotation.x = Math.PI/2;
+            rg.add(rb);
+            const rf = new THREE.Mesh(
+                new THREE.ConeGeometry(0.05, 0.3, 8),
+                new THREE.MeshBasicMaterial({ color: 0xff4400, transparent: true, opacity: 0.6, blending: THREE.AdditiveBlending })
+            );
+            rf.rotation.x = -Math.PI/2;
+            rf.position.z = -0.4;
+            rg.add(rf);
+            rg.userData = { type: 'rocket', name: `FALCON-${i+1}` };
+            scene.add(rg);
+            rockets.push(rg);
+        }
+
+        // Beams
+        const beams = [];
+        for (let i = 0; i < 8; i++) {
+            const b = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.006, 0.006, 1, 4),
+                new THREE.MeshBasicMaterial({ color: 0x00d4aa, transparent: true, opacity: 0.2 })
+            );
+            b.geometry.rotateX(Math.PI/2);
+            b.visible = false;
+            scene.add(b);
+            beams.push(b);
+        }
+
+        // Raycaster for tooltips
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+        const tooltip = document.getElementById('tooltip');
+
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+            mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+
+            raycaster.setFromCamera(mouse, camera);
+            const allObjs = [...sats, enemyG, friendlyG, ...rockets];
+            const hits = raycaster.intersectObjects(allObjs, true);
+
+            if (hits.length > 0) {
+                let obj = hits[0].object;
+                while (obj.parent && !obj.userData.type) obj = obj.parent;
+                const d = obj.userData;
+                tooltip.style.display = 'block';
+                tooltip.style.left = (e.clientX + 15) + 'px';
+                tooltip.style.top = (e.clientY + 15) + 'px';
+                let html = `<h4>${d.name}</h4>`;
+                if (d.type === 'sat') html += `<div class="tt-row"><span class="tt-label">Plane</span><span class="tt-value">${d.plane}</span></div>`;
+                if (d.type === 'enemy' || d.type === 'friendly') html += `<div class="tt-row"><span class="tt-label">Mach</span><span class="tt-value">${d.mach}</span></div>`;
+                if (d.type === 'rocket') html += `<div class="tt-row"><span class="tt-label">Status</span><span class="tt-value">Ascending</span></div>`;
+                tooltip.innerHTML = html;
+            } else {
+                tooltip.style.display = 'none';
+            }
+        });
+
+        // Hero view controls
+        window.setHeroView = (view) => {
+            document.querySelectorAll('.hero-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            if (view === 'enemy') {
+                controls.autoRotate = false;
+                heroViewTarget = 'enemy';
+            } else if (view === 'friendly') {
+                controls.autoRotate = false;
+                heroViewTarget = 'friendly';
+            } else {
+                controls.autoRotate = true;
+                heroViewTarget = null;
+            }
+        };
+        let heroViewTarget = null;
+
+        // Animation
+        const clock = new THREE.Clock();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const dt = clock.getDelta();
+            const t = clock.getElapsedTime();
+
+            // Update sats
+            sats.forEach(sat => {
+                sat.userData.angle += 0.0008;
+                const a = sat.userData.angle;
+                const inc = 53 * Math.PI / 180;
+                const raan = (sat.userData.plane / 6) * Math.PI;
+                sat.position.set(
+                    SAT_R * (Math.cos(raan)*Math.cos(a) - Math.sin(raan)*Math.cos(inc)*Math.sin(a)),
+                    SAT_R * Math.sin(inc)*Math.sin(a),
+                    SAT_R * (Math.sin(raan)*Math.cos(a) + Math.cos(raan)*Math.cos(inc)*Math.sin(a))
+                );
+                sat.lookAt(0,0,0);
+            });
+
+            // Enemy orbit
+            const eLat = 30 + 15 * Math.sin(t * 0.2);
+            const eLon = t * 15;
+            const eAlt = 30;
+            const eR = EARTH_R + eAlt * 0.001;
+            enemyG.position.set(
+                eR * Math.cos(eLat*0.017) * Math.cos(eLon*0.017),
+                eR * Math.sin(eLat*0.017),
+                eR * Math.cos(eLat*0.017) * Math.sin(eLon*0.017)
+            );
+            enemyG.lookAt(enemyG.position.clone().add(new THREE.Vector3(1,0,0.5)));
+            ePlasma.material.opacity = 0.1 + 0.1 * Math.sin(t * 3);
+
+            // Friendly orbit
+            const fLat = 40 + 10 * Math.cos(t * 0.15);
+            const fLon = -80 + t * 12;
+            const fAlt = 25;
+            const fR = EARTH_R + fAlt * 0.001;
+            friendlyG.position.set(
+                fR * Math.cos(fLat*0.017) * Math.cos(fLon*0.017),
+                fR * Math.sin(fLat*0.017),
+                fR * Math.cos(fLat*0.017) * Math.sin(fLon*0.017)
+            );
+            friendlyG.lookAt(friendlyG.position.clone().add(new THREE.Vector3(0.7,0,0.7)));
+
+            // Rockets
+            rockets.forEach((rg, i) => {
+                const rt = t * 0.3 + i * 2;
+                const rLat = 28.5 + rt * 2;
+                const rAlt = Math.min(rt * 8, 200);
+                const rR = EARTH_R + rAlt * 0.001;
+                rg.position.set(
+                    rR * Math.cos(rLat*0.017) * Math.cos(-80*0.017),
+                    rR * Math.sin(rLat*0.017),
+                    rR * Math.cos(rLat*0.017) * Math.sin(-80*0.017)
+                );
+                rg.lookAt(0,0,0);
+                rg.children[1].scale.y = 0.5 + 0.5 * Math.sin(t * 10 + i);
+            });
+
+            // Beams
+            for (let i = 0; i < 4; i++) {
+                const sat = sats[i * 4];
+                const dir = sat.position.clone().sub(enemyG.position);
+                beams[i].position.copy(enemyG.position).add(dir.multiplyScalar(0.5));
+                beams[i].scale.set(1, 1, dir.length());
+                beams[i].lookAt(sat.position);
+                beams[i].visible = true;
+                beams[i].material.opacity = 0.15 + 0.1 * Math.sin(t * 2 + i);
+            }
+            for (let i = 0; i < 2; i++) {
+                const sat = sats[20 + i];
+                const dir = sat.position.clone().sub(friendlyG.position);
+                beams[4 + i].position.copy(friendlyG.position).add(dir.multiplyScalar(0.5));
+                beams[4 + i].scale.set(1, 1, dir.length());
+                beams[4 + i].lookAt(sat.position);
+                beams[4 + i].visible = true;
+                beams[4 + i].material.color.setHex(0x2a9d8f);
+            }
+
+            // Update stats
+            document.getElementById('h-sats').textContent = '150';
+            document.getElementById('h-enemy').textContent = 'M' + (10 + 0.2 * Math.sin(t)).toFixed(1);
+            document.getElementById('h-friendly').textContent = 'M' + (7.8 + 0.2 * Math.cos(t)).toFixed(1);
+            document.getElementById('h-links').textContent = Math.floor(20 + 4 * Math.sin(t * 0.5));
+
+            // Camera follow
+            if (heroViewTarget === 'enemy') {
+                camera.position.lerp(enemyG.position.clone().add(new THREE.Vector3(3, 2, 3)), 0.03);
+                controls.target.lerp(enemyG.position, 0.05);
+            } else if (heroViewTarget === 'friendly') {
+                camera.position.lerp(friendlyG.position.clone().add(new THREE.Vector3(3, 2, 3)), 0.03);
+                controls.target.lerp(friendlyG.position, 0.05);
+            }
+
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        animate();
+
+        window.addEventListener('resize', () => {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            camera.aspect = rect.width / rect.height;
+            camera.updateProjectionMatrix();
+            renderer.setSize(rect.width, rect.height);
+        });
+    </script>
+</body>
+</html>
