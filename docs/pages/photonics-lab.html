@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photonics Lab — General Simulation — Space Photonics</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #050811; color: #e0e6ed; line-height: 1.6; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 16px; }
+        nav { background: #1b263b; padding: 12px; border-radius: 10px; margin-bottom: 16px; display: flex; flex-wrap: wrap; gap: 8px; }
+        nav a { color: #e0e6ed; text-decoration: none; padding: 8px 14px; border-radius: 6px; font-size: 0.9em; background: #0d1b2a; }
+        nav a:hover, nav a.active { background: #00d4aa; color: #050811; }
+        h1 { font-size: 1.4em; color: #00d4aa; margin: 16px 0 8px; }
+        .subtitle { color: #778da9; font-size: 0.85em; margin-bottom: 16px; }
+        .hud { background: rgba(5,8,17,0.88); border: 1px solid rgba(65,90,119,0.5); border-radius: 10px; backdrop-filter: blur(8px); padding: 16px; margin-bottom: 16px; }
+        .hud-row { display: flex; justify-content: space-between; padding: 3px 0; font-size: 0.8em; border-bottom: 1px dashed rgba(65,90,119,0.3); }
+        .hud-label { color: #90e0ef; }
+        .hud-value { color: #ffd166; font-family: ui-monospace, Menlo, monospace; }
+        footer { text-align: center; padding: 30px; color: #778da9; font-size: 0.8em; }
+        .mono { font-family: ui-monospace, Menlo, monospace; }
+
+        /* ─── Hamburger Navigation ─── */
+        .nav-hamburger { display: none; position: fixed; top: 8px; left: 8px; z-index: 300; background: rgba(5,8,17,0.92); border: 1px solid #00d4aa; color: #00d4aa; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 1.2em; }
+        .nav-overlay { display: none; position: fixed; inset: 0; z-index: 250; background: rgba(5,8,17,0.95); backdrop-filter: blur(12px); flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 20px; overflow-y: auto; }
+        .nav-overlay.active { display: flex; }
+        .nav-overlay a { color: #90e0ef; text-decoration: none; padding: 10px 20px; font-size: 1.1em; border-radius: 8px; background: rgba(13,27,42,0.7); border: 1px solid rgba(65,90,119,0.3); width: 200px; text-align: center; }
+        .nav-overlay a:hover, .nav-overlay a.active { background: #00d4aa; color: #050811; }
+        .nav-close { position: absolute; top: 8px; right: 8px; color: #e63946; font-size: 1.5em; cursor: pointer; background: none; border: none; padding: 8px; }
+
+        @media (max-width: 768px) {
+            nav { display: none; }
+            .nav-hamburger { display: block; }
+            .lab-grid { grid-template-columns: 1fr !important; }
+            #sim-canvas { height: 340px !important; }
+        }
+
+        /* ─── Auto banner ─── */
+        .auto-strip { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; background: rgba(5,8,17,0.88); border: 1px solid rgba(0,212,170,0.45); border-radius: 10px; padding: 10px 16px; margin-bottom: 16px; }
+        .auto-dot { color: #00d4aa; font-family: ui-monospace, Menlo, monospace; font-weight: 700; font-size: 0.9em; animation: pulse 1.2s ease-in-out infinite; }
+        @keyframes pulse { 0%,100% { opacity: 1; text-shadow: 0 0 10px #00d4aa; } 50% { opacity: 0.35; text-shadow: none; } }
+        .auto-strip.manual .auto-dot { color: #ffd166; animation: none; }
+        .switch { position: relative; width: 92px; height: 30px; background: #0d1b2a; border: 1px solid #00d4aa; border-radius: 999px; cursor: pointer; display: flex; align-items: center; font-family: ui-monospace, Menlo, monospace; font-size: 0.68em; }
+        .switch .knob { position: absolute; top: 2px; left: 2px; width: 44px; height: 24px; border-radius: 999px; background: #00d4aa; color: #050811; display: flex; align-items: center; justify-content: center; font-weight: 700; transition: left 0.25s, background 0.25s; }
+        .switch.off { border-color: #ffd166; }
+        .switch.off .knob { left: 46px; background: #ffd166; }
+        #opt-badge { font-family: ui-monospace, Menlo, monospace; font-size: 0.78em; color: #ffd166; background: rgba(255,209,102,0.12); border: 1px solid rgba(255,209,102,0.5); border-radius: 8px; padding: 4px 12px; display: none; }
+
+        /* ─── Chain slots ─── */
+        .chain { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-bottom: 16px; }
+        @media (max-width: 1000px) { .chain { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 640px) { .chain { grid-template-columns: repeat(2, 1fr); } }
+        .slot { background: #1b263b; border: 1px solid rgba(65,90,119,0.5); border-radius: 10px; padding: 10px; }
+        .slot h3 { font-size: 0.72em; color: #00d4aa; font-family: ui-monospace, Menlo, monospace; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+        .slot .mat-name { font-size: 0.8em; color: #ffd166; font-family: ui-monospace, Menlo, monospace; min-height: 2.4em; }
+        .slot .dev-name { font-size: 0.66em; color: #778da9; min-height: 2.2em; margin: 3px 0; }
+        .slot select { width: 100%; background: #0d1b2a; color: #e0e6ed; border: 1px solid #415a77; border-radius: 6px; padding: 4px 6px; font-size: 0.7em; font-family: ui-monospace, Menlo, monospace; }
+        .slot select:disabled { opacity: 0.4; cursor: not-allowed; }
+        .slot .arrow { text-align: center; color: #415a77; font-size: 0.7em; margin-top: 4px; }
+
+        /* ─── Lab grid ─── */
+        .lab-grid { display: grid; grid-template-columns: 1.7fr 1fr; gap: 16px; margin-bottom: 16px; }
+        #sim-canvas { width: 100%; height: 460px; background: #050811; border: 1px solid rgba(65,90,119,0.5); border-radius: 10px; display: block; }
+        .log-box { background: #050811; border: 1px solid rgba(0,212,170,0.3); border-radius: 8px; padding: 10px; font-family: ui-monospace, Menlo, monospace; font-size: 0.7em; color: #00d4aa; height: 180px; overflow-y: auto; line-height: 1.7; }
+        .log-box .rej { color: #e63946; }
+        .log-box .star { color: #ffd166; }
+
+        /* ─── Metric tiles + bars ─── */
+        .tiles { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-bottom: 16px; }
+        @media (max-width: 900px) { .tiles { grid-template-columns: repeat(3, 1fr); } }
+        .tile { background: rgba(5,8,17,0.88); border: 1px solid rgba(65,90,119,0.5); border-radius: 10px; padding: 10px; text-align: center; }
+        .tile .k { font-size: 0.62em; color: #90e0ef; text-transform: uppercase; letter-spacing: 0.1em; }
+        .tile .v { font-size: 1.25em; color: #ffd166; font-family: ui-monospace, Menlo, monospace; font-weight: 600; }
+        .tile .u { font-size: 0.62em; color: #778da9; font-family: ui-monospace, Menlo, monospace; }
+        .tile.bad .v { color: #e63946; }
+        .tile.good .v { color: #00d4aa; }
+        .bars { display: flex; flex-direction: column; gap: 7px; }
+        .bar-row { display: flex; align-items: center; gap: 10px; font-size: 0.72em; }
+        .bar-row .bl { width: 300px; font-family: ui-monospace, Menlo, monospace; color: #90e0ef; font-size: 0.9em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        @media (max-width: 700px) { .bar-row .bl { width: 140px; } }
+        .bar-track { flex: 1; background: #0d1b2a; border-radius: 5px; height: 16px; overflow: hidden; }
+        .bar-fill { height: 100%; border-radius: 5px; background: #00d4aa; transition: width 0.5s; }
+        .bar-row:first-child .bar-fill { background: #ffd166; }
+        .bar-num { font-family: ui-monospace, Menlo, monospace; color: #ffd166; min-width: 44px; text-align: right; }
+        .canon { font-family: ui-monospace, Menlo, monospace; font-size: 0.74em; color: #90e0ef; background: rgba(42,157,143,0.1); border: 1px solid rgba(42,157,143,0.4); border-radius: 8px; padding: 10px 14px; margin-top: 14px; }
+        .canon b { color: #ffd166; }
+    </style>
+</head>
+<body>
+    <button class="nav-hamburger" id="nav-hamburger">☰</button>
+    <div class="nav-overlay" id="nav-overlay">
+        <button class="nav-close" id="nav-close">✕</button>
+        <a href="../index.html">🏠 Dashboard</a>
+        <a href="../pages/architecture.html">🏛️ Architecture</a>
+        <a href="../pages/digital-twin.html">🎮 3D Twin</a>
+        <a href="../pages/opa-analysis.html">📡 OPA</a>
+        <a href="../pages/link-budget.html">📊 Link Budget</a>
+        <a href="../pages/hypersonic.html">🚀 Hypersonic</a>
+        <a href="../pages/vleo-constellation.html">🌐 VLEO</a>
+        <a href="../pages/mapper-3d.html">🗺️ Mapper</a>
+        <a href="../pages/satellite-digital-twin.html">🛰️ Sat Twin</a>
+        <a href="../pages/interception-mission.html">🎯 Intercept</a>
+        <a href="../pages/vehicle-terminal.html">🛰️ Terminal</a>
+        <a href="../pages/ehf-optical-trade.html">📡 EHF vs Opt</a>
+        <a href="../pages/ppln-calculator.html">🔢 PPLN</a>
+        <a href="../pages/research-gaps.html">🔬 Gaps</a>
+        <a href="../pages/specifications.html">📐 Specs</a>
+        <a href="../pages/components.html">🧩 Components</a>
+        <a href="../pages/materials.html">🧪 Materials</a>
+        <a href="../pages/photonics-lab.html" class="active">🎛️ Sim Lab</a>
+        <a href="../pages/foundry.html">🏭 Foundry</a>
+        <a href="../pages/foundry-cleanroom.html">🏭 Clean Room</a>
+    </div>
+
+    <div class="container">
+        <nav>
+            <a href="../index.html">🏠 Dashboard</a>
+            <a href="../pages/architecture.html">🏛️ Architecture</a>
+            <a href="../pages/digital-twin.html">🎮 3D Twin</a>
+            <a href="../pages/opa-analysis.html">📡 OPA</a>
+            <a href="../pages/link-budget.html">📊 Link Budget</a>
+            <a href="../pages/hypersonic.html">🚀 Hypersonic</a>
+            <a href="../pages/vleo-constellation.html">🌐 VLEO</a>
+            <a href="../pages/mapper-3d.html">🗺️ Mapper</a>
+            <a href="../pages/satellite-digital-twin.html">🛰️ Sat Twin</a>
+            <a href="../pages/interception-mission.html">🎯 Intercept</a>
+            <a href="../pages/vehicle-terminal.html">🛰️ Terminal</a>
+            <a href="../pages/ehf-optical-trade.html">📡 EHF vs Opt</a>
+            <a href="../pages/ppln-calculator.html">🔢 PPLN</a>
+            <a href="../pages/research-gaps.html">🔬 Gaps</a>
+            <a href="../pages/specifications.html">📐 Specs</a>
+            <a href="../pages/components.html">🧩 Components</a>
+            <a href="../pages/materials.html">🧪 Materials</a>
+            <a href="../pages/photonics-lab.html" class="active">🎛️ Sim Lab</a>
+            <a href="../pages/foundry.html">🏭 Foundry</a>
+            <a href="../pages/foundry-cleanroom.html">🏭 Clean Room</a>
+        </nav>
+
+        <h1>🎛️ Photonics Lab — General Simulation (Materials × Devices, Auto Mode)</h1>
+        <div class="subtitle">Auto-running optimizer exploring material × device pairings across the full Photon-1 terminal chain. Live Friis link budget, rate scaling, Mach-10 tracking.</div>
+
+        <!-- AUTO MODE banner -->
+        <div class="auto-strip" id="auto-strip">
+            <span class="auto-dot" id="auto-dot">● AUTO MODE</span>
+            <div class="switch" id="mode-switch"><div class="knob" id="mode-knob">AUTO</div></div>
+            <span class="mono" style="font-size:0.72em;color:#778da9" id="mode-note">Engine hill-climbs every 4 s · pickers locked</span>
+            <span id="opt-badge">★ OPTIMAL — matches Photon-1 baseline</span>
+        </div>
+
+        <!-- Chain slots -->
+        <div class="chain" id="chain"></div>
+
+        <!-- Canvas + side HUD -->
+        <div class="lab-grid">
+            <div>
+                <canvas id="sim-canvas" width="900" height="460"></canvas>
+                <div class="canon" style="margin-top:10px">Canonical specs: <b>1550 nm</b> · <b>64×64 OPA</b> · <b>SDA 3.1</b> · <b>−50 dBm</b> · <b>≤45 W / 12 kg</b> · <b>Mach 10 tracking</b></div>
+            </div>
+            <div class="hud">
+                <div class="hud-row"><span class="hud-label">Chain</span><span class="hud-value" id="h-chain">—</span></div>
+                <div class="hud-row"><span class="hud-label">TX power out</span><span class="hud-value" id="h-ptx">—</span></div>
+                <div class="hud-row"><span class="hud-label">Modulator VπL / BW</span><span class="hud-value" id="h-mod">—</span></div>
+                <div class="hud-row"><span class="hud-label">Steering range / repoint</span><span class="hud-value" id="h-steer">—</span></div>
+                <div class="hud-row"><span class="hud-label">Coating + optics loss</span><span class="hud-value" id="h-loss">—</span></div>
+                <div class="hud-row"><span class="hud-label">RX sensitivity @ rate</span><span class="hud-value" id="h-sens">—</span></div>
+                <div class="hud-row"><span class="hud-label">Doppler (Mach 10)</span><span class="hud-value" id="h-dopp">—</span></div>
+                <div class="hud-row"><span class="hud-label">Objective score</span><span class="hud-value" id="h-score">—</span></div>
+                <h3 class="mono" style="font-size:0.7em;color:#00d4aa;margin:12px 0 6px">AUTO-OPTIMIZATION LOG</h3>
+                <div class="log-box" id="opt-log"></div>
+            </div>
+        </div>
+
+        <!-- Metric tiles -->
+        <div class="tiles" id="tiles"></div>
+
+        <!-- Top-5 bar chart -->
+        <div class="hud">
+            <h3 class="mono" style="font-size:0.85em;color:#00d4aa;margin-bottom:10px">TOP-5 AUTO-DISCOVERED CONFIGURATIONS</h3>
+            <div class="bars" id="top-bars"></div>
+        </div>
+
+        <footer>Space Photonics · Photonics Lab · auto mode default ON · Friis: Pr = Pt + Gt + Gr − 20log10(4πR/λ) − Latm − Lpoint</footer>
+    </div>
+    <script>
+    (function () {
+        'use strict';
+        const $ = id => document.getElementById(id);
+
+        /* ─── Curated datasets: material options per slot ─── */
+        // tx: dBmOut boost over 1W EDFA baseline (30 dBm), wavelength note, power draw, mass
+        const SLOTS = [
+            { key: 'tx', title: 'TX Source', dev: 'EDFA 1W + DFB laser', options: [
+                { name: 'InP DFB (1550 nm)', dBm: 30, loss: 0, bw: 1.0, power: 8, mass: 0.4 },
+                { name: 'Er:Glass (1550 nm, +17 dBm)', dBm: 28, loss: 0.2, bw: 0.8, power: 9, mass: 0.5 },
+                { name: 'Er:YLF (1550 nm eye-safe)', dBm: 27, loss: 0.3, bw: 0.7, power: 10, mass: 0.6 },
+                { name: 'Nd:YAG (1064 nm)', dBm: 26, loss: 0.8, bw: 0.6, power: 12, mass: 0.8 },
+                { name: 'Ti:Sapphire (800 nm)', dBm: 25, loss: 1.2, bw: 0.5, power: 14, mass: 1.0 }
+            ]},
+            { key: 'mod', title: 'Modulator', dev: 'IQ modulator (SDA OISL)', options: [
+                { name: 'LNOI/TFLN (VπL 2.2 V·cm, 100 GHz)', vpi: 2.2, bwGHz: 100, loss: 0.5, power: 4, mass: 0.3 },
+                { name: 'BaTiO3-Si (r33 ~923 pm/V)', vpi: 1.8, bwGHz: 120, loss: 1.2, power: 5, mass: 0.3 },
+                { name: 'InP EAM', vpi: 3.0, bwGHz: 60, loss: 1.5, power: 4, mass: 0.25 },
+                { name: 'Si PN (30 GHz)', vpi: 5.0, bwGHz: 30, loss: 1.0, power: 3, mass: 0.2 },
+                { name: 'GaP', vpi: 4.0, bwGHz: 40, loss: 0.9, power: 3, mass: 0.25 }
+            ]},
+            { key: 'steer', title: 'Beam Steering', dev: '64×64 OPA chip', options: [
+                { name: 'LNOI OPA 64×64 (±15°, 100 µs)', range: 15, repointUs: 100, loss: 1.0, power: 6, mass: 0.5, aperture: 1.0 },
+                { name: 'Si OPA 32×32', range: 10, repointUs: 150, loss: 1.3, power: 5, mass: 0.4, aperture: 0.8 },
+                { name: 'TeO2 AOM', range: 3, repointUs: 10, loss: 1.5, power: 7, mass: 0.6, aperture: 0.6 },
+                { name: 'SBN ceramic', range: 5, repointUs: 300, loss: 1.4, power: 6, mass: 0.5, aperture: 0.7 },
+                { name: 'FSM backup', range: 2, repointUs: 1000, loss: 0.3, power: 8, mass: 1.2, aperture: 0.9 }
+            ]},
+            { key: 'chan', title: 'Channel / Optics', dev: '5 cm aperture telescope', options: [
+                { name: 'Fused silica + HfO2/SiO2 (high LIDT)', loss: 0.6, power: 2, mass: 2.0, therm: 1.0 },
+                { name: 'MgF2 AR coatings', loss: 0.9, power: 2, mass: 2.0, therm: 0.9 },
+                { name: 'CaF2 optics', loss: 1.1, power: 2, mass: 2.4, therm: 0.8 },
+                { name: 'Chalcogenide As2S3', loss: 1.5, power: 2, mass: 1.8, therm: 0.6 }
+            ]},
+            { key: 'rx', title: 'Receiver', dev: 'APD + TIA front-end', options: [
+                { name: 'InGaAs APD (−50 dBm, 1550 nm)', sens: -50, loss: 0.2, power: 3, mass: 0.4 },
+                { name: 'SiGe APD', sens: -47, loss: 0.3, power: 3, mass: 0.4 },
+                { name: 'Ge-on-Si', sens: -44, loss: 0.4, power: 2, mass: 0.3 },
+                { name: 'HgCdTe', sens: -45, loss: 0.6, power: 5, mass: 0.8 },
+                { name: 'Graphene PD', sens: -40, loss: 0.8, power: 2, mass: 0.2 }
+            ]},
+            { key: 'comms', title: 'Comms Output', dev: 'SDA OISL 3.1 modem', options: [
+                { name: 'SOI + Si3N4 (0.1 dB/m) modem', rateCap: 100, loss: 0.2, power: 10, mass: 1.0 },
+                { name: 'LNOI wafer modem', rateCap: 120, loss: 0.3, power: 12, mass: 1.1 },
+                { name: 'SiO2 planar modem', rateCap: 60, loss: 0.4, power: 9, mass: 1.0 },
+                { name: 'Legacy 10 Gbps modem', rateCap: 10, loss: 0.1, power: 6, mass: 1.4 }
+            ]}
+        ];
+
+        /* ─── Canonical physics constants ─── */
+        const LAM = 1550e-9, D_AP = 0.05, R_BASE_KM = 5000, L_ATM = 0.5;
+        const G_dBi = 10 * Math.log10(Math.pow(Math.PI * D_AP / LAM, 2)); // ≈ 100 dBi
+        const BEAM_urad = LAM / D_AP * 1e6; // ≈ 31 µrad
+        const HGV_V = 3020, DOPPLER_GHz = HGV_V / LAM / 1e9; // ≈ +1.95 GHz
+        const P_BUDGET = 45, M_BUDGET = 12;
+        // Optimal combo: InP DFB + LNOI mod + LNOI OPA + fused silica/HfO2 + InGaAs APD + SOI/Si3N4
+        const OPTIMAL = [0, 0, 0, 0, 0, 0];
+
+        /* ─── State (all declared before use) ─── */
+        const state = { sel: [1, 1, 1, 1, 1, 1], auto: true, best: null, top5: [], log: [], score: 0, metrics: null };
+        let particles = [], t0 = performance.now();
+
+        function chosen(i) { return SLOTS[i].options[state.sel[i]]; }
+
+        /* ─── Live physics engine ─── */
+        function compute() {
+            const tx = chosen(0), mod = chosen(1), st = chosen(2), ch = chosen(3), rx = chosen(4), cm = chosen(5);
+            const Pt = tx.dBm; // dBm
+            const Lpoint = Math.max(0, 3 - st.range * 0.15); // pointing loss grows for small-range steerers
+            const Lextra = mod.loss + st.loss + ch.loss + rx.loss + cm.loss + tx.loss;
+            const Pr = Pt + 2 * G_dBi - 20 * Math.log10(4 * Math.PI * R_BASE_KM * 1e3 / LAM) - L_ATM - Lpoint - Lextra;
+            // data rate: limited by modulator BW, TX BW factor, modem cap
+            let rate = Math.min(mod.bwGHz * tx.bw, cm.rateCap);
+            rate = Math.max(1, Math.round(rate));
+            // sensitivity rate-scaled: 1.5 dB per octave above 10 Gbps
+            const sens = rx.sens - (rate > 10 ? 1.5 * Math.log2(rate / 10) : 0);
+            const margin = Pr - sens;
+            // max range: solve Friis for R at Pr = sens
+            const spare = margin;
+            const maxRangeKm = Math.round(R_BASE_KM * Math.pow(10, spare / 20));
+            // track score vs Mach-10 HGV: need range & speed; repoint 100 µs ideal
+            const needRange = 8, needUs = 250;
+            const track = Math.round(100 * Math.min(1, st.range / needRange) * Math.min(1, needUs / st.repointUs) * st.aperture);
+            const power = tx.power + mod.power + st.power + ch.power + rx.power + cm.power;
+            const mass = +(tx.mass + mod.mass + st.mass + ch.mass + rx.mass + cm.mass + 4.5).toFixed(1); // +structure
+            // objective score
+            let score = 50 + margin * 1.5 + (rate - 100) * 0.25 + (track - 80) * 0.3;
+            if (power > P_BUDGET) score -= (power - P_BUDGET) * 3;
+            if (mass > M_BUDGET) score -= (mass - M_BUDGET) * 4;
+            score = Math.round(score * 10) / 10;
+            state.score = score;
+            state.metrics = { Pt: Pt, Pr: Math.round(Pr * 10) / 10, margin: Math.round(margin * 10) / 10,
+                rate: rate, sens: Math.round(sens * 10) / 10, maxRangeKm: maxRangeKm, track: track,
+                power: Math.round(power), mass: mass, Lpoint: Math.round(Lpoint * 10) / 10, Lextra: Math.round(Lextra * 10) / 10,
+                vpi: mod.vpi, bwGHz: mod.bwGHz, range: st.range, repointUs: st.repointUs };
+            return state.metrics;
+        }
+
+        /* ─── HUD / tiles / picks rendering ─── */
+        function renderHUD() {
+            const m = state.metrics;
+            $('h-chain').textContent = state.sel.map((s, i) => SLOTS[i].options[s].name.split(' ')[0].replace(/[^A-Za-z0-9]/g, '')).join('·');
+            $('h-ptx').textContent = '+' + m.Pt + ' dBm (' + (Math.pow(10, (m.Pt - 30) / 10)).toFixed(1) + ' W)';
+            $('h-mod').textContent = m.vpi + ' V·cm / ' + m.bwGHz + ' GHz';
+            $('h-steer').textContent = '±' + m.range + '° / ' + m.repointUs + ' µs';
+            $('h-loss').textContent = m.Lextra.toFixed(1) + ' dB (point ' + m.Lpoint.toFixed(1) + ' dB)';
+            $('h-sens').textContent = m.sens.toFixed(1) + ' dBm @ ' + m.rate + ' Gbps';
+            $('h-dopp').textContent = '+' + DOPPLER_GHz.toFixed(2) + ' GHz';
+            $('h-score').textContent = m ? state.score.toFixed(1) : '—';
+            const tiles = [
+                ['Link margin', m.margin.toFixed(1), 'dB @ 5,000 km', m.margin >= 0],
+                ['Max range', m.maxRangeKm.toLocaleString(), 'km', m.maxRangeKm >= 5000],
+                ['Data rate', m.rate, 'Gbps', m.rate >= 100],
+                ['Track score', m.track, 'vs HGV /100', m.track >= 80],
+                ['Power', m.power, 'W / 45 W', m.power <= P_BUDGET],
+                ['Mass est.', m.mass, 'kg / 12 kg', m.mass <= M_BUDGET]
+            ];
+            $('tiles').innerHTML = tiles.map(t =>
+                '<div class="tile ' + (t[3] ? 'good' : 'bad') + '"><div class="k">' + t[0] + '</div>' +
+                '<div class="v">' + t[1] + '</div><div class="u">' + t[2] + '</div></div>').join('');
+            state.sel.forEach((s, i) => {
+                const el = $('pick-' + i);
+                if (el) el.value = String(s);
+                $('mat-' + i).textContent = SLOTS[i].options[s].name;
+            });
+            // optimal badge
+            const isOpt = state.sel.every((s, i) => s === OPTIMAL[i]);
+            $('opt-badge').style.display = isOpt ? 'block' : 'none';
+        }
+
+        function renderTop5() {
+            if (!state.top5.length) { $('top-bars').innerHTML = '<div class="mono" style="color:#778da9;font-size:0.75em">Collecting trials…</div>'; return; }
+            const max = Math.max.apply(null, state.top5.map(t => t.score).concat([1]));
+            $('top-bars').innerHTML = state.top5.map(t =>
+                '<div class="bar-row"><span class="bl">' + t.label + '</span>' +
+                '<div class="bar-track"><div class="bar-fill" style="width:' + Math.max(3, Math.round(t.score / max * 100)) + '%"></div></div>' +
+                '<span class="bar-num">' + t.score.toFixed(1) + '</span></div>').join('');
+        }
+
+        function configLabel(sel) {
+            return sel.map((s, i) => SLOTS[i].options[s].name.split(' ')[0].replace(/[^A-Za-z0-9:+]/g, '')).join(' + ');
+        }
+
+        function pushTop5(score) {
+            const label = configLabel(state.sel);
+            if (state.top5.some(t => t.label === label)) return;
+            state.top5.push({ label: label, score: score });
+            state.top5.sort((a, b) => b.score - a.score);
+            state.top5 = state.top5.slice(0, 5);
+        }
+
+        function logLine(msg, cls) {
+            state.log.push({ msg: msg, cls: cls || '' });
+            state.log = state.log.slice(-8);
+            $('opt-log').innerHTML = state.log.map(l =>
+                '<div class="' + l.cls + '">▸ ' + l.msg + '</div>').join('');
+            $('opt-log').scrollTop = $('opt-log').scrollHeight;
+        }
+
+        /* ─── Chain slots DOM ─── */
+        function buildSlots() {
+            $('chain').innerHTML = SLOTS.map((s, i) =>
+                '<div class="slot"><h3>' + (i + 1) + '. ' + s.title + '</h3>' +
+                '<div class="mat-name" id="mat-' + i + '"></div>' +
+                '<div class="dev-name">⚙ ' + s.dev + '</div>' +
+                '<select id="pick-' + i + '" disabled>' +
+                s.options.map((o, j) => '<option value="' + j + '">' + o.name + '</option>').join('') +
+                '</select><div class="arrow">' + (i < 5 ? '▼' : '■ out') + '</div></div>').join('');
+            SLOTS.forEach((s, i) => {
+                $('pick-' + i).addEventListener('change', function () {
+                    state.sel[i] = parseInt(this.value, 10);
+                    compute(); renderHUD();
+                    logLine('Manual: ' + SLOTS[i].options[state.sel[i]].name.split(' (')[0] + ' → margin ' + state.metrics.margin.toFixed(1) + ' dB, ' + state.metrics.rate + ' Gbps');
+                });
+            });
+        }
+
+        /* ─── Auto optimizer: hill-climb every 4 s ─── */
+        function autoStep() {
+            if (!state.auto) return;
+            const curScore = state.score;
+            // perturb 1–2 slots to neighboring options
+            const trial = state.sel.slice();
+            const nPert = Math.random() < 0.5 ? 1 : 2;
+            const changed = [];
+            for (let k = 0; k < nPert; k++) {
+                const i = Math.floor(Math.random() * 6);
+                const n = SLOTS[i].options.length;
+                const d = Math.random() < 0.5 ? -1 : 1;
+                const ni = Math.min(n - 1, Math.max(0, trial[i] + d));
+                if (ni !== trial[i] && !changed.includes(i)) { trial[i] = ni; changed.push(i); }
+            }
+            if (!changed.length) return;
+            const saved = state.sel.slice();
+            state.sel = trial;
+            compute();
+            const newScore = state.score;
+            const m = state.metrics;
+            const names = changed.map(i => SLOTS[i].options[trial[i]].name.split(' (')[0]).join(' + ');
+            if (newScore >= curScore) {
+                logLine('Trial: ' + names + ' → VπL ' + m.vpi + ', rate ' + m.rate + ' Gbps, margin ' + (m.margin >= 0 ? '+' : '') + m.margin.toFixed(1) + ' dB — ACCEPTED', '');
+                pushTop5(newScore);
+                renderTop5();
+                if (state.sel.every((s, i) => s === OPTIMAL[i])) {
+                    logLine('★ OPTIMAL reached — matches Photon-1 baseline (InP DFB + LNOI + 64×64 OPA + InGaAs APD)', 'star');
+                }
+            } else {
+                logLine('Trial: ' + names + ' → score ' + newScore.toFixed(1) + ' < ' + curScore.toFixed(1) + ' — REJECTED', 'rej');
+                state.sel = saved;
+                compute();
+            }
+            renderHUD();
+        }
+
+        /* ─── Mode toggle ─── */
+        function setAuto(on) {
+            state.auto = on;
+            $('mode-switch').className = 'switch' + (on ? '' : ' off');
+            $('mode-knob').textContent = on ? 'AUTO' : 'MAN';
+            $('auto-strip').className = 'auto-strip' + (on ? '' : ' manual');
+            $('auto-dot').textContent = on ? '● AUTO MODE' : '● MANUAL MODE';
+            $('mode-note').textContent = on ? 'Engine hill-climbs every 4 s · pickers locked' : 'Pickers unlocked — change any material to recompute';
+            SLOTS.forEach((s, i) => { $('pick-' + i).disabled = on; });
+            logLine(on ? 'AUTO MODE engaged — optimizer running' : 'MANUAL MODE — pickers unlocked', on ? '' : 'star');
+        }
+
+        /* ─── Canvas animation ─── */
+        const cv = $('sim-canvas'), ctx = cv.getContext('2d');
+        const BLOCK_COLORS = ['#ffd166', '#00d4aa', '#90e0ef', '#2a9d8f', '#e0e6ed', '#00d4aa'];
+        function marginColor(margin) {
+            if (margin < 0) return '#e63946';
+            if (margin < 6) return '#ffd166';
+            return '#00d4aa';
+        }
+        function initParticles() {
+            particles = [];
+            for (let i = 0; i < 60; i++) particles.push({ x: Math.random(), off: Math.random() * 40 - 20, sp: 0.0016 + Math.random() * 0.0012 });
+        }
+        function draw(ts) {
+            const t = (ts - t0) / 1000;
+            const W = cv.width, H = cv.height;
+            ctx.clearRect(0, 0, W, H);
+            const m = state.metrics;
+            const streamCol = marginColor(m.margin);
+            const nB = 6, pad = 14, bw = (W - pad * 2) / nB, bh = 110, by = H * 0.42 - bh / 2;
+            // material blocks
+            for (let i = 0; i < nB; i++) {
+                const bx = pad + i * bw;
+                const pulse = 0.55 + 0.25 * Math.sin(t * 2 + i);
+                ctx.fillStyle = 'rgba(13,27,42,0.9)';
+                ctx.strokeStyle = BLOCK_COLORS[i];
+                ctx.globalAlpha = pulse;
+                ctx.lineWidth = 1.5;
+                ctx.beginPath(); ctx.roundRect(bx + 4, by, bw - 8, bh, 8); ctx.fill(); ctx.stroke();
+                ctx.globalAlpha = 1;
+                ctx.fillStyle = BLOCK_COLORS[i];
+                ctx.font = '10px ui-monospace, Menlo, monospace';
+                ctx.textAlign = 'center';
+                const nm = SLOTS[i].options[state.sel[i]].name.split(' (')[0];
+                ctx.fillText(nm.length > 16 ? nm.slice(0, 15) + '…' : nm, bx + bw / 2, by + bh / 2 - 4);
+                ctx.fillStyle = '#778da9';
+                ctx.fillText(SLOTS[i].title.toUpperCase(), bx + bw / 2, by + bh / 2 + 12);
+            }
+            // photon stream through blocks
+            ctx.strokeStyle = streamCol; ctx.lineWidth = 2; ctx.globalAlpha = 0.9;
+            const yc = by + bh / 2;
+            ctx.beginPath(); ctx.moveTo(pad, yc); ctx.lineTo(W - pad, yc); ctx.stroke();
+            particles.forEach(p => {
+                p.x += p.sp; if (p.x > 1) p.x = 0;
+                const px = pad + p.x * (W - pad * 2);
+                // widen in steering block (index 2)
+                let py = yc + p.off * 0.4 * Math.sin(p.x * 6.28 * 2 + t * 3);
+                const steerX0 = pad + 2 * bw, steerX1 = pad + 3 * bw;
+                if (px > steerX0 && px < steerX1) {
+                    const f = (px - steerX0) / bw;
+                    py = yc + p.off * f * 1.8;
+                }
+                ctx.fillStyle = streamCol;
+                ctx.beginPath(); ctx.arc(px, py, 2.2, 0, 6.29); ctx.fill();
+            });
+            // steering fan lines sweeping ±range
+            const st = chosen(2);
+            const sx = pad + 3 * bw - 8, sy = yc;
+            const fanDeg = st.range;
+            for (let k = -2; k <= 2; k++) {
+                const ang = (k / 2) * fanDeg * Math.PI / 180 * Math.sin(t * 1.5);
+                ctx.strokeStyle = 'rgba(144,224,239,0.55)'; ctx.lineWidth = 1;
+                ctx.beginPath(); ctx.moveTo(sx, sy);
+                ctx.lineTo(sx + Math.cos(ang) * 90, sy + Math.sin(ang) * 90); ctx.stroke();
+            }
+            // header readout
+            ctx.fillStyle = '#90e0ef'; ctx.font = '12px ui-monospace, Menlo, monospace'; ctx.textAlign = 'left';
+            ctx.fillText('λ=1550 nm · G=' + G_dBi.toFixed(1) + ' dBi · θ=' + BEAM_urad.toFixed(0) + ' µrad · beam ' + (m.rate) + ' Gbps', pad, 22);
+            ctx.fillStyle = streamCol;
+            ctx.fillText('LINK MARGIN ' + (m.margin >= 0 ? '+' : '') + m.margin.toFixed(1) + ' dB · range ' + m.maxRangeKm.toLocaleString() + ' km · Pr ' + m.Pr.toFixed(1) + ' dBm', pad, 40);
+            // HGV inset (bottom strip): red target streaks, beam tracks it
+            const iy = H - 90, iw = W - pad * 2;
+            ctx.fillStyle = 'rgba(13,27,42,0.9)'; ctx.strokeStyle = 'rgba(230,57,70,0.5)';
+            ctx.beginPath(); ctx.roundRect(pad, iy, iw, 76, 8); ctx.fill(); ctx.stroke();
+            ctx.fillStyle = '#e63946'; ctx.font = '10px ui-monospace, Menlo, monospace';
+            ctx.fillText('HGV TRACKING INSET — Mach 10 (3,020 m/s @ 30 km) · Δf +' + DOPPLER_GHz.toFixed(2) + ' GHz', pad + 10, iy + 16);
+            const hx = pad + 20 + ((t * 0.35) % 1) * (iw - 60); // scaled streak
+            const hy = iy + 48;
+            ctx.strokeStyle = 'rgba(230,57,70,0.35)'; ctx.lineWidth = 6;
+            ctx.beginPath(); ctx.moveTo(hx - 46, hy); ctx.lineTo(hx, hy); ctx.stroke();
+            ctx.fillStyle = '#e63946';
+            ctx.beginPath(); ctx.moveTo(hx + 8, hy); ctx.lineTo(hx - 4, hy - 6); ctx.lineTo(hx - 4, hy + 6); ctx.closePath(); ctx.fill();
+            // tracking beam from chain to HGV
+            const lock = m.track >= 80;
+            ctx.strokeStyle = lock ? 'rgba(0,212,170,0.8)' : 'rgba(255,209,102,0.7)';
+            ctx.lineWidth = 1.5; ctx.setLineDash([5, 4]);
+            ctx.beginPath(); ctx.moveTo(sx, by + bh); ctx.lineTo(hx, hy); ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.fillStyle = lock ? '#00d4aa' : '#ffd166'; ctx.textAlign = 'right';
+            ctx.fillText('TRACK ' + m.track + '/100 ' + (lock ? 'LOCK' : 'MARGINAL'), pad + iw - 10, iy + 16);
+            ctx.textAlign = 'left';
+            requestAnimationFrame(draw);
+        }
+
+        /* ─── Hamburger nav ─── */
+        const hamBtn = $('nav-hamburger'), navOverlay = $('nav-overlay'), navClose = $('nav-close');
+        hamBtn.addEventListener('click', () => navOverlay.classList.add('active'));
+        navClose.addEventListener('click', () => navOverlay.classList.remove('active'));
+        navOverlay.querySelectorAll('a').forEach(a => a.addEventListener('click', () => navOverlay.classList.remove('active')));
+
+        /* ─── Boot (AUTO MODE ON by default) ─── */
+        $('mode-switch').addEventListener('click', () => setAuto(!state.auto));
+        buildSlots();
+        initParticles();
+        compute();
+        renderHUD();
+        pushTop5(state.score);
+        renderTop5();
+        setAuto(true);
+        logLine('Boot: λ=1550 nm · 64×64 OPA · SDA 3.1 · −50 dBm · ≤45 W / 12 kg');
+        setInterval(autoStep, 4000);
+        requestAnimationFrame(draw);
+    })();
+    </script>
+</body>
+</html>
