@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flight Heritage & ISL Benchmarks — Space Photonics</title>
+<style>
+  :root {
+    --bg: #0a0e17;
+    --bg-card: #0f1623;
+    --bg-hover: #141d2e;
+    --border: #1e2a3f;
+    --text: #c9d1d9;
+    --text-dim: #8b949e;
+    --accent: #58a6ff;
+    --accent-glow: rgba(88,166,255,0.15);
+    --success: #3fb950;
+    --warning: #d29922;
+    --danger: #f85149;
+    --critical: #ff7b72;
+    --important: #79c0ff;
+    --optional: #d2a8ff;
+    --notneeded: #8b949e;
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, sans-serif;
+    --mono: "SF Mono", Monaco, "Cascadia Code", "Fira Code", monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  header {
+    background: linear-gradient(180deg, rgba(88,166,255,0.08) 0%, transparent 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 1rem 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(12px);
+  }
+  .nav-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .logo {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  nav { display: flex; gap: 1.2rem; flex-wrap: wrap; }
+  nav a {
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    font-weight: 500;
+    padding: 0.25rem 0;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  nav a:hover, nav a.active {
+    color: var(--text);
+    border-bottom-color: var(--accent);
+    text-decoration: none;
+  }
+
+  main {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+  h1 {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(90deg, var(--accent), #a371f7);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .subtitle {
+    color: var(--text-dim);
+    margin-bottom: 2rem;
+    font-size: 1.05rem;
+  }
+
+  section {
+    margin-bottom: 3rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem 2rem;
+    transition: border-color 0.2s;
+  }
+  section:hover { border-color: #303d55; }
+  h2 {
+    font-size: 1.35rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  h3 {
+    font-size: 1.1rem;
+    color: var(--important);
+    margin: 1.5rem 0 0.75rem;
+  }
+  p { margin-bottom: 1rem; color: var(--text-dim); }
+
+  .filters {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+  }
+  .filter-btn {
+    background: var(--bg-hover);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 0.4rem 0.9rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: var(--font);
+  }
+  .filter-btn:hover, .filter-btn.active {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+
+  .table-wrap {
+    overflow-x: auto;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    margin-top: 1rem;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+    min-width: 800px;
+  }
+  thead {
+    background: linear-gradient(180deg, #161f30 0%, #0f1623 100%);
+    position: sticky;
+    top: 0;
+  }
+  th {
+    text-align: left;
+    padding: 0.85rem 1rem;
+    font-weight: 600;
+    color: var(--accent);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  td {
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    vertical-align: top;
+  }
+  tbody tr { transition: background 0.15s; }
+  tbody tr:hover { background: var(--bg-hover); }
+  tbody tr:last-child td { border-bottom: none; }
+
+  .badge {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .badge-complete { background: rgba(63,185,80,0.15); color: var(--success); border: 1px solid rgba(63,185,80,0.3); }
+  .badge-operational { background: rgba(88,166,255,0.15); color: var(--accent); border: 1px solid rgba(88,166,255,0.3); }
+  .badge-design { background: rgba(210,153,34,0.15); color: var(--warning); border: 1px solid rgba(210,153,34,0.3); }
+  .badge-inactive { background: rgba(248,81,73,0.15); color: var(--danger); border: 1px solid rgba(248,81,73,0.3); }
+  .badge-planned { background: rgba(210,168,255,0.15); color: var(--optional); border: 1px solid rgba(210,168,255,0.3); }
+  .badge-demo { background: rgba(121,192,255,0.15); color: var(--important); border: 1px solid rgba(121,192,255,0.3); }
+  .badge-achieved { background: rgba(86,211,100,0.15); color: #56d364; border: 1px solid rgba(86,211,100,0.3); }
+
+  .tag {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.78rem;
+    margin: 0.15rem 0.15rem 0.15rem 0;
+    cursor: pointer;
+    transition: transform 0.1s;
+    border: 1px solid transparent;
+  }
+  .tag:hover { transform: translateY(-1px); }
+  .tag-critical { background: rgba(255,123,114,0.12); color: var(--critical); border-color: rgba(255,123,114,0.25); }
+  .tag-important { background: rgba(121,192,255,0.12); color: var(--important); border-color: rgba(121,192,255,0.25); }
+  .tag-optional { background: rgba(210,168,255,0.12); color: var(--optional); border-color: rgba(210,168,255,0.25); }
+
+  .orbit-geo { color: #ff7b72; }
+  .orbit-leo { color: #79c0ff; }
+  .orbit-iss { color: #d2a8ff; }
+  .orbit-sso { color: #56d364; }
+  .orbit-molniya { color: #f0883e; }
+  .orbit-l1 { color: #f778ba; }
+  .orbit-ground { color: #8b949e; }
+
+  .highlight-box {
+    background: linear-gradient(135deg, rgba(88,166,255,0.08), rgba(163,113,247,0.08));
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    margin: 1rem 0;
+  }
+  .highlight-box strong { color: var(--accent); }
+
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+  .info-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.25rem;
+    transition: all 0.2s;
+  }
+  .info-card:hover {
+    border-color: var(--accent);
+    box-shadow: 0 0 20px var(--accent-glow);
+  }
+  .info-card h4 {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    color: var(--accent);
+  }
+  .info-card p {
+    font-size: 0.88rem;
+    margin-bottom: 0;
+  }
+  .info-card .metric {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0.5rem 0;
+    font-family: var(--mono);
+  }
+
+  footer {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    border-top: 1px solid var(--border);
+    margin-top: 2rem;
+  }
+
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: #484f58; }
+
+  @media (max-width: 768px) {
+    main { padding: 1rem; }
+    section { padding: 1rem; }
+    h1 { font-size: 1.5rem; }
+    .nav-container { flex-direction: column; align-items: flex-start; }
+    nav { gap: 0.8rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="nav-container">
+    <a href="../index.html" class="logo">🛰️ Space Photonics</a>
+    <nav>
+      <a href="../index.html">🏠 Dashboard</a>
+      <a href="architecture.html">🏛️ Architecture</a>
+      <a href="satellite-digital-twin.html">🎮 3D Twin</a>
+      <a href="opa-beam-steering.html">📡 OPA</a>
+      <a href="link-budget.html">📊 Link Budget</a>
+      <a href="hypersonic.html">🚀 Hypersonic</a>
+      <a href="vleo.html">🌐 VLEO</a>
+      <a href="orbital-mapper.html">🗺️ Mapper</a>
+      <a href="satellite-digital-twin.html">🛰️ Sat Twin</a>
+      <a href="intercept.html">🎯 Intercept</a>
+      <a href="terminal.html">🛰️ Terminal</a>
+      <a href="ehf-vs-opt.html">📡 EHF vs Opt</a>
+      <a href="ppln.html">🔢 PPLN</a>
+      <a href="gaps.html">🔬 Gaps</a>
+      <a href="specs.html">📐 Specs</a>
+      <a href="components.html">🧩 Components</a>
+      <a href="materials.html">🧪 Materials</a>
+      <a href="photonics-lab.html">🎛️ Sim Lab</a>
+      <a href="foundry.html">🏭 Foundry</a>
+      <a href="clean-room.html">🏭 Clean Room</a>
+      <a href="missions.html" class="active">📡 Missions</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <h1>Flight Heritage & ISL Benchmarks</h1>
+  <p class="subtitle">
+    Every material in the <a href="materials.html">Photon‑1 catalog</a> is traceable to flight‑proven optical links.
+    This page maps real satellites from our database to the materials they validate.
+  </p>
+
+  <!-- Statistics -->
+  <section>
+    <h2>📊 Mission Database at a Glance</h2>
+    <div class="cards-grid" id="stats">
+      <div class="info-card">
+        <h4>Total Missions</h4>
+        <div class="metric" id="totalMissions">0</div>
+        <p>Including planned, operational, and completed</p>
+      </div>
+      <div class="info-card">
+        <h4>🟢 Operational</h4>
+        <div class="metric" id="operationalCount">0</div>
+        <p>Currently active in orbit</p>
+      </div>
+      <div class="info-card">
+        <h4>🌍 GEO / LEO / SSO</h4>
+        <div class="metric" id="orbitBreakdown">0 / 0 / 0</div>
+        <p>Breakdown by primary orbit</p>
+      </div>
+      <div class="info-card">
+        <h4>📡 Frequency Allocations</h4>
+        <div class="metric" id="freqCount">0</div>
+        <p>Total frequency entries in our database</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Mission Table -->
+  <section>
+    <h2>🛰️ Mission → Material Traceability</h2>
+    <p>Filter by orbit or status. Click a material tag to jump to the Materials Catalog.</p>
+
+    <div class="filters">
+      <button class="filter-btn active" onclick="filterTable('all', 'mission')">All</button>
+      <button class="filter-btn" onclick="filterTable('GEO', 'mission')">GEO</button>
+      <button class="filter-btn" onclick="filterTable('LEO', 'mission')">LEO</button>
+      <button class="filter-btn" onclick="filterTable('SSO', 'mission')">SSO</button>
+      <button class="filter-btn" onclick="filterTable('Molniya', 'mission')">Molniya</button>
+      <button class="filter-btn" onclick="filterTable('L1', 'mission')">L1</button>
+      <button class="filter-btn" onclick="filterTable('Operational', 'mission')">🟢 Operational</button>
+      <button class="filter-btn" onclick="filterTable('Inactive', 'mission')">🔴 Inactive</button>
+      <button class="filter-btn" onclick="filterTable('Planned', 'mission')">🟡 Planned</button>
+    </div>
+
+    <div class="table-wrap">
+      <table id="missionTable">
+        <thead>
+          <tr>
+            <th>Satellite</th>
+            <th>Agency</th>
+            <th>Orbit</th>
+            <th>Payload / Optical</th>
+            <th>Status</th>
+            <th>Materials Validated</th>
+            <th>Correlation to Photon‑1</th>
+          </tr>
+        </thead>
+        <tbody id="missionBody">
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Frequency Table -->
+  <section>
+    <h2>📡 RF Frequency Allocations (from our database)</h2>
+    <p>These frequencies represent the legacy RF services that Photon‑1's optical ISL will augment or replace.</p>
+    <div class="filters">
+      <button class="filter-btn active" onclick="filterTable('all', 'freq')">All</button>
+      <button class="filter-btn" onclick="filterTable('Telemetry', 'freq')">Telemetry</button>
+      <button class="filter-btn" onclick="filterTable('Command', 'freq')">Command</button>
+      <button class="filter-btn" onclick="filterTable('DCP', 'freq')">DCP</button>
+      <button class="filter-btn" onclick="filterTable('GEOS', 'freq')">GEOS & R</button>
+    </div>
+    <div class="table-wrap">
+      <table id="freqTable">
+        <thead>
+          <tr>
+            <th>Satellite</th>
+            <th>Service</th>
+            <th>Frequency (MHz)</th>
+            <th>Bandwidth (kHz)</th>
+            <th>Polarisation</th>
+            <th>Data Rate</th>
+          </tr>
+        </thead>
+        <tbody id="freqBody">
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Material Categories Summary -->
+  <section>
+    <h2>🔬 Material Categories Validated by Missions</h2>
+
+    <h3>I. Nonlinear & EO Crystals</h3>
+    <div class="highlight-box">
+      <strong>Correlate with:</strong> LCRD (1550 nm SHG), Micius (SPDC), EDRS (pointing/steering)<br>
+      <strong>Materials:</strong> <span class="tag tag-critical">TFLN (#1)</span> <span class="tag tag-important">MgO:LN (#2)</span> <span class="tag tag-optional">KTP/PPKTP (#4)</span> <span class="tag tag-optional">BBO (#5)</span>
+    </div>
+
+    <h3>II. III-V Semiconductors</h3>
+    <div class="highlight-box">
+      <strong>Correlate with:</strong> ILLUMA‑T, TBIRD, Starlink, LUCAS<br>
+      <strong>Materials:</strong> <span class="tag tag-critical">InP (#12)</span> <span class="tag tag-critical">InGaAsP (#18)</span> <span class="tag tag-critical">InGaAs (#14)</span> <span class="tag tag-important">GaAs (#11)</span> <span class="tag tag-important">AlGaAs (#17)</span>
+    </div>
+
+    <h3>III. Dielectrics & Coatings</h3>
+    <div class="highlight-box">
+      <strong>Correlate with:</strong> LCRD, EDRS, GEO‑KOMPSAT, GOES‑R<br>
+      <strong>Materials:</strong> <span class="tag tag-critical">SiO₂ (#42)</span> <span class="tag tag-critical">HfO₂ (#46)</span> <span class="tag tag-critical">SiN (#41)</span> <span class="tag tag-important">Al₂O₃ (#43)</span> <span class="tag tag-optional">Ta₂O₅ (#44)</span> <span class="tag tag-critical">MgF₂ (#49)</span>
+    </div>
+
+    <h3>IV. Thermal Management</h3>
+    <div class="highlight-box">
+      <strong>Correlate with:</strong> LCRD, ILLUMA‑T, Starlink, Earth‑observing SSO<br>
+      <strong>Materials:</strong> <span class="tag tag-important">Cu‑W</span> <span class="tag tag-important">AlN</span> <span class="tag tag-optional">Diamond</span> <span class="tag tag-optional">Pyrolytic Graphite</span>
+    </div>
+
+    <h3>V. Heterogeneous Substrates</h3>
+    <div class="highlight-box">
+      <strong>Correlate with:</strong> Every Si‑photonics PIC (SOI), InP‑on‑Si demonstrations<br>
+      <strong>Materials:</strong> <span class="tag tag-critical">SOI (#91)</span> <span class="tag tag-critical">TFLN‑on‑Insulator (#94)</span> <span class="tag tag-critical">SiGe (#95)</span> <span class="tag tag-important">InP‑on‑Si (#93)</span>
+    </div>
+  </section>
+
+  <!-- Cross‑link to Materials -->
+  <section style="text-align: center; background: linear-gradient(135deg, rgba(88,166,255,0.05), rgba(163,113,247,0.05));">
+    <h2>🔗 Explore the Materials Catalog</h2>
+    <p style="max-width: 600px; margin: 0 auto 1.5rem;">
+      Every mission above maps to specific materials in the Photon‑1 bill of materials.
+      Browse the full 100‑material catalog with suppliers, heritage, and 2023‑26 developments.
+    </p>
+    <a href="materials.html" style="display: inline-block; background: var(--accent); color: #fff; padding: 0.75rem 2rem; border-radius: 8px; font-weight: 600; font-size: 1rem;">📋 Open Materials Catalog →</a>
+  </section>
+
+</main>
+
+<footer>
+  <p>🛰️ Space Photonics — Photon‑1 VLEO Optical Inter‑Satellite Link Terminal</p>
+  <p style="margin-top: 0.5rem; font-size: 0.8rem;">Data compiled from NASA, ESA, JAXA, and primary mission sources. Unverified figures explicitly omitted.</p>
+</footer>
+
+<script>
+const missions = [
+  { acronym: "LCRD", agency: "NASA", orbit: "GEO", payload: "1550 nm DPSK modem", status: "Complete", materials: ["TFLN modulators", "HfO₂/SiO₂ coatings", "InGaAsP amps", "Thermal management"], note: "Primary GEO benchmark" },
+  { acronym: "ILLUMA-T", agency: "NASA", orbit: "ISS", payload: "1.2 Gbps optical modem", status: "Complete", materials: ["InP PICs", "InGaAsP SOA", "COTS III-V qual", "Thermal mgmt"], note: "COTS-to-space qualification" },
+  { acronym: "TBIRD", agency: "NASA/MIT-LL", orbit: "LEO", payload: "200 Gbps coherent", status: "Complete", materials: ["InP transceivers", "Coherent optics", "Packaging"], note: "Throughput record" },
+  { acronym: "EDRS-A/C", agency: "ESA/Airbus", orbit: "GEO", payload: "1.8 Gbps relay", status: "Operational", materials: ["Dielectric mirrors", "SiO₂/Ta₂O₅", "InP lasers", "Thermal control"], note: "99.53% reliability" },
+  { acronym: "Starlink ISL", agency: "SpaceX", orbit: "LEO", payload: "100–400 Gbps", status: "Operational", materials: ["InP lasers", "SiN PICs", "Rad-hard", "Thermal cycling"], note: "Mass production benchmark" },
+  { acronym: "SOCRATES", agency: "NICT/JAXA", orbit: "SSO", payload: "10 Mbps PAT", status: "Operational", materials: ["PAT systems"], note: "Acquisition reference" },
+  { acronym: "LUCAS", agency: "JAXA", orbit: "GEO", payload: "1.8 Gbps", status: "Operational", materials: ["Thermal-vacuum", "GEO optics"], note: "JAXA thermal data" },
+  { acronym: "Micius", agency: "CAS", orbit: "SSO", payload: "QKD @ 850/1550", status: "Operational", materials: ["BBO/PPKTP", "Quantum crystals"], note: "Quantum link loss" },
+  { acronym: "Guangchuan 01/02", agency: "Aurora Starcom", orbit: "LEO", payload: "400 Gbps ISL", status: "Demo", materials: ["Coherent DSP", "High-power amps"], note: "400 Gbps at 640 km" },
+  { acronym: "NICT Ground Demo", agency: "NICT", orbit: "Ground", payload: "2 Tbps WDM", status: "Achieved", materials: ["WDM multiplexing", "Compact terminals"], note: "5×400 Gbps" },
+  { acronym: "Sentinel-1A", agency: "ESA", orbit: "SSO", payload: "C-band SAR", status: "Inactive", materials: ["SAR antennas"], note: "Radar, not optical" },
+  { acronym: "Sentinel-2A", agency: "ESA", orbit: "SSO", payload: "MSI imager", status: "Operational", materials: ["Multispectral optics"], note: "Optical imaging" },
+  { acronym: "Sentinel-3A", agency: "ESA", orbit: "SSO", payload: "OLCI/SLSTR", status: "Operational", materials: ["Ocean/land optics"], note: "Thermal & colour" },
+  { acronym: "Sentinel-5P", agency: "ESA", orbit: "SSO", payload: "TROPOMI", status: "Operational", materials: ["UV/VIS/NIR grating"], note: "Atmospheric" },
+  { acronym: "Landsat-8", agency: "NASA/USGS", orbit: "SSO", payload: "OLI/TIRS", status: "Operational", materials: ["Multispectral optics", "Thermal IR"], note: "Earth resource" },
+  { acronym: "Landsat-9", agency: "NASA/USGS", orbit: "SSO", payload: "OLI/TIRS", status: "Operational", materials: ["Same as Landsat-8"], note: "Continuity" },
+  { acronym: "Aqua", agency: "NASA", orbit: "SSO", payload: "AIRS/AMSU/MODIS", status: "Operational", materials: ["IR/Vis optics"], note: "EOS" },
+  { acronym: "Terra", agency: "NASA", orbit: "SSO", payload: "ASTER/MISR/MODIS", status: "Operational", materials: ["Multi‑angle optics"], note: "EOS" },
+  { acronym: "Aura", agency: "NASA", orbit: "SSO", payload: "MLS/OMI", status: "Operational", materials: ["UV/Vis spectrometers"], note: "Atmospheric" },
+  { acronym: "GOES-16", agency: "NOAA", orbit: "GEO", payload: "ABI/GLM", status: "Operational", materials: ["IR/Vis optics", "Thermal control"], note: "Weather" },
+  { acronym: "GOES-18", agency: "NOAA", orbit: "GEO", payload: "ABI/GLM", status: "Operational", materials: ["Same"], note: "Weather" },
+  { acronym: "Himawari-8", agency: "JMA", orbit: "GEO", payload: "AHI", status: "Operational", materials: ["IR/Vis optics"], note: "Japan weather" },
+  { acronym: "Meteosat-12", agency: "EUMETSAT", orbit: "GEO", payload: "FCI/LI", status: "Operational", materials: ["IR/Vis optics"], note: "Europe weather" },
+  { acronym: "GEO-KOMPSAT-2A", agency: "KMA", orbit: "GEO", payload: "AMI", status: "Operational", materials: ["IR/Vis optics"], note: "Korea weather" },
+  { acronym: "GOSAT", agency: "JAXA", orbit: "SSO", payload: "TANSO-FTS", status: "Operational", materials: ["IR interferometer"], note: "Greenhouse gas" },
+  { acronym: "OCO-2", agency: "NASA", orbit: "SSO", payload: "OCO spectrometer", status: "Operational", materials: ["IR grating"], note: "CO₂" },
+  { acronym: "SMAP", agency: "NASA", orbit: "SSO", payload: "L‑band radiometer", status: "Operational", materials: ["RF antenna"], note: "Soil moisture" },
+  { acronym: "SWOT", agency: "NASA/CNES", orbit: "LEO", payload: "KaRIN radar", status: "Operational", materials: ["Ka‑band antenna"], note: "Water topography" },
+  { acronym: "Sentinel-6A", agency: "EUMETSAT", orbit: "LEO", payload: "Poseidon-4", status: "Operational", materials: ["Ku/C altimeter"], note: "Sea level" },
+  { acronym: "Jason-3", agency: "NOAA", orbit: "LEO", payload: "Poseidon-3B", status: "Operational", materials: ["Altimeter"], note: "Ocean" },
+  { acronym: "GPM Core", agency: "NASA/JAXA", orbit: "LEO", payload: "DPR/GMI", status: "Operational", materials: ["Dual‑freq radar"], note: "Precipitation" },
+  { acronym: "CloudSat", agency: "NASA", orbit: "SSO", payload: "CPR", status: "Inactive", materials: ["94 GHz radar"], note: "Cloud" },
+  { acronym: "CALIPSO", agency: "NASA/CNES", orbit: "SSO", payload: "CALIOP lidar", status: "Inactive", materials: ["532/1064 nm lidar"], note: "Aerosol/cloud" },
+  { acronym: "EarthCARE", agency: "ESA/JAXA", orbit: "SSO", payload: "ATLID/CPR/MSI", status: "Operational", materials: ["Lidar/Radar/Imager"], note: "Cloud/aerosol" },
+  { acronym: "Aeolus", agency: "ESA", orbit: "SSO", payload: "ALADIN lidar", status: "Inactive", materials: ["355 nm UV lidar"], note: "Wind" },
+  { acronym: "GRACE-FO", agency: "NASA/DLR", orbit: "LEO", payload: "MWI/Ka‑band", status: "Operational", materials: ["Microwave", "Laser ranging"], note: "Gravity" },
+  { acronym: "GOCE", agency: "ESA", orbit: "SSO", payload: "EGG gradiometer", status: "Inactive", materials: ["Gravity", "GPS"], note: "Geoid" },
+  { acronym: "TanDEM-X", agency: "DLR", orbit: "SSO", payload: "SAR‑X", status: "Operational", materials: ["X‑band SAR"], note: "Bistatic radar" },
+  { acronym: "TerraSAR-X", agency: "DLR", orbit: "SSO", payload: "SAR‑X", status: "Operational", materials: ["X‑band SAR"], note: "Radar" },
+  { acronym: "Pléiades-1A/B", agency: "CNES", orbit: "SSO", payload: "HiRI", status: "Operational", materials: ["High‑resolution optics"], note: "Imaging" },
+  { acronym: "SPOT-6/7", agency: "CNES", orbit: "SSO", payload: "NAOMI", status: "Operational", materials: ["Multispectral"], note: "Imaging" },
+  { acronym: "Resurs-P", agency: "Roscosmos", orbit: "SSO", payload: "Geoton‑L1", status: "Operational", materials: ["High‑res optics"], note: "Russian imaging" },
+  { acronym: "CBERS-4", agency: "INPE/CAST", orbit: "SSO", payload: "MUX/IRS", status: "Operational", materials: ["Multispectral"], note: "Brazil‑China" },
+  { acronym: "KOMPSAT-3", agency: "KARI", orbit: "SSO", payload: "AEISS", status: "Operational", materials: ["High‑res optics"], note: "Korean imaging" },
+  { acronym: "RadarSat-2", agency: "CSA", orbit: "SSO", payload: "SAR", status: "Operational", materials: ["C‑band SAR"], note: "Canada" },
+  { acronym: "RCM", agency: "CSA", orbit: "SSO", payload: "SAR RCM", status: "Operational", materials: ["C‑band SAR"], note: "Constellation" },
+  { acronym: "SARAL", agency: "CNES/ISRO", orbit: "SSO", payload: "AltiKa", status: "Operational", materials: ["Ka‑band altimeter"], note: "Ocean" },
+  { acronym: "HY-2B/C", agency: "NSOAS", orbit: "SSO", payload: "ALT/HSCAT", status: "Operational", materials: ["Altimeter/scatterometer"], note: "Chinese ocean" },
+  { acronym: "CFOSAT", agency: "NSOAS/CNES", orbit: "SSO", payload: "SWIM/CSCAT", status: "Operational", materials: ["Radar/scatterometer"], note: "Ocean" },
+  { acronym: "NISAR", agency: "NASA/ISRO", orbit: "SSO", payload: "L/S‑band SAR", status: "Planned", materials: ["Dual‑band radar"], note: "Launch 2025" },
+  { acronym: "BIOMASS", agency: "ESA", orbit: "SSO", payload: "P‑band SAR", status: "Planned", materials: ["P‑band radar"], note: "Biomass" },
+  { acronym: "FLEX", agency: "ESA", orbit: "SSO", payload: "FLORIS", status: "Planned", materials: ["Fluorescence"], note: "Plant health" },
+  { acronym: "CIMR", agency: "ESA", orbit: "SSO", payload: "MW radiometer", status: "Planned", materials: ["MW antenna"], note: "Sea ice" },
+  { acronym: "CO2M", agency: "ESA", orbit: "SSO", payload: "CO2I/NO2I", status: "Planned", materials: ["IR grating"], note: "CO₂ monitoring" },
+  { acronym: "ROSE-L", agency: "ESA", orbit: "SSO", payload: "L‑band SAR", status: "Planned", materials: ["L‑band radar"], note: "Copernicus" },
+  { acronym: "CHIME", agency: "ESA", orbit: "SSO", payload: "Hyperspectral", status: "Planned", materials: ["VNIR/SWIR grating"], note: "Imaging" },
+  { acronym: "LSTM", agency: "ESA", orbit: "SSO", payload: "Thermal IR", status: "Planned", materials: ["LWIR optics"], note: "Temperature" }
+];
+
+const frequencies = [
+  { sat: "Argos-4 (GAzelle)", service: "DCP", freq: 401.65, bw: 4, pol: "RHCP", rate: "0.4 kBit/s" },
+  { sat: "Argos-4 (GAzelle)", service: "DCP", freq: 465.9875, bw: 5, pol: "RHCP", rate: "0.4 kBit/s" },
+  { sat: "AWS PFM", service: "Telemetry", freq: 2230, bw: 100, pol: "", rate: "" },
+  { sat: "AWS PFM", service: "Telemetry", freq: 2053, bw: 100, pol: "", rate: "" },
+  { sat: "COMS", service: "TC & Ranging", freq: 2091.76, bw: 1000, pol: "RHCP", rate: "1 kBit/s" },
+  { sat: "COMS", service: "TM", freq: 2271.6, bw: 1000, pol: "linear", rate: "2.048 kBit/s" },
+  { sat: "COSMIC-1", service: "Command", freq: 2039.5, bw: 64, pol: "RHCP", rate: "32 kBit/s" },
+  { sat: "COSMIC-2", service: "Command", freq: 2093.1, bw: 64, pol: "RHCP", rate: "32 kBit/s" },
+  { sat: "CryoSat-2", service: "DORIS", freq: 401.25, bw: 23, pol: "RHCP", rate: "" },
+  { sat: "CryoSat-2", service: "DORIS", freq: 2036.25, bw: 95, pol: "RHCP", rate: "" },
+  { sat: "DSCOVR", service: "Command", freq: 2039.65, bw: 36, pol: "linear", rate: "2 kBit/s" },
+  { sat: "Electro-L N2", service: "GEOS & R", freq: 406.05, bw: 100, pol: "RHCP", rate: "0.4 kBit/s" },
+  { sat: "Electro-L N2", service: "GEOS & R", freq: 1544.5, bw: 200, pol: "LHCP", rate: "1.2 kBit/s" },
+  { sat: "Electro-L N2", service: "TC & Ranging", freq: 5747.124, bw: 10050, pol: "LHCP", rate: "0.1/1.0 kBit/s" },
+  { sat: "Electro-L N2", service: "Telemetry", freq: 3405.703, bw: 9290, pol: "RHCP", rate: "0.1/32.0 kBit/s" },
+  { sat: "Electro-L N3", service: "GEOS & R", freq: 406.05, bw: 100, pol: "RHCP", rate: "0.4 kBit/s" },
+  { sat: "Electro-L N3", service: "GEOS & R", freq: 1544.5, bw: 200, pol: "LHCP", rate: "1.2 kBit/s" },
+  { sat: "Electro-L N3", service: "TC & Ranging", freq: 5747.124, bw: 10050, pol: "LHCP", rate: "0.1/1.0 kBit/s" },
+  { sat: "Electro-L N3", service: "Telemetry", freq: 3405.703, bw: 9290, pol: "RHCP", rate: "0.1/32.0 kBit/s" },
+  { sat: "GOES-16", service: "DCPR", freq: "401.7‑402.4", bw: 1.2, pol: "linear", rate: "1.8 kBit/s" },
+  { sat: "GOES-16", service: "GEOS & R", freq: 406.05, bw: 1.6, pol: "RHCP", rate: "0.4 kBit/s" },
+  { sat: "GOES-16", service: "TC & Ranging", freq: 2036, bw: 84, pol: "RHCP", rate: "4 kBit/s" },
+  { sat: "GOES-16", service: "Command", freq: 2034.2, bw: 8, pol: "RHCP", rate: "4 kBit/s" },
+  { sat: "GOES-18", service: "DCPR", freq: "401.7‑402.4", bw: 1.2, pol: "linear", rate: "1.8 kBit/s" },
+  { sat: "GOES-18", service: "GEOS & R", freq: 406.05, bw: 1, pol: "RHCP", rate: "" },
+  { sat: "Himawari-8", service: "TC & Ranging", freq: 14125, bw: 40, pol: "LHCP", rate: "0.5 kBit/s" },
+  { sat: "Himawari-8", service: "TM & Ranging", freq: 12475, bw: 1200, pol: "LHCP", rate: "15.36 kBit/s" },
+  { sat: "Metop-B", service: "S & RSAT", freq: 406.05, bw: 100, pol: "linear", rate: "2.4 kBit/s" },
+  { sat: "Metop-B", service: "TC & Ranging", freq: 2053.4583, bw: 1500, pol: "RHCP", rate: "2 kBit/s" },
+  { sat: "Metop-B", service: "TM", freq: 2230, bw: 2000, pol: "RHCP", rate: "4.096 kBit/s" },
+  { sat: "NOAA-20", service: "Command", freq: 2067.27, bw: 256, pol: "RHCP", rate: "128 kBit/s" },
+  { sat: "NOAA-20", service: "TT & C", freq: 2247.5, bw: 3200, pol: "RHCP", rate: "32.768 kBit/s" },
+  { sat: "Sentinel-3A", service: "DORIS", freq: 401.25, bw: 23, pol: "RHCP", rate: "4 kBit/s" },
+  { sat: "Sentinel-3A", service: "TM", freq: 2254.1, bw: 2200, pol: "RHCP", rate: "2000 kBit/s" }
+];
+
+function renderMissions() {
+  const tbody = document.getElementById('missionBody');
+  tbody.innerHTML = '';
+  missions.forEach(m => {
+    const tr = document.createElement('tr');
+    tr.dataset.orbit = m.orbit;
+    tr.dataset.status = m.status;
+    const matTags = m.materials.map(mat => {
+      let cls = 'tag-optional';
+      if (mat.includes('TFLN') || mat.includes('InP') || mat.includes('HfO₂') || mat.includes('SiO₂') || mat.includes('SiN') || mat.includes('MgF₂')) cls = 'tag-critical';
+      else if (mat.includes('SOA') || mat.includes('COTS') || mat.includes('Thermal') || mat.includes('Rad') || mat.includes('Packaging') || mat.includes('DSP')) cls = 'tag-important';
+      return `<span class="tag ${cls}" onclick="window.location.href='materials.html'">${mat}</span>`;
+    }).join(' ');
+    const statusClass = m.status.toLowerCase();
+    tr.innerHTML = `
+      <td><strong>${m.acronym}</strong></td>
+      <td>${m.agency}</td>
+      <td><span class="orbit-${m.orbit.toLowerCase()}">${m.orbit}</span></td>
+      <td>${m.payload}</td>
+      <td><span class="badge badge-${statusClass}">${m.status}</span></td>
+      <td>${matTags}</td>
+      <td>${m.note}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+  updateStats();
+}
+
+function renderFrequencies() {
+  const tbody = document.getElementById('freqBody');
+  tbody.innerHTML = '';
+  frequencies.forEach(f => {
+    const tr = document.createElement('tr');
+    tr.dataset.service = f.service;
+    tr.innerHTML = `
+      <td>${f.sat}</td>
+      <td>${f.service}</td>
+      <td>${f.freq}</td>
+      <td>${f.bw}</td>
+      <td>${f.pol}</td>
+      <td>${f.rate}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+  document.getElementById('freqCount').textContent = frequencies.length;
+}
+
+function updateStats() {
+  const total = missions.length;
+  document.getElementById('totalMissions').textContent = total;
+  const op = missions.filter(m => m.status === 'Operational').length;
+  document.getElementById('operationalCount').textContent = op;
+  const geo = missions.filter(m => m.orbit === 'GEO').length;
+  const leo = missions.filter(m => m.orbit === 'LEO').length;
+  const sso = missions.filter(m => m.orbit === 'SSO').length;
+  document.getElementById('orbitBreakdown').textContent = `${geo} / ${leo} / ${sso}`;
+}
+
+function filterTable(criteria, tableType) {
+  const container = document.getElementById(tableType === 'mission' ? 'missionTable' : 'freqTable').closest('section');
+  const btns = container.querySelectorAll('.filters .filter-btn');
+  btns.forEach(b => b.classList.remove('active'));
+  if (event && event.target && event.target.classList.contains('filter-btn')) {
+    event.target.classList.add('active');
+  } else {
+    btns[0].classList.add('active');
+  }
+
+  if (tableType === 'mission') {
+    const rows = document.querySelectorAll('#missionBody tr');
+    rows.forEach(row => {
+      const orbit = row.dataset.orbit;
+      const status = row.dataset.status;
+      let show = false;
+      if (criteria === 'all') show = true;
+      else if (['GEO','LEO','SSO','Molniya','L1'].includes(criteria) && orbit === criteria) show = true;
+      else if (['Operational','Inactive','Planned','Complete','Demo','Achieved'].includes(criteria) && status === criteria) show = true;
+      row.style.display = show ? '' : 'none';
+    });
+  } else if (tableType === 'freq') {
+    const rows = document.querySelectorAll('#freqBody tr');
+    rows.forEach(row => {
+      const service = row.dataset.service;
+      let show = false;
+      if (criteria === 'all') show = true;
+      else if (service && service.includes(criteria)) show = true;
+      row.style.display = show ? '' : 'none';
+    });
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  renderMissions();
+  renderFrequencies();
+});
+</script>
+
+</body>
+</html>
