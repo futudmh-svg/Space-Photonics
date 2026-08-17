@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unified Optical Backbone — Space Photonics</title>
+<style>
+  :root {
+    --bg: #0a0e17;
+    --bg-card: #0f1623;
+    --bg-hover: #141d2e;
+    --border: #1e2a3f;
+    --text: #c9d1d9;
+    --text-dim: #8b949e;
+    --accent: #58a6ff;
+    --accent-glow: rgba(88,166,255,0.15);
+    --success: #3fb950;
+    --warning: #d29922;
+    --danger: #f85149;
+    --critical: #ff7b72;
+    --important: #79c0ff;
+    --optional: #d2a8ff;
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, sans-serif;
+    --mono: "SF Mono", Monaco, "Cascadia Code", "Fira Code", monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  header {
+    background: linear-gradient(180deg, rgba(88,166,255,0.08) 0%, transparent 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 1rem 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(12px);
+  }
+  .nav-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .logo {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  nav { display: flex; gap: 1.2rem; flex-wrap: wrap; }
+  nav a {
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    font-weight: 500;
+    padding: 0.25rem 0;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  nav a:hover, nav a.active {
+    color: var(--text);
+    border-bottom-color: var(--accent);
+    text-decoration: none;
+  }
+
+  main {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+  h1 {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(90deg, var(--accent), #a371f7);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .subtitle {
+    color: var(--text-dim);
+    margin-bottom: 2rem;
+    font-size: 1.05rem;
+  }
+
+  section {
+    margin-bottom: 3rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+  }
+  section h2 {
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  section h3 {
+    font-size: 1.1rem;
+    margin: 1.5rem 0 0.75rem;
+    color: var(--accent);
+  }
+  section p { color: var(--text-dim); margin-bottom: 1rem; }
+
+  .badge {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+  .badge-green { background: rgba(63,185,80,0.15); color: var(--success); }
+  .badge-yellow { background: rgba(210,153,34,0.15); color: var(--warning); }
+  .badge-red { background: rgba(248,81,73,0.15); color: var(--danger); }
+  .badge-blue { background: rgba(88,166,255,0.15); color: var(--accent); }
+  .badge-purple { background: rgba(210,168,255,0.15); color: var(--optional); }
+
+  .tag {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    margin: 0.15rem 0.15rem 0 0;
+    cursor: pointer;
+    border: 1px solid transparent;
+  }
+  .tag-critical { background: rgba(255,123,114,0.12); color: var(--critical); border-color: rgba(255,123,114,0.25); }
+  .tag-important { background: rgba(121,192,255,0.12); color: var(--important); border-color: rgba(121,192,255,0.25); }
+  .tag-optional { background: rgba(210,168,255,0.1); color: var(--optional); border-color: rgba(210,168,255,0.2); }
+
+  .table-wrap {
+    overflow-x: auto;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    margin: 1rem 0;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+  }
+  th {
+    background: var(--bg-hover);
+    color: var(--text-dim);
+    font-weight: 600;
+    text-align: left;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  td {
+    padding: 0.6rem 1rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    vertical-align: top;
+  }
+  tr:hover td { background: rgba(88,166,255,0.03); }
+
+  .diagram-box {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.25rem;
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    line-height: 1.5;
+    overflow-x: auto;
+    color: var(--text-dim);
+    margin: 1rem 0;
+  }
+  .diagram-box .label { color: var(--accent); font-weight: 600; }
+  .diagram-box .sub { color: var(--text-dim); }
+  .diagram-box .green { color: var(--success); }
+  .diagram-box .yellow { color: var(--warning); }
+  .diagram-box .red { color: var(--danger); }
+
+  .cta-box {
+    background: linear-gradient(90deg, rgba(88,166,255,0.08), transparent);
+    border-left: 3px solid var(--accent);
+    padding: 1.25rem;
+    border-radius: 0 8px 8px 0;
+    margin-top: 2rem;
+  }
+
+  .ref-list {
+    columns: 2;
+    column-gap: 2rem;
+    font-size: 0.82rem;
+    color: var(--text-dim);
+    list-style: none;
+    padding: 0;
+  }
+  .ref-list li {
+    margin-bottom: 0.6rem;
+    break-inside: avoid;
+    padding-left: 1.5rem;
+    position: relative;
+  }
+  .ref-list li::before {
+    content: attr(data-num);
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-weight: 600;
+    font-family: var(--mono);
+  }
+  .ref-list a { color: var(--accent); word-break: break-all; }
+
+  @media (max-width: 768px) {
+    main { padding: 1rem; }
+    .ref-list { columns: 1; }
+    th, td { padding: 0.5rem; font-size: 0.8rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="nav-container">
+    <div class="logo">🛰️ Space Photonics</div>
+    <nav>
+      <a href="../index.html">Home</a>
+      <a href="materials.html">Materials</a>
+      <a href="satellite-digital-twin.html">Digital Twin</a>
+      <a href="missions.html">Missions</a>
+      <a href="unified-backbone.html" class="active">Backbone</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <h1>Unified Optical Backbone</h1>
+  <p class="subtitle">One coherent photonic backend serving three divergent missions: orbital HPC, hypersonic tracking, and metrology-grade clock transfer. Shared comb. Shared OPA. Swappable front-ends.</p>
+
+  <!-- Architecture Overview -->
+  <section>
+    <h2>🎯 Architecture Thesis</h2>
+    <p>Mechanical gimbals and fixed-point ISL are insufficient for next-generation space infrastructure. A <strong>software-defined optical backbone</strong> — built around a femtosecond frequency comb, OPA beam steering, and coherent detection — can reconfigure between distributed computing, precision tracking, and clock metrology by swapping front-end optics while keeping the photonic backend identical.</p>
+
+    <div class="diagram-box">
+<span class="label">┌─────────────────────────────────────────────────────────────┐</span>
+<span class="label">│              ORBITAL PLATFORM — UNIFIED BACKBONE             │</span>
+<span class="label">│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐         │</span>
+<span class="label">│  │  HPC Node A │  │  HPC Node B │  │  HPC Node C │  ...   │</span>
+<span class="label">│  │  (LEO/GEO)  │  │  (LEO/GEO)  │  │  (LEO/GEO)  │         │</span>
+<span class="label">│  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘         │</span>
+<span class="label">│         │                │                │                │</span>
+<span class="label">│         └────────────────┴────────────────┘                │</span>
+<span class="label">│              <span class="green">Optical Frequency Comb (Master Clock)</span>          │</span>
+<span class="label">│              ├─ 193 THz (1550 nm): HPC data + ISL          │</span>
+<span class="label">│              ├─ 281 THz (1064 nm): Tracking / ranging       │</span>
+<span class="label">│              └─ 385 THz ( 778 nm): Clock comparison (Sr)    │</span>
+<span class="label">│                         │                                    │</span>
+<span class="label">│              ┌──────────┴──────────┐                        │</span>
+<span class="label">│              │   <span class="green">OPA Switch Fabric</span>   │                        │</span>
+<span class="label">│              │ (Reconfigurable Mesh)  │                        │</span>
+<span class="label">│              └──────────┬──────────┘                        │</span>
+<span class="label">│         ┌───────────────┼───────────────┐                   │</span>
+<span class="label">│         │               │               │                   │</span>
+<span class="label">│    ┌────┴────┐    ┌────┴────┐    ┌────┴────┐               │</span>
+<span class="label">│    │ <span class="green">HPC ISL</span> │    │<span class="yellow">Tracking</span> │    │ <span class="green">Clock</span>  │               │</span>
+<span class="label">│    │ (Vacuum)│    │ (Atmos) │    │Transfer │               │</span>
+<span class="label">│    │ Small   │    │ Large   │    │Precision│               │</span>
+<span class="label">│    │ Aperture│    │ Aperture│    │ Aperture│               │</span>
+<span class="label">│    │ No AO   │    │ AO +    │    │ Stable  │               │</span>
+<span class="label">│    │         │    │ Turbulence│   │ Platform│               │</span>
+<span class="label">│    └─────────┘    └─────────┘    └─────────┘               │</span>
+<span class="label">│         │               │               │                   │</span>
+<span class="label">│    ┌────┴────┐    ┌────┴────┐    ┌────┴────┐               │</span>
+<span class="label">│    │<span class="green">Coherent</span> │    │<span class="yellow">Coherent</span> │    │<span class="green">Coherent</span> │               │</span>
+<span class="label">│    │<span class="green">Rx + DSP</span> │    │<span class="yellow">Rx + AO</span> │    │<span class="green">Rx + PLL</span> │               │</span>
+<span class="label">│    │<span class="green">MPI offload</span>│   │<span class="yellow">Kalman filter</span>│  │<span class="green">Stability counter</span>│            │</span>
+<span class="label">│    └─────────┘    └─────────┘    └─────────┘               │</span>
+<span class="label">└─────────────────────────────────────────────────────────────┘</span>
+    </div>
+
+    <p>The electronic co-pilot is the same FPGA/DSP chassis running different firmware loads: MPI offload for HPC, Kalman tracking for hypersonic, and a phase-locked stability counter for clock comparison. The photonic backend never changes.</p>
+  </section>
+
+  <!-- Shared Backend -->
+  <section>
+    <h2>🔧 Shared Photonic Backend</h2>
+    <p>These components are identical across all three missions. They are the "nervous system" of the platform.</p>
+
+    <h3>1. Optical Frequency Comb (Master Clock)</h3>
+    <p>A single femtosecond pulse train generates thousands of phase-locked tones. One comb seeds all three missions simultaneously.</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Comb Tooth</th><th>Wavelength</th><th>Mission</th><th>Function</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>193 THz</td><td>1550 nm (C-band)</td><td>HPC + ISL</td><td>Data modulation, WDM channels, coherent detection LO</td></tr>
+          <tr><td>281 THz</td><td>1064 nm</td><td>Tracking / ranging</td><td>Lidar illuminator, Doppler extraction, range gating</td></tr>
+          <tr><td>385 THz</td><td>778 nm</td><td>Clock comparison</td><td>Sr optical lattice clock interrogation, metrology</td></tr>
+          <tr><td>~1 THz spacing</td><td>—</td><td>All</td><td>Common phase reference for coherence across nodes</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><strong>Why this works:</strong> All teeth are phase-locked to the same repetition rate. Doppler shifts, clock drifts, and phase noise are correlated and can be subtracted. <strong>Material:</strong> TFLN (#1) or InP (#12) for microcomb generation.</p>
+
+    <h3>2. OPA Switch Fabric</h3>
+    <p>The OPA is not just a beam steerer — it is a <strong>reconfigurable optical router</strong>. By superimposing multiple phase holograms, a single aperture can form independent beams to 4–8 neighbors simultaneously.</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Feature</th><th>HPC Mode</th><th>Tracking Mode</th><th>Clock Mode</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Beams per aperture</td><td>4–8 (multicast)</td><td>1 (high power)</td><td>1 (low noise)</td></tr>
+          <tr><td>Reconfiguration time</td><td>1–10 µs</td><td>1–10 µs</td><td>Static (hours)</td></tr>
+          <tr><td>Steering range</td><td>±10°</td><td>±10°</td><td>±0.5°</td></tr>
+          <tr><td>Pointing precision</td><td>10 µrad</td><td>1 µrad</td><td>0.1 µrad</td></tr>
+          <tr><td>Power per beam</td><td>10–100 mW</td><td>1–10 W (with booster)</td><td>1–5 mW</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><strong>Material:</strong> TFLN-on-insulator (#94) for OPA phase shifters, SiN (#41) for low-loss feed network.</p>
+
+    <h3>3. Coherent Detection + Electronic Co-Pilot</h3>
+    <p>All three missions use the same coherent receiver architecture: signal mixed with a comb tooth (LO), detected on a balanced InGaAs photodiode pair, digitized, and processed by a shared DSP/FPGA chassis.</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Layer</th><th>Hardware</th><th>Firmware Load A (HPC)</th><th>Firmware Load B (Tracking)</th><th>Firmware Load C (Clock)</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Photonic</td><td>Balanced 90° hybrid + InGaAs PD</td><td>QPSK/16-QAM demod</td><td>Doppler/range extraction</td><td>Phase noise PSD analysis</td></tr>
+          <tr><td>ADC</td><td>64 GSa/s, 12-bit</td><td>4× oversampling</td><td>1× (bandwidth limited)</td><td>High-resolution (20-bit equiv)</td></tr>
+          <tr><td>DSP</td><td>FPGA + AI accelerator</td><td>MPI offload, MACsec</td><td>Kalman filter, track gate</td><td>PLL, stability counter</td></tr>
+          <tr><td>Output</td><td>Ethernet / SpaceWire</td><td>RDMA over converged Ethernet</td><td>Fire control bus</td><td>1 PPS + 10 MHz reference</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><strong>Material:</strong> InGaAs (#14) balanced detectors, SiGe (#95) for front-end TIA, InP (#12) for 90° hybrid.</p>
+  </section>
+
+  <!-- Divergent Front-Ends -->
+  <section>
+    <h2>🔀 Divergent Front-Ends</h2>
+    <p>While the backend is shared, the front-end optics and electronic firmware must diverge for each mission. This is the honest engineering trade-off.</p>
+
+    <h3>Mission A: Orbital HPC Parallel Synchronization</h3>
+    <p><span class="badge badge-green">Vacuum-only</span> <span class="badge badge-blue">Proven heritage</span></p>
+    <p>The constellation acts as a single distributed supercomputer. The OPA establishes a reconfigurable optical mesh (torus, hypercube, or all-to-all) based on the workload. White Rabbit-style optical clock transfer achieves picosecond-level synchronization without GPS dependence.</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Parameter</th><th>Value</th><th>Why It Matters</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Clock stability</td><td>10⁻¹⁷ @ 1000 s</td><td>Sub-nanosecond MPI barrier sync across 100 nodes</td></tr>
+          <tr><td>Link latency</td><td>1–5 ms (LEO crosslink)</td><td>Deterministic for RDMA</td></tr>
+          <tr><td>Reconfiguration</td><td>1–10 µs (OPA)</td><td>Topology switches between FFT ring and all-reduce tree</td></tr>
+          <tr><td>Data rate</td><td>100–400 Gbps per link</td><td>Coherent DSP with 16-QAM</td></tr>
+          <tr><td>Doppler</td><td>±10 MHz @ 1550 nm</td><td>LEO orbital mechanics; trivial for DSP</td></tr>
+          <tr><td>Aperture</td><td>5–10 cm</td><td>Small, light, no AO needed</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><strong>Key advantage:</strong> No atmosphere, no plasma, cooperative beacons. The OPA can run at maximum efficiency without adaptive optics overhead. <strong>Flight heritage:</strong> LCRD, EDRS, Starlink ISL, TBIRD.</p>
+
+    <h3>Mission B: Hypersonic Tracking (Atmospheric)</h3>
+    <p><span class="badge badge-yellow">Atmospheric path</span> <span class="badge badge-red">Uncooperative target</span> <span class="badge badge-purple">Research stage</span></p>
+    <p>The same comb tooth (281 THz / 1064 nm) seeds a high-power illuminator. The return is weak, Doppler-shifted by ±10 GHz, and corrupted by atmospheric scintillation. The OPA performs sector scan and fine track; an adaptive optics (AO) deformable mirror corrects wavefront distortion before the coherent mixer.</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Parameter</th><th>Value</th><th>Challenge</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Target speed</td><td>Mach 5–10 (1.7–3.4 km/s)</td><td>Angular rate 10–40 °/s at 10 km</td></tr>
+          <tr><td>Doppler shift</td><td>±10 GHz @ 1064 nm</td><td>Requires ultra-wideband coherent receiver</td></tr>
+          <tr><td>Return signal</td><td>10⁻¹² to 10⁻¹⁰ W</td><td>Shot-noise limited; needs large aperture + AO</td></tr>
+          <tr><td>Atmospheric turbulence</td><td>r₀ = 5–15 cm</td><td>Scintillation, beam wander; AO latency 1–10 ms</td></tr>
+          <tr><td>Plasma sheath</td><td>nₑ ≈ 10¹⁶–10¹⁸ m⁻³</td><td>Optical penetrates (ω_laser >> ω_plasma), but emits broadband glow</td></tr>
+          <tr><td>Aperture</td><td>30–100 cm</td><td>Mass, thermal, pointing stability</td></tr>
+          <tr><td>Illuminator power</td><td>100 W–1 kW (pulsed)</td><td>Thermal blooming, eye safety, power budget</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><strong>Critical divergence:</strong> This mission requires a <strong>separate high-power amplifier</strong> (EDFA or Raman) and <strong>adaptive optics</strong> that the HPC mission does not. The OPA backend is shared, but the front-end telescope and AO loop are mission-specific. The electronic co-pilot runs a Kalman filter with target dynamics model, not MPI offload.</p>
+    <p><strong>Honest assessment:</strong> This is the least mature of the three missions. No deployed system uses all-optical coherent tracking for hypersonic targets. SBIRS/HBTSS use IR thermal emission (passive), not active laser illumination. The optical approach is physically valid but engineering-limited by SNR and atmospheric turbulence.</p>
+
+    <h3>Mission C: Metrology-Grade Clock Transfer</h3>
+    <p><span class="badge badge-green">Vacuum-only</span> <span class="badge badge-blue">NIST demonstrated</span></p>
+    <p>Optical lattice clocks (Sr, Yb) achieve 10⁻¹⁸ stability. To compare two clocks in orbit without degrading their performance, the optical phase must be transferred through free space with minimal phase noise. The comb provides a coherent carrier; the OPA maintains pointing; the electronic co-pilot measures and subtracts path-length variations.</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Parameter</th><th>Value</th><th>Why It Matters</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Clock stability</td><td>10⁻¹⁸ @ 1 s</td><td>1 s error per 30 billion years</td></tr>
+          <tr><td>Transfer stability</td><td>10⁻¹⁷ @ 1000 s</td><td>Goal: preserve clock performance across link</td></tr>
+          <tr><td>Wavelength</td><td>778 nm (Sr) or 578 nm (Yb)</td><td>Clock transition wavelengths</td></tr>
+          <tr><td>Link type</td><td>Space-to-space (vacuum)</td><td>No atmospheric phase noise</td></tr>
+          <tr><td>Pointing</td><td>Static or slow drift</td><td>OPA locks once; minimal reconfiguration</td></tr>
+          <tr><td>Power</td><td>1–5 mW</td><td>Low power; signal is strong (cooperative beacon)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><strong>Key advantage:</strong> Cooperative, strong signal, no atmosphere. The hardest problem is not the link but the <strong>platform vibration</strong> (micro-vibration from reaction wheels, 1–100 Hz, 1–100 µrad). The OPA must track this at kHz rates to preserve phase coherence. <strong>Heritage:</strong> NIST/JILA free-space optical clock transfer; ESA ACES (mission concept).</p>
+  </section>
+
+  <!-- Convergence/Divergence Matrix -->
+  <section>
+    <h2>⚖️ Convergence vs. Divergence Matrix</h2>
+    <p>Where can the platform truly share hardware, and where must it fork?</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Subsystem</th><th>HPC ISL</th><th>Hypersonic Track</th><th>Clock Transfer</th><th>Verdict</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Frequency comb</td><td>✅ Shared</td><td>✅ Shared</td><td>✅ Shared</td><td><span class="badge badge-green">Unified</span></td></tr>
+          <tr><td>OPA beam steering</td><td>✅ Shared</td><td>✅ Shared</td><td>✅ Shared</td><td><span class="badge badge-green">Unified</span></td></tr>
+          <tr><td>Coherent receiver</td><td>✅ Shared</td><td>✅ Shared (wideband)</td><td>✅ Shared</td><td><span class="badge badge-green">Unified</span></td></tr>
+          <tr><td>Electronic co-pilot (DSP)</td><td>⚠️ MPI firmware</td><td>⚠️ Kalman firmware</td><td>⚠️ PLL firmware</td><td><span class="badge badge-yellow">Same HW, different FW</span></td></tr>
+          <tr><td>Pre-amplifier</td><td>SOA 10 dBm</td><td>EDFA 30 dBm</td><td>SOA 5 dBm</td><td><span class="badge badge-yellow">Swappable module</span></td></tr>
+          <tr><td>Aperture / telescope</td><td>5–10 cm</td><td>30–100 cm + AO</td><td>10–20 cm</td><td><span class="badge badge-red">Mission-specific</span></td></tr>
+          <tr><td>Adaptive optics</td><td>❌ None</td><td>✅ Essential</td><td>⚠️ Helpful</td><td><span class="badge badge-red">Track only</span></td></tr>
+          <tr><td>Atmospheric compensation</td><td>❌ None</td><td>✅ Required</td><td>❌ None</td><td><span class="badge badge-red">Track only</span></td></tr>
+          <tr><td>High-power illuminator</td><td>❌ None</td><td>✅ 100 W–1 kW</td><td>❌ None</td><td><span class="badge badge-red">Track only</span></td></tr>
+          <tr><td>Thermal management</td><td>Standard</td><td>Extreme (kW dissipation)</td><td>Standard</td><td><span class="badge badge-yellow">Track scales differently</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Material Mapping -->
+  <section>
+    <h2>🔬 Photon-1 Material Catalog Mapping</h2>
+    <p>Each material in the catalog maps to a specific layer of the unified backbone or a mission-specific front-end.</p>
+
+    <h3>Shared Backend Materials</h3>
+    <div style="margin-bottom:1rem;">
+      <span class="tag tag-critical" onclick="window.location.href='materials.html'">TFLN (#1)</span> — Comb generation, OPA phase shifters, MZI modulators<br>
+      <span class="tag tag-critical" onclick="window.location.href='materials.html'">InP (#12)</span> — Microcomb alternative, 90° hybrid, SOA pre-amps<br>
+      <span class="tag tag-critical" onclick="window.location.href='materials.html'">SiN (#41)</span> — Low-loss feed network, AWG demux, MRR filtering<br>
+      <span class="tag tag-critical" onclick="window.location.href='materials.html'">TFLN-on-Insulator (#94)</span> — OPA chip, high-density MZI mesh<br>
+      <span class="tag tag-important" onclick="window.location.href='materials.html'">InGaAs (#14)</span> — Balanced photodetectors, coherent receiver<br>
+      <span class="tag tag-important" onclick="window.location.href='materials.html'">SiGe (#95)</span> — Transimpedance amplifiers (TIA), electronic co-pilot front-end<br>
+      <span class="tag tag-important" onclick="window.location.href='materials.html'">InGaAsP (#18)</span> — DFB lasers, SOA gain media<br>
+    </div>
+
+    <h3>Mission-Specific Front-End Materials</h3>
+    <div style="margin-bottom:1rem;">
+      <span class="tag tag-important" onclick="window.location.href='materials.html'">Cu-W</span> — Heat spreader for high-power EDFA (tracking)<br>
+      <span class="tag tag-important" onclick="window.location.href='materials.html'">AlN</span> — Submount for high-power laser diodes (tracking)<br>
+      <span class="tag tag-important" onclick="window.location.href='materials.html'">Diamond</span> — Thermal management for kW-class illuminator (tracking)<br>
+      <span class="tag tag-optional" onclick="window.location.href='materials.html'">SiO₂ (#42)</span> — EDFA cladding, fiber isolators<br>
+      <span class="tag tag-optional" onclick="window.location.href='materials.html'">HfO₂ (#46)</span> — AR coatings on large aperture (tracking)<br>
+      <span class="tag tag-optional" onclick="window.location.href='materials.html'">MgF₂ (#49)</span> — Broadband AR coating (clock multi-wavelength)<br>
+      <span class="tag tag-optional" onclick="window.location.href='materials.html'">Al₂O₃ (#43)</span> — Sapphire window for large telescope (tracking)<br>
+    </div>
+  </section>
+
+  <!-- Limitations -->
+  <section>
+    <h2>⚠️ Honest Limitations</h2>
+    <p>This architecture is physically sound but not yet flight-proven as a unified system. Each piece has heritage; the integration does not.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Limitation</th><th>Impact</th><th>Mitigation</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>OPA steering range</td><td>±10° limits constellation geometry</td><td>Hybrid: satellite bus pointing + OPA fine steering</td></tr>
+          <tr><td>MZI mesh calibration drift</td><td>Radiation/thermal shifts biases; mesh degrades</td><td>Electronic co-pilot continuously re-calibrates via tap monitors</td></tr>
+          <tr><td>High-power tracking thermal</td><td>kW illuminator requires massive radiator</td><td>Pulsed operation (duty cycle 1–10%); space-based platform avoids atmosphere</td></tr>
+          <tr><td>Atmospheric turbulence</td><td>Scintillation breaks coherence for ground-to-air</td><td>Space-based sensor looking down; or airborne platform at 20 km</td></tr>
+          <tr><td>Hypersonic SNR</td><td>Skin return from diffuse target is extremely weak</td><td>Track ionized wake (larger cross-section) or use IR passive cueing</td></tr>
+          <tr><td>Clock transfer micro-vibration</td><td>Reaction wheels induce 1–100 µrad jitter</td><td>OPA kHz tracking loop + post-processing phase subtraction</td></tr>
+          <tr><td>Power budget conflict</td><td>HPC needs 10W; tracking needs 1000W; same bus</td><td>Modular power architecture; tracking mode disables HPC links</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <div class="cta-box">
+    <strong>🔗 Explore the Component Catalog</strong><br>
+    Every material above is traceable to a specific entry in the Photon-1 bill of materials with flight heritage references.
+    <br><a href="materials.html">📋 Open Materials Catalog →</a> &nbsp;|&nbsp; <a href="missions.html">🛰️ View Flight Heritage →</a>
+  </div>
+
+  <!-- References -->
+  <section>
+    <h2>📚 References</h2>
+    <ol class="ref-list">
+      <li data-num="1"><a href="https://www.nasa.gov/mission_pages/tdm/lcrd/overview.html">NASA LCRD Mission Overview — Coherent optical relay</a></li>
+      <li data-num="2"><a href="https://www.nasa.gov/communicating-with-missions/tbird/">NASA TBIRD — 200 Gbps CubeSat coherent link</a></li>
+      <li data-num="3"><a href="https://www.airbus.com/en/space/telecommunications/space-data-highway-edrs">ESA EDRS (SpaceDataHighway) — GEO relay</a></li>
+      <li data-num="4"><a href="https://www.starlink.com/updates">SpaceX Starlink ISL — Mass-produced optical terminals</a></li>
+      <li data-num="5"><a href="https://www.nist.gov/news-events/news/2023/04/nist-physicists-create-worlds-first-free-space-optical-atomic-clock">NIST — Free-space optical atomic clock transfer</a></li>
+      <li data-num="6"><a href="https://doi.org/10.1038/s41586-021-04345-7">Nature — Optical clock comparison at 10⁻¹⁸ stability</a></li>
+      <li data-num="7"><a href="https://www.darpa.mil/program/photonics-in-the-package-for-extreme-scalability">DARPA PIPES — Photonic interconnects for sensor processing</a></li>
+      <li data-num="8"><a href="https://www.darpa.mil/program/space-based-adaptive-optics">DARPA SBAO — Space-based adaptive optics</a></li>
+      <li data-num="9"><a href="https://www.esa.int/Science_Exploration/Space_Science/ACES">ESA ACES — Atomic Clock Ensemble in Space</a></li>
+      <li data-num="10"><a href="https://www.nict.go.jp/en/press/2023/04/11-1.html">NICT — 2 Tbps WDM free-space optical communication</a></li>
+      <li data-num="11"><a href="https://www.nro.gov/news/press-release/hbtss.html">NRO HBTSS — Hypersonic Ballistic Tracking Space Sensor</a></li>
+      <li data-num="12"><a href="https://www.lockheedmartin.com/en-us/products/sbirs.html">Lockheed Martin SBIRS — GEO IR early warning</a></li>
+      <li data-num="13"><a href="https://www.cern.ch/white-rabbit/">CERN White Rabbit — Sub-nanosecond Ethernet synchronization</a></li>
+      <li data-num="14"><a href="https://doi.org/10.1364/OE.27.032658">Optica — Microcomb-based coherent optical communications</a></li>
+      <li data-num="15"><a href="https://doi.org/10.1364/AO.435982">Applied Optics — Adaptive optics for laser communications through turbulence</a></li>
+      <li data-num="16"><a href="https://www.mda.mil/system/aegis_bmd.html">MDA Aegis BMD — RF phased array + gimbal hybrid tracking</a></li>
+      <li data-num="17"><a href="https://doi.org/10.1109/JLT.2021.3087234">JLT — TFLN integrated optical phased arrays</a></li>
+      <li data-num="18"><a href="https://doi.org/10.1038/s41566-020-00711-z">Nature Photonics — Optical frequency combs for metrology</a></li>
+      <li data-num="19"><a href="https://doi.org/10.1364/OPTICA.7.000338">Optica — Photonic integrated circuits for microwave photonics</a></li>
+      <li data-num="20"><a href="https://doi.org/10.1109/TPS.2020.2998452">IEEE TPS — Plasma sheath effects on optical propagation</a></li>
+    </ol>
+  </section>
+</main>
+
+</body>
+</html>
